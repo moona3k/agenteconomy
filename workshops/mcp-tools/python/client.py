@@ -7,11 +7,16 @@ The response includes tool output + payment metadata (_meta).
 
 import os
 import httpx
+import urllib3
+from dotenv import load_dotenv
 from payments_py import Payments, PaymentOptions
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+load_dotenv()
 
 payments = Payments.get_instance(
     PaymentOptions(
-        nvm_api_key=os.getenv("NVM_API_KEY", ""),  # subscriber key
+        nvm_api_key=os.getenv("NVM_SUBSCRIBER_API_KEY", ""),
         environment=os.getenv("NVM_ENVIRONMENT", "sandbox"),
     )
 )
@@ -26,11 +31,12 @@ def main():
     access_token = token_result["accessToken"]
 
     # 2. Call MCP tool via JSON-RPC
-    with httpx.Client() as client:
+    with httpx.Client(timeout=60.0) as client:
         response = client.post(
             f"{SERVER_URL}/mcp",
             headers={
                 "Content-Type": "application/json",
+                "Accept": "application/json, text/event-stream",
                 "Authorization": f"Bearer {access_token}",
             },
             json={

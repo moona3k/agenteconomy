@@ -8,10 +8,15 @@ redemption, HTTP transport, and session management.
 
 import asyncio
 import os
+import urllib3
+from dotenv import load_dotenv
 from payments_py import Payments, PaymentOptions
 from payments_py.mcp import PaymentsMCP
 
-payments = Payments(
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+load_dotenv()
+
+payments = Payments.get_instance(
     PaymentOptions(
         nvm_api_key=os.getenv("NVM_API_KEY", ""),
         environment=os.getenv("NVM_ENVIRONMENT", "sandbox"),
