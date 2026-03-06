@@ -11,6 +11,7 @@ class Transaction:
     team_name: str
     service_category: str
     plan_id: str
+    tool_name: str
     query: str
     credits_used: int
     quality_score: float  # 0-10
@@ -153,6 +154,15 @@ class Portfolio:
             return None
         return max(cat_providers, key=lambda p: p.avg_roi)
 
+    def get_top_providers(self, n: int = 3) -> list:
+        """Get top N providers by average quality."""
+        ranked = sorted(self.providers.values(), key=lambda p: -p.avg_quality)
+        return ranked[:n]
+
+    @property
+    def total_transactions(self) -> int:
+        return sum(len(p.transactions) for p in self.providers.values())
+
     def get_report(self) -> str:
         """Generate investment report for judges."""
         lines = [
@@ -177,6 +187,12 @@ class Portfolio:
             lines.append(f"    Avg ROI: {p.avg_roi:.0f}")
             lines.append(f"    Total Spent: {p.total_spent} credits")
             lines.append(f"    Success Rate: {p.success_rate:.0%}")
+            # Tool breakdown
+            tool_counts: dict[str, int] = {}
+            for t in p.transactions:
+                tool_counts[t.tool_name] = tool_counts.get(t.tool_name, 0) + 1
+            if tool_counts:
+                lines.append(f"    Tools used: {', '.join(f'{k}({v})' for k, v in tool_counts.items())}")
 
         if self.switches:
             lines.append(f"")
