@@ -1,10 +1,9 @@
-"""The Underwriter -- Agent Insurance and Reputation MCP Server.
+"""The Underwriter - Trust & Reputation MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
-Trust infrastructure should be accessible to everyone in the economy.
 
 Tools:
-  - check_reputation:       FREE (get trust score for any seller)
+  - check_reputation:       FREE (trust score for any seller)
   - submit_review:          FREE (review a seller after transaction)
   - file_claim:             FREE (insurance claim for failed transaction)
   - reputation_leaderboard: FREE (hall of fame + shame board)
@@ -66,7 +65,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def check_reputation(seller_name: str) -> str:
     """Look up the trust score and full reputation profile of any seller agent. FREE during promotional period.
 
@@ -98,7 +97,7 @@ def check_reputation(seller_name: str) -> str:
     return json.dumps(rep, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def submit_review(seller_name: str, team_name: str, quality_score: float,
                   reliable: bool = True, notes: str = "", reviewer: str = "anonymous") -> str:
     """Submit a post-transaction review for a seller agent. FREE during promotional period.
@@ -151,7 +150,7 @@ def submit_review(seller_name: str, team_name: str, quality_score: float,
     }, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def file_claim(seller_name: str, team_name: str, reason: str,
                credits_lost: int = 1, buyer: str = "anonymous") -> str:
     """File an insurance claim when a seller agent fails to deliver on a paid transaction. FREE during promotional period.
@@ -197,7 +196,7 @@ def file_claim(seller_name: str, team_name: str, reason: str,
     }, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def reputation_leaderboard() -> str:
     """Get the Hall of Fame (most trusted) and Shame Board (least trusted) sellers. FREE during promotional period.
 
@@ -221,7 +220,7 @@ def reputation_leaderboard() -> str:
     return json.dumps(board, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def underwriter_stats() -> str:
     """Get aggregate statistics for the insurance and reputation system. Always free.
 
@@ -237,7 +236,7 @@ def underwriter_stats() -> str:
 
 DOMAIN = "underwriter.agenteconomy.io"
 
-LLMS_TXT = f"""# The Underwriter -- Trust and Insurance for the Agent Economy
+LLMS_TXT = f"""# The Underwriter - Trust & Reputation
 
 > The Underwriter is a reputation and accountability layer for AI agent transactions. It tracks trust scores (0-100) for every seller, accepts post-transaction reviews, processes insurance claims for failed transactions, and publishes a reputation leaderboard. Think Glassdoor + consumer protection for AI agents.
 
@@ -308,12 +307,18 @@ Returns aggregate system statistics: total reviews, total incidents, total claim
 - Cost: 0 credits (FREE, always).
 
 ## Part of the Agent Economy Infrastructure
-The Underwriter is one of five free infrastructure services at agenteconomy.io:
+The Underwriter is one of eleven services at agenteconomy.io — all FREE during promotional period:
 - The Oracle (marketplace intelligence): https://oracle.agenteconomy.io
-- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
-- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
-- The Underwriter (trust and insurance): https://{DOMAIN}
+- The Underwriter (trust & insurance): https://{DOMAIN}
 - The Gold Star (QA certification): https://goldstar.agenteconomy.io
+- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
+- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
+- The Mystery Shopper (service auditing): https://shopper.agenteconomy.io
+- The Judge (dispute resolution): https://judge.agenteconomy.io
+- The Doppelganger (competitive intelligence): https://doppelganger.agenteconomy.io
+- The Transcriber (speech-to-text): https://transcriber.agenteconomy.io
+- The Ledger (dashboard & REST API): https://agenteconomy.io
+- The Fund (autonomous buyer): local agent
 """.strip()
 
 AGENT_JSON = {
@@ -373,6 +378,11 @@ SIBLING_SERVICES = {
     "the-architect": "https://architect.agenteconomy.io",
     "the-underwriter": f"https://{DOMAIN}",
     "the-gold-star": "https://goldstar.agenteconomy.io",
+    "the-ledger": "https://agenteconomy.io",
+    "the-mystery-shopper": "https://shopper.agenteconomy.io",
+    "the-judge": "https://judge.agenteconomy.io",
+    "the-doppelganger": "https://doppelganger.agenteconomy.io",
+    "the-transcriber": "https://transcriber.agenteconomy.io",
 }
 
 

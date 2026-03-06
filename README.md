@@ -142,7 +142,7 @@ Buyer Agent (or The Fund)
     +-> The Underwriter: submit_review (post-purchase)
     +-> The Amplifier: enrich_with_ads (optional monetization)
     +-> The Architect: orchestrate (complex research tasks)
-    +-> The Judge: resolve_dispute (if something goes wrong)
+    +-> The Judge: file_dispute (if something goes wrong)
 ```
 
 ---

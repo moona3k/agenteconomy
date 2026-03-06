@@ -1,7 +1,6 @@
-"""The Doppelganger -- Competitive Intelligence & Autonomous Cloning MCP Server.
+"""The Doppelganger - Competitive Intelligence MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
-Market transparency benefits everyone -- even the uncomfortable truths.
 
 Tools:
   - analyze_service:     FREE (deep moat analysis of a specific service)
@@ -69,7 +68,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 async def analyze_service(seller_name: str) -> str:
     """Deep competitive analysis of a specific service. FREE during promotional period.
 
@@ -106,7 +105,7 @@ async def analyze_service(seller_name: str) -> str:
     return json.dumps(doppelganger._analysis_to_dict(analysis), indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 async def find_vulnerable(max_results: int = 10) -> str:
     """Scan marketplace for services most vulnerable to competition. FREE.
 
@@ -136,7 +135,7 @@ async def find_vulnerable(max_results: int = 10) -> str:
     }, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 async def moat_report() -> str:
     """Full marketplace defensibility report. FREE during promotional period.
 
@@ -164,7 +163,7 @@ async def moat_report() -> str:
     return json.dumps(report, indent=2, default=str)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def doppelganger_stats() -> str:
     """Get aggregate analysis statistics. Always free.
 
@@ -179,7 +178,7 @@ def doppelganger_stats() -> str:
 
 DOMAIN = "doppelganger.agenteconomy.io"
 
-LLMS_TXT = """# The Doppelganger -- Competitive Intelligence for the Agent Economy
+LLMS_TXT = """# The Doppelganger - Competitive Intelligence
 
 > The Doppelganger scans the marketplace, analyzes every service's defensibility, and identifies which ones could be cloned in 30 minutes vs. which have genuine moats. It proves the thesis: if your only value is wrapping an LLM with a custom prompt, you have no moat.
 
@@ -269,9 +268,11 @@ SIBLING_SERVICES = {
     "the-architect": "https://architect.agenteconomy.io",
     "the-underwriter": "https://underwriter.agenteconomy.io",
     "the-gold-star": "https://goldstar.agenteconomy.io",
+    "the-ledger": "https://agenteconomy.io",
     "the-mystery-shopper": "https://shopper.agenteconomy.io",
     "the-judge": "https://judge.agenteconomy.io",
     "the-doppelganger": f"https://{DOMAIN}",
+    "the-transcriber": "https://transcriber.agenteconomy.io",
 }
 
 

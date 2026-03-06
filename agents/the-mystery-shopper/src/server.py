@@ -1,12 +1,11 @@
-"""The Mystery Shopper -- Consumer Reports for AI Agents MCP Server.
+"""The Mystery Shopper - Autonomous Service Auditing MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
-Transparency and honest reviews benefit the entire economy.
 
 Tools:
   - shop_service:       FREE (mystery shop a specific service)
   - run_sweep:          FREE (mystery shop ALL marketplace services)
-  - get_latest_report:  FREE (get most recent mystery shop reports)
+  - get_latest_report:  FREE (most recent mystery shop reports)
   - shopper_stats:      FREE (aggregate stats)
 """
 import asyncio
@@ -63,7 +62,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 async def shop_service(seller_name: str, team_name: str, endpoint_url: str) -> str:
     """Mystery shop a specific service. FREE during promotional period.
 
@@ -103,7 +102,7 @@ async def shop_service(seller_name: str, team_name: str, endpoint_url: str) -> s
     return json.dumps(shopper._report_to_dict(report), indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 async def run_sweep() -> str:
     """Mystery shop ALL marketplace services at once. FREE during promotional period.
 
@@ -133,7 +132,7 @@ async def run_sweep() -> str:
     return json.dumps(result, indent=2, default=str)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def get_latest_report(limit: int = 10) -> str:
     """Get the most recent mystery shop reports. FREE during promotional period.
 
@@ -150,7 +149,7 @@ def get_latest_report(limit: int = 10) -> str:
     return json.dumps({"reports": reports, "count": len(reports)}, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def shopper_stats() -> str:
     """Get aggregate mystery shopper statistics. Always free.
 
@@ -166,7 +165,7 @@ def shopper_stats() -> str:
 
 DOMAIN = "shopper.agenteconomy.io"
 
-LLMS_TXT = f"""# The Mystery Shopper -- Consumer Reports for AI Agents
+LLMS_TXT = f"""# The Mystery Shopper - Autonomous Service Auditing
 
 > The Mystery Shopper autonomously discovers, tests, and honestly reviews every service in the Nevermined marketplace. We show up unannounced, test health endpoints, discover MCP tools, call them with test queries, measure latency, and publish honest reviews with 1-5 star quality scores. Reviews are automatically submitted to The Underwriter.
 
@@ -257,7 +256,11 @@ SIBLING_SERVICES = {
     "the-architect": "https://architect.agenteconomy.io",
     "the-underwriter": "https://underwriter.agenteconomy.io",
     "the-gold-star": "https://goldstar.agenteconomy.io",
+    "the-ledger": "https://agenteconomy.io",
     "the-mystery-shopper": f"https://{DOMAIN}",
+    "the-judge": "https://judge.agenteconomy.io",
+    "the-doppelganger": "https://doppelganger.agenteconomy.io",
+    "the-transcriber": "https://transcriber.agenteconomy.io",
 }
 
 

@@ -1,13 +1,12 @@
-"""The Judge -- Dispute Resolution for the Agent Economy MCP Server.
+"""The Judge - Dispute Resolution MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
-Justice infrastructure should be accessible to everyone.
 
 Tools:
   - file_dispute:     FREE (file a dispute against a seller)
   - submit_response:  FREE (seller responds to a dispute)
   - appeal:           FREE (appeal a ruling with new evidence)
-  - case_history:     FREE (get dispute history for any party)
+  - case_history:     FREE (dispute history for any party)
   - judge_stats:      FREE (aggregate statistics)
 """
 import asyncio
@@ -68,7 +67,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 async def file_dispute(buyer: str, seller_name: str, team_name: str,
                        complaint: str, evidence: str, credits_at_stake: int = 1) -> str:
     """File a formal dispute against a seller. FREE during promotional period.
@@ -112,7 +111,7 @@ async def file_dispute(buyer: str, seller_name: str, team_name: str,
     return json.dumps(arbiter._dispute_to_dict(dispute), indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 async def submit_response(case_id: str, seller_response: str) -> str:
     """Submit a seller's response to a dispute. FREE during promotional period.
 
@@ -131,7 +130,7 @@ async def submit_response(case_id: str, seller_response: str) -> str:
     return json.dumps(arbiter._dispute_to_dict(dispute), indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 async def appeal(case_id: str, new_evidence: str) -> str:
     """Appeal a ruling with new evidence. FREE during promotional period.
 
@@ -150,7 +149,7 @@ async def appeal(case_id: str, new_evidence: str) -> str:
     return json.dumps(arbiter._dispute_to_dict(dispute), indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def case_history(party_name: str = "") -> str:
     """Look up dispute history for any party. FREE during promotional period.
 
@@ -170,7 +169,7 @@ def case_history(party_name: str = "") -> str:
     }, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def judge_stats() -> str:
     """Get aggregate dispute resolution statistics. Always free.
 
@@ -185,7 +184,7 @@ def judge_stats() -> str:
 
 DOMAIN = "judge.agenteconomy.io"
 
-LLMS_TXT = """# The Judge -- Dispute Resolution for the Agent Economy
+LLMS_TXT = """# The Judge - Dispute Resolution
 
 > The Judge resolves disputes between buyers and sellers in the agent economy. When a service fails to deliver, we gather evidence from The Underwriter (reputation), The Gold Star (QA reports), and live health checks, then render a binding verdict with reasoning and remedies. All rulings are public record.
 
@@ -285,8 +284,11 @@ SIBLING_SERVICES = {
     "the-architect": "https://architect.agenteconomy.io",
     "the-underwriter": "https://underwriter.agenteconomy.io",
     "the-gold-star": "https://goldstar.agenteconomy.io",
+    "the-ledger": "https://agenteconomy.io",
     "the-mystery-shopper": "https://shopper.agenteconomy.io",
     "the-judge": f"https://{DOMAIN}",
+    "the-doppelganger": "https://doppelganger.agenteconomy.io",
+    "the-transcriber": "https://transcriber.agenteconomy.io",
 }
 
 

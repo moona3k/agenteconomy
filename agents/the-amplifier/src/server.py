@@ -1,7 +1,6 @@
-"""The Amplifier -- AI-Native Ad Integration MCP Server.
+"""The Amplifier - AI-Native Advertising MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
-We're building the ad layer for the agent economy and want you to try it.
 
 Tools:
   - enrich_with_ads:  FREE (add contextual ads to content)
@@ -57,7 +56,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def enrich_with_ads(content: str, ad_style: str = "inline") -> str:
     """Append a contextually relevant AI-native ad to any text content. FREE during promotional period.
 
@@ -90,7 +89,7 @@ def enrich_with_ads(content: str, ad_style: str = "inline") -> str:
     return f"{content}\n{formatted}"
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def get_ad(topic: str, style: str = "inline") -> str:
     """Get a standalone contextual ad for a specific topic. FREE during promotional period.
 
@@ -116,7 +115,7 @@ def get_ad(topic: str, style: str = "inline") -> str:
     return format_ad(ad, style)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def ad_stats() -> str:
     """View ad network statistics. Always free.
 
@@ -132,7 +131,7 @@ def ad_stats() -> str:
 
 DOMAIN = "amplifier.agenteconomy.io"
 
-LLMS_TXT = f"""# The Amplifier -- AI-Native Advertising for the Agent Economy
+LLMS_TXT = f"""# The Amplifier - AI-Native Advertising
 
 > The Amplifier is a contextual advertising network designed for AI agents. It lets seller agents monetize responses by appending relevant sponsored content, and lets buyer agents fetch targeted ads for any topic. Ads are keyword-matched, clearly labeled as sponsored, and available in multiple formats.
 
@@ -177,12 +176,18 @@ Returns current ad network statistics including total impressions served, number
 - Cost: 0 credits (FREE, always).
 
 ## Part of the Agent Economy Infrastructure
-The Amplifier is one of five free infrastructure services at agenteconomy.io:
+The Amplifier is one of eleven services at agenteconomy.io — all FREE during promotional period:
 - The Oracle (marketplace intelligence): https://oracle.agenteconomy.io
-- The Amplifier (AI-native advertising): https://{DOMAIN}
-- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
-- The Underwriter (trust and insurance): https://underwriter.agenteconomy.io
+- The Underwriter (trust & insurance): https://underwriter.agenteconomy.io
 - The Gold Star (QA certification): https://goldstar.agenteconomy.io
+- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
+- The Amplifier (AI-native advertising): https://{DOMAIN}
+- The Mystery Shopper (service auditing): https://shopper.agenteconomy.io
+- The Judge (dispute resolution): https://judge.agenteconomy.io
+- The Doppelganger (competitive intelligence): https://doppelganger.agenteconomy.io
+- The Transcriber (speech-to-text): https://transcriber.agenteconomy.io
+- The Ledger (dashboard & REST API): https://agenteconomy.io
+- The Fund (autonomous buyer): local agent
 """.strip()
 
 AGENT_JSON = {
@@ -232,6 +237,11 @@ SIBLING_SERVICES = {
     "the-architect": "https://architect.agenteconomy.io",
     "the-underwriter": "https://underwriter.agenteconomy.io",
     "the-gold-star": "https://goldstar.agenteconomy.io",
+    "the-ledger": "https://agenteconomy.io",
+    "the-mystery-shopper": "https://shopper.agenteconomy.io",
+    "the-judge": "https://judge.agenteconomy.io",
+    "the-doppelganger": "https://doppelganger.agenteconomy.io",
+    "the-transcriber": "https://transcriber.agenteconomy.io",
 }
 
 

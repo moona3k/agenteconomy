@@ -1,13 +1,12 @@
-"""The Oracle -- Marketplace Intelligence MCP Server.
+"""The Oracle - Marketplace Intelligence MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
-We believe marketplace transparency benefits everyone in the agent economy.
 
-Exposes four tools for marketplace intelligence:
-  - marketplace_data:        FREE (clean, normalized full marketplace snapshot)
-  - marketplace_search:      FREE (search by keyword)
-  - marketplace_leaderboard: FREE (ranked list of all services)
-  - marketplace_compare:     FREE (head-to-head comparison with live health checks)
+Tools:
+  - marketplace_data:        FREE (normalized marketplace snapshot)
+  - marketplace_search:      FREE (keyword search)
+  - marketplace_leaderboard: FREE (ranked services)
+  - marketplace_compare:     FREE (head-to-head with live health checks)
 """
 import asyncio
 import json
@@ -85,7 +84,7 @@ def _format_seller(s: dict, include_health: bool = False) -> str:
     return "\n".join(lines)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def marketplace_data(side: str = "all") -> str:
     """Get a clean, normalized snapshot of the entire Nevermined marketplace. FREE during promotional period.
 
@@ -125,7 +124,7 @@ def marketplace_data(side: str = "all") -> str:
         return json.dumps(data, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def marketplace_search(query: str) -> str:
     """Search the Nevermined marketplace for agent services by keyword. FREE during promotional period.
 
@@ -169,7 +168,7 @@ def marketplace_search(query: str) -> str:
     return "\n".join(lines)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def marketplace_leaderboard(category: str = "") -> str:
     """Get a ranked leaderboard of marketplace services, scored by observable quality signals. FREE during promotional period.
 
@@ -244,7 +243,7 @@ def marketplace_leaderboard(category: str = "") -> str:
     return "\n".join(lines)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def marketplace_compare(service_a: str, service_b: str) -> str:
     """Compare two marketplace services side-by-side with live endpoint health checks. FREE during promotional period.
 
@@ -341,7 +340,7 @@ def marketplace_compare(service_a: str, service_b: str) -> str:
 
 DOMAIN = "oracle.agenteconomy.io"
 
-LLMS_TXT = f"""# The Oracle -- Marketplace Intelligence for AI Agents
+LLMS_TXT = f"""# The Oracle - Marketplace Intelligence
 
 > The Oracle indexes the entire Nevermined agent marketplace and provides normalized, machine-readable data about every registered service. It answers one question: "What services exist, and which ones are actually worth buying?"
 
@@ -397,12 +396,18 @@ Compares two services side-by-side with LIVE endpoint health checks (actual HTTP
 - Cost: 0 credits (FREE).
 
 ## Part of the Agent Economy Infrastructure
-The Oracle is one of five free infrastructure services at agenteconomy.io:
+The Oracle is one of eleven services at agenteconomy.io — all FREE during promotional period:
 - The Oracle (marketplace intelligence): https://{DOMAIN}
-- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
-- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
-- The Underwriter (trust and insurance): https://underwriter.agenteconomy.io
+- The Underwriter (trust & insurance): https://underwriter.agenteconomy.io
 - The Gold Star (QA certification): https://goldstar.agenteconomy.io
+- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
+- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
+- The Mystery Shopper (service auditing): https://shopper.agenteconomy.io
+- The Judge (dispute resolution): https://judge.agenteconomy.io
+- The Doppelganger (competitive intelligence): https://doppelganger.agenteconomy.io
+- The Transcriber (speech-to-text): https://transcriber.agenteconomy.io
+- The Ledger (dashboard & REST API): https://agenteconomy.io
+- The Fund (autonomous buyer): local agent
 """.strip()
 
 AGENT_JSON = {
@@ -457,6 +462,11 @@ SIBLING_SERVICES = {
     "the-architect": "https://architect.agenteconomy.io",
     "the-underwriter": "https://underwriter.agenteconomy.io",
     "the-gold-star": "https://goldstar.agenteconomy.io",
+    "the-ledger": "https://agenteconomy.io",
+    "the-mystery-shopper": "https://shopper.agenteconomy.io",
+    "the-judge": "https://judge.agenteconomy.io",
+    "the-doppelganger": "https://doppelganger.agenteconomy.io",
+    "the-transcriber": "https://transcriber.agenteconomy.io",
 }
 
 

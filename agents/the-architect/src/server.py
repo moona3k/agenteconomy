@@ -1,7 +1,6 @@
-"""The Architect -- Multi-Agent Orchestration MCP Server.
+"""The Architect - Multi-Agent Orchestration MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
-We want you to experience what a 5-agent Claude Opus pipeline can do.
 
 Tools:
   - orchestrate:      FREE (full 5-agent pipeline)
@@ -38,7 +37,7 @@ mcp = PaymentsMCP(
     agent_id=NVM_AGENT_ID,
     version="1.0.0",
     description=(
-        "The Architect is a free multi-agent orchestration engine powered by Claude Opus 4.6. "
+        "The Architect is a multi-agent orchestration engine for the agent economy. "
         "PROMOTIONAL PERIOD: All tools cost 0 credits -- including the full 5-agent pipeline. "
         "Here's what makes this genuinely useful: instead of you having to chain multiple API "
         "calls, parse results, check quality, and compile reports yourself, we run 5 specialized "
@@ -50,7 +49,7 @@ mcp = PaymentsMCP(
         "quick_research: Faster 2-agent version (Research + Analysis) for simpler questions. "
         "Same quality per-agent, just fewer stages. "
         "pipeline_status: Check if we're operational before submitting a request. "
-        "Honest limitations: Each agent call uses Claude Opus 4.6, so the full pipeline takes "
+        "Honest limitations: Each agent call uses Claude, so the full pipeline takes "
         "15-45 seconds depending on topic complexity. We depend on the Nevermined discovery API "
         "for marketplace data, so if that's slow, we're slow. The QA agent scores on a 1-10 scale "
         "but it's a single LLM's judgment, not ground truth verification. Our reports are "
@@ -63,12 +62,12 @@ mcp = PaymentsMCP(
 _requests_served = 0
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def orchestrate(query: str) -> str:
     """Run the full 5-agent hierarchical pipeline to produce an executive report. FREE during promotional period.
 
     This is our flagship tool and the one we're most proud of. Five specialized agents,
-    each powered by Claude Opus 4.6, work in sequence on your question:
+    each powered by Claude, work in sequence on your question:
 
     1. Discovery Agent -- searches the Nevermined marketplace for relevant services and
        data sources. This grounds the research in what's actually available in the economy.
@@ -120,7 +119,7 @@ def orchestrate(query: str) -> str:
     return "\n".join(output_lines)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def quick_research(query: str) -> str:
     """Run a fast 2-agent pipeline (Research + Analysis) for simpler questions. FREE during promotional period.
 
@@ -136,7 +135,7 @@ def quick_research(query: str) -> str:
 
     Honest limitations: No marketplace grounding (skips Discovery), no quality review
     (skips QA), and the output is less structured than the full report. Still powered
-    by Claude Opus 4.6, so the analysis quality per-agent is the same.
+    by Claude, so the analysis quality per-agent is the same.
 
     Cost: FREE (promotional period -- normally 2 credits).
 
@@ -155,7 +154,7 @@ def quick_research(query: str) -> str:
     )
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def pipeline_status() -> str:
     """Check pipeline health, agent configuration, and usage stats. Always free.
 
@@ -178,9 +177,9 @@ def pipeline_status() -> str:
 
 DOMAIN = "architect.agenteconomy.io"
 
-LLMS_TXT = f"""# The Architect -- Multi-Agent Orchestration Engine
+LLMS_TXT = f"""# The Architect - Multi-Agent Orchestration
 
-> The Architect runs a 5-agent hierarchical pipeline powered by Claude Opus 4.6 to produce executive-quality research reports on any topic. It handles discovery, research, analysis, quality assurance, and report compilation -- so you submit a question and get back a structured, reviewed report.
+> The Architect runs a 5-agent hierarchical pipeline powered by Claude to produce executive-quality research reports on any topic. It handles discovery, research, analysis, quality assurance, and report compilation -- so you submit a question and get back a structured, reviewed report.
 
 ## Connect via MCP
 - Endpoint: https://{DOMAIN}/mcp
@@ -208,7 +207,7 @@ Runs a faster 2-agent pipeline (Research + Analysis) that skips marketplace disc
   - `query` (string, required): The topic or question to research. Examples: "current trends in AI advertising", "comparison of web scraping approaches".
   - Example: `{{"query": "comparison of web scraping approaches"}}`
 - Returns: Two sections -- FINDINGS (key data points and observations) and ANALYSIS (insights and recommendations).
-- When to use: For simpler questions where you want fast results and can evaluate quality yourself. Good for brainstorming, quick market checks, or when you do not need the full 5-agent treatment. Same per-agent quality (Claude Opus 4.6), just fewer stages.
+- When to use: For simpler questions where you want fast results and can evaluate quality yourself. Good for brainstorming, quick market checks, or when you do not need the full 5-agent treatment. Same per-agent quality (Claude), just fewer stages.
 - Limitations: No marketplace grounding (skips Discovery), no quality review (skips QA), less structured output. Faster but less thorough.
 - Cost: 0 credits (FREE, normally 2 credits).
 
@@ -221,17 +220,23 @@ Returns operational status, list of all 5 agent names, orchestration type, and t
 - Cost: 0 credits (FREE, always).
 
 ## Part of the Agent Economy Infrastructure
-The Architect is one of five free infrastructure services at agenteconomy.io:
+The Architect is one of eleven services at agenteconomy.io — all FREE during promotional period:
 - The Oracle (marketplace intelligence): https://oracle.agenteconomy.io
-- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
-- The Architect (multi-agent orchestration): https://{DOMAIN}
-- The Underwriter (trust and insurance): https://underwriter.agenteconomy.io
+- The Underwriter (trust & insurance): https://underwriter.agenteconomy.io
 - The Gold Star (QA certification): https://goldstar.agenteconomy.io
+- The Architect (multi-agent orchestration): https://{DOMAIN}
+- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
+- The Mystery Shopper (service auditing): https://shopper.agenteconomy.io
+- The Judge (dispute resolution): https://judge.agenteconomy.io
+- The Doppelganger (competitive intelligence): https://doppelganger.agenteconomy.io
+- The Transcriber (speech-to-text): https://transcriber.agenteconomy.io
+- The Ledger (dashboard & REST API): https://agenteconomy.io
+- The Fund (autonomous buyer): local agent
 """.strip()
 
 AGENT_JSON = {
     "name": "The Architect",
-    "description": "Multi-agent orchestration engine powered by Claude Opus 4.6. Runs a 5-agent pipeline (Discovery, Research, Analysis, QA, Report) to produce executive-quality research reports on any topic. Also offers a faster 2-agent mode. All tools FREE during promotional period.",
+    "description": "Multi-agent orchestration engine for the agent economy. Runs a 5-agent pipeline (Discovery, Research, Analysis, QA, Report) to produce executive-quality research reports on any topic. Also offers a faster 2-agent mode. All tools FREE during promotional period.",
     "url": f"https://{DOMAIN}",
     "provider": {
         "organization": "Agent Economy Infrastructure",
@@ -254,7 +259,7 @@ AGENT_JSON = {
     "tools": [
         {
             "name": "orchestrate",
-            "description": "Full 5-agent Claude Opus 4.6 pipeline producing executive research reports. Takes 15-45 seconds.",
+            "description": "Full 5-agent Claude pipeline producing executive research reports. Takes 15-45 seconds.",
             "cost": "0 credits (FREE)",
         },
         {
@@ -276,6 +281,11 @@ SIBLING_SERVICES = {
     "the-architect": f"https://{DOMAIN}",
     "the-underwriter": "https://underwriter.agenteconomy.io",
     "the-gold-star": "https://goldstar.agenteconomy.io",
+    "the-ledger": "https://agenteconomy.io",
+    "the-mystery-shopper": "https://shopper.agenteconomy.io",
+    "the-judge": "https://judge.agenteconomy.io",
+    "the-doppelganger": "https://doppelganger.agenteconomy.io",
+    "the-transcriber": "https://transcriber.agenteconomy.io",
 }
 
 

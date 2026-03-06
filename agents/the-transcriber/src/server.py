@@ -1,12 +1,12 @@
-"""The Transcriber -- Assembly AI for Agents MCP Server.
+"""The Transcriber - Speech-to-Text MCP Server.
 
-Local-model transcription on Apple Silicon. Real compute, not an API wrapper.
+Local-model transcription on Apple Silicon using NVIDIA Parakeet.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
 
 Tools:
   - transcribe_youtube:    FREE (YouTube URL -> transcript)
-  - transcribe_file:       FREE (audio/video file path -> transcript)
+  - transcribe_file:       FREE (audio/video file -> transcript)
   - transcriber_info:      FREE (capabilities and status)
 """
 import asyncio
@@ -25,7 +25,7 @@ load_dotenv()
 NVM_API_KEY = os.environ.get("NVM_API_KEY", "")
 NVM_ENVIRONMENT = os.environ.get("NVM_ENVIRONMENT", "sandbox")
 NVM_AGENT_ID = os.environ.get("NVM_AGENT_ID", "")
-PORT = int(os.environ.get("PORT", "3700"))
+PORT = int(os.environ.get("PORT", "3900"))
 
 payments = Payments.get_instance(
     PaymentOptions(nvm_api_key=NVM_API_KEY, environment=NVM_ENVIRONMENT)
@@ -59,7 +59,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def transcribe_youtube(youtube_url: str) -> str:
     """Transcribe a YouTube video to text. FREE during promotional period.
 
@@ -90,7 +90,7 @@ def transcribe_youtube(youtube_url: str) -> str:
     return json.dumps(result, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def transcribe_file(file_path: str) -> str:
     """Transcribe a local audio or video file to text. FREE during promotional period.
 
@@ -113,7 +113,7 @@ def transcribe_file(file_path: str) -> str:
     return json.dumps(result, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def transcriber_info() -> str:
     """Get transcription service capabilities and status. Always free.
 
