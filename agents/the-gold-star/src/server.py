@@ -486,28 +486,6 @@ def _load_snapshot():
 def _add_agent_routes(app):
     """Add dashboard, API, /llms.txt, /.well-known/agent.json to the FastAPI app."""
 
-    # ─── Dashboard ───
-    # Intercept GET / with HTML dashboard before the MCP library's JSON handler.
-    from starlette.middleware.base import BaseHTTPMiddleware
-    from starlette.responses import Response as StarletteResponse
-
-    class DashboardMiddleware(BaseHTTPMiddleware):
-        async def dispatch(self, request, call_next):
-            # Serve dashboard HTML for browser requests to /
-            if request.url.path in ("/", "/dashboard") and request.method == "GET":
-                accept = request.headers.get("accept", "")
-                # Serve HTML if browser request (accept includes text/html) or no specific accept
-                if "text/html" in accept or ("application/json" not in accept and "text/event-stream" not in accept):
-                    html_path = DASHBOARD_DIR / "index.html"
-                    if html_path.exists():
-                        return StarletteResponse(
-                            content=html_path.read_bytes(),
-                            media_type="text/html",
-                        )
-            return await call_next(request)
-
-    app.add_middleware(DashboardMiddleware)
-
     # ─── API Endpoints ───
 
     @app.get("/api/snapshot", response_class=JSONResponse)
@@ -576,14 +554,59 @@ async def _run():
     if app:
         _add_agent_routes(app)
 
+        # Wrap ASGI app to intercept GET / for dashboard HTML.
+        # add_middleware() doesn't work after startup, so we wrap the ASGI callable.
+        inner_app = app.router.app if hasattr(app.router, "app") else None
+        from starlette.responses import Response as StarletteResponse
+
+        original_asgi = app.__call__
+
+        async def dashboard_asgi(scope, receive, send):
+            if (
+                scope["type"] == "http"
+                and scope["method"] == "GET"
+                and scope["path"] in ("/", "/dashboard")
+            ):
+                headers = dict(scope.get("headers", []))
+                accept = headers.get(b"accept", b"").decode()
+                if "text/html" in accept or (
+                    "application/json" not in accept
+                    and "text/event-stream" not in accept
+                ):
+                    html_path = DASHBOARD_DIR / "index.html"
+                    if html_path.exists():
+                        body = html_path.read_bytes()
+                        await send({
+                            "type": "http.response.start",
+                            "status": 200,
+                            "headers": [
+                                [b"content-type", b"text/html; charset=utf-8"],
+                                [b"content-length", str(len(body)).encode()],
+                            ],
+                        })
+                        await send({
+                            "type": "http.response.body",
+                            "body": body,
+                        })
+                        return
+            await original_asgi(scope, receive, send)
+
+        app.__call__ = dashboard_asgi
+
     base = info["baseUrl"]
     print(f"\nThe Gold Star running at: {base}")
     print(f"  MCP endpoint:  {base}/mcp")
     print(f"  Health check:  {base}/health")
+    print(f"  Dashboard:     {base}/")
+    print(f"  API snapshot:  {base}/api/snapshot")
     print(f"  llms.txt:      {base}/llms.txt")
     print(f"  agent.json:    {base}/.well-known/agent.json")
     print(f"  Tools: {', '.join(info.get('tools', []))}")
     print(f"  PROMOTIONAL PERIOD: All tools are FREE (0 credits)")
+    print(f"  Snapshot data dir: {REPORTS_DIR} (exists={REPORTS_DIR.exists()})")
+    snap = _find_latest_snapshot()
+    print(f"  Latest snapshot: {snap}")
+    print(f"  Dashboard HTML: {DASHBOARD_DIR / 'index.html'} (exists={(DASHBOARD_DIR / 'index.html').exists()})")
     print()
 
     loop = asyncio.get_running_loop()
