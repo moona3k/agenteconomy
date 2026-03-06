@@ -78,3 +78,10 @@ poetry.lock
 *.bak
 *.tmp
 venv/
+
+# Agent runtime data (generated at runtime, not source code)
+investment-data.json
+investment-report.txt
+fund-output.log
+**/data/*.json
+!docs/data/*.json

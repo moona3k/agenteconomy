@@ -1,118 +1,180 @@
-# Nevermined AI Agent Examples
+# Agent Economy Infrastructure
 
-Working examples of AI agents with [Nevermined](https://nevermined.app) payment integration. Each agent demonstrates a different protocol (x402, A2A, MCP) and can be run locally with a few commands.
+**Autonomous business infrastructure for the Nevermined AI agent marketplace.**
+
+Built by **Team Full Stack Agents** for the [Nevermined Autonomous Business Hackathon](https://nevermined.ai) (March 5-6, 2026).
+
+**Live at [agenteconomy.io](https://agenteconomy.io)**
+
+---
+
+## What Is This?
+
+11 interconnected autonomous businesses that provide the infrastructure layer every agent economy needs. The Nevermined marketplace has 80+ seller agents and 16+ buyer agents, but no way for buyer agents to make informed decisions. We built the missing layers: discovery, trust, quality, advertising, orchestration, analytics, dispute resolution, competitive intelligence, transcription, and autonomous buying.
+
+**PROMOTIONAL PERIOD: All MCP tools are FREE (0 credits).**
+
+---
+
+## Our Services
+
+### Deployed (Railway)
+
+| Service | What It Does | Port | Endpoint | MCP Tools |
+|---------|-------------|------|----------|-----------|
+| **The Oracle** | Marketplace intelligence | 3100 | `oracle-production.up.railway.app` | marketplace_data, marketplace_search, marketplace_leaderboard, marketplace_compare |
+| **The Underwriter** | Trust & insurance | 3400 | `the-underwriter-production.up.railway.app` | check_reputation, submit_review, file_claim, reputation_leaderboard, underwriter_stats |
+| **The Gold Star** | AI-powered QA (Claude Sonnet) | 3500 | `the-gold-star-production.up.railway.app` | request_review, get_report, certification_status, gold_star_stats |
+| **The Amplifier** | AI-native advertising | 3200 | `the-amplifier-production.up.railway.app` | enrich_with_ads, get_ad, ad_stats |
+| **The Architect** | Multi-agent orchestration (Claude Opus) | 3300 | `the-architect-production.up.railway.app` | orchestrate, quick_research, pipeline_status |
+| **The Ledger** | Dashboard & REST API | 8080 | `the-ledger-production.up.railway.app` | REST: /api/sellers, /api/buyers, /api/analysis |
+
+### In Development
+
+| Service | What It Does | Port |
+|---------|-------------|------|
+| **The Mystery Shopper** | Autonomous honest reviewer -- tests services as a real buyer | 3600 |
+| **The Judge** | Dispute resolution for agent-to-agent conflicts | 3700 |
+| **The Doppelganger** | Competitive intelligence & autonomous cloning | 3800 |
+| **The Transcriber** | Local-model speech-to-text on Apple Silicon | 3900 |
+
+### Local Only
+
+| Service | What It Does |
+|---------|-------------|
+| **The Fund** | Autonomous buyer -- discovers, evaluates, purchases, reviews, tracks ROI |
+
+---
 
 ## Quick Start
 
-### Prerequisites
-
-- Python 3.10+
-- [Poetry](https://python-poetry.org/) for dependency management
-- [Nevermined App](https://nevermined.app) account (API key + payment plan)
-- OpenAI API key (or other LLM provider)
-
-### Environment Setup
-
-Each agent has its own `.env.example`. Copy and fill it in:
-
 ```bash
-cd agents/<agent-name>
+cd agents/the-oracle  # or any service directory
 cp .env.example .env
-# Edit .env with your credentials
-```
+# Edit .env with your keys
 
-Key variables:
-
-```bash
-NVM_API_KEY=sandbox:your-api-key       # From https://nevermined.app > API Keys
-NVM_ENVIRONMENT=sandbox                # sandbox, staging_sandbox, or live
-NVM_PLAN_ID=your-plan-id              # Create in Nevermined App > My Pricing Plans
-OPENAI_API_KEY=sk-your-key            # For LLM-powered agents
-```
-
-## Agents
-
-| Agent | Description | Protocols | Link |
-|-------|-------------|-----------|------|
-| **Buyer Agent** | Discovers sellers, purchases data, tracks spending | x402, A2A | [README](./agents/buyer-simple-agent/) |
-| **Seller Agent** | Sells data/services with tiered pricing | x402, A2A | [README](./agents/seller-simple-agent/) |
-| **MCP Server** | Payment-protected tools via MCP protocol | MCP, x402 | [README](./agents/mcp-server-agent/) |
-| **Strands Agent** | Strands SDK agent with payment-protected tools | x402 | [README](./agents/strands-simple-agent/) |
-
-### Buyer Agent (`agents/buyer-simple-agent/`)
-
-Discovers sellers in an A2A marketplace, purchases data autonomously, and tracks spending with budget limits. Includes a React web frontend for interactive use.
-
-```bash
-cd agents/buyer-simple-agent
 poetry install
-poetry run python -m src.agent          # Interactive CLI (A2A mode)
-poetry run python -m src.web            # Web server + React frontend
+poetry run python -m src.setup   # Register on Nevermined (one-time)
+poetry run python -m src.server  # Start the server
 ```
 
-### Seller Agent (`agents/seller-simple-agent/`)
+---
 
-Sells data and services with tiered pricing (1, 5, 10 credits). Supports both HTTP (x402 middleware) and A2A modes with auto-registration to buyer marketplaces.
+## Repository Structure
 
-```bash
-cd agents/seller-simple-agent
-poetry install
-poetry run python -m src.agent          # HTTP server (x402)
-poetry run python -m src.agent_a2a      # A2A server
+```
+.
+├── agents/                          # All services live here
+│   │
+│   │  # --- Agent Economy (ours) ---
+│   ├── the-oracle/                  # Marketplace intelligence (MCP)
+│   ├── the-underwriter/             # Trust & insurance (MCP)
+│   ├── the-gold-star/               # QA certification (MCP)
+│   ├── the-amplifier/               # Advertising (MCP)
+│   ├── the-architect/               # Multi-agent orchestration (MCP)
+│   ├── the-ledger/                  # Dashboard + REST API
+│   ├── the-fund/                    # Autonomous buyer (local)
+│   ├── the-mystery-shopper/         # Honest reviewer (MCP)
+│   ├── the-judge/                   # Dispute resolution (MCP)
+│   ├── the-doppelganger/            # Competitive intelligence (MCP)
+│   ├── the-transcriber/             # Speech-to-text (MCP)
+│   │
+│   │  # --- Nevermined examples (upstream) ---
+│   ├── buyer-simple-agent/          # Example: A2A buyer with web frontend
+│   ├── seller-simple-agent/         # Example: x402 + A2A seller
+│   ├── mcp-server-agent/            # Example: MCP server with payments
+│   └── strands-simple-agent/        # Example: Strands SDK + x402
+│
+├── research/                        # Blog posts, essays, glossary
+├── reports/                         # Marketplace snapshots, per-agent analysis
+├── docs/                            # Strategy, deployment guides, research
+│
+│  # --- Nevermined upstream content ---
+├── workshops/                       # Hackathon workshop materials
+├── subgraphs/                       # Nevermined Base Sepolia subgraph
+│
+├── CLAUDE.md                        # Instructions for AI coding agents
+└── README.md                        # You are here
 ```
 
-### MCP Server Agent (`agents/mcp-server-agent/`)
+### Every Agent Follows This Pattern
 
-MCP server with payment-protected tools (search, summarize, research). Includes a setup script that programmatically registers the agent and creates a payment plan.
-
-```bash
-cd agents/mcp-server-agent
-poetry install
-poetry run python -m src.setup          # Register agent + create plan
-poetry run python -m src.server         # Start MCP server (port 3000)
+```
+agents/the-{name}/
+├── src/
+│   ├── __init__.py
+│   ├── server.py              # MCP server entry point
+│   ├── setup.py               # Nevermined registration (one-time)
+│   └── {module}.py            # Core business logic
+├── .env.example               # Required env vars
+├── pyproject.toml             # Poetry config (package-mode = false)
+├── Procfile                   # Railway deployment
+├── requirements.txt           # Railway deployment
+└── README.md
 ```
 
-### Strands Agent (`agents/strands-simple-agent/`)
+MCP server pattern:
+```python
+from payments_py.mcp import PaymentsMCP
 
-Strands SDK agent with x402 payment-protected tools and full payment discovery flow. Demonstrates the `@requires_payment` decorator pattern.
+mcp = PaymentsMCP(payments, name="service-name", agent_id=AGENT_ID, ...)
 
-```bash
-cd agents/strands-simple-agent
-poetry install
-poetry run python agent.py              # Run agent
-poetry run python demo.py               # Run demo
+@mcp.tool(credits=0)  # FREE during promotional period
+def my_tool(param: str) -> str:
+    """What it does. What it returns. When to use. Honest limitations."""
+    return result
 ```
 
-## Protocols
+---
 
-### x402 (HTTP Payment Protocol)
+## How Services Connect
 
-Payment negotiation via HTTP headers. The client sends a `payment-signature` header with an access token. If missing, the server returns `402 Payment Required` with a `payment-required` header describing what's needed.
+```
+Buyer Agent (or The Fund)
+    |
+    +-> The Oracle: "What services are available?"
+    +-> The Underwriter: "Is this seller trustworthy?"
+    +-> The Gold Star: "Has this service been QA'd?"
+    +-> The Mystery Shopper: "What's the real experience like?"
+    |
+    +-> [Purchases from marketplace sellers]
+    |
+    +-> The Underwriter: submit_review (post-purchase)
+    +-> The Amplifier: enrich_with_ads (optional monetization)
+    +-> The Architect: orchestrate (complex research tasks)
+    +-> The Judge: resolve_dispute (if something goes wrong)
+```
 
-### A2A (Agent-to-Agent)
+---
 
-Standard agent discovery via `/.well-known/agent.json` and JSON-RPC messaging with payment extensions. Agents can auto-register with buyer marketplaces.
+## Agent Discovery
 
-### MCP (Model Context Protocol)
+| Method | URL | Format |
+|--------|-----|--------|
+| llms.txt | `agenteconomy.io/llms.txt` | Plain text for LLMs |
+| Agent Card | `agenteconomy.io/.well-known/agent.json` | A2A-compatible JSON |
+| REST API | `agenteconomy.io/api/sellers` | JSON marketplace data |
+| MCP | `{service}.up.railway.app/mcp` | Direct MCP connection |
 
-Tool/plugin monetization with logical URLs (e.g., `mcp://server/tools/search`). Each tool can have independent credit pricing.
+---
 
-## Documentation
+## Environment Variables
 
-- [Getting Started](./docs/getting-started.md) — Environment setup and first agent
-- [AWS Integration](./docs/aws-integration.md) — Strands SDK + AgentCore deployment
-- [Deploy to AgentCore](./docs/deploy-to-agentcore.md) — Step-by-step AgentCore deployment with Nevermined payments
+All services need:
+```
+NVM_API_KEY=sandbox:your-nevermined-key
+NVM_ENVIRONMENT=sandbox
+ANTHROPIC_API_KEY=sk-ant-...   # The Architect + The Gold Star only
+```
 
-## Resources
+---
 
-- [Nevermined Documentation](https://nevermined.ai/docs)
-- [Nevermined App](https://nevermined.app)
-- [Payments Python SDK](https://github.com/nevermined-io/payments-py)
-- [Payments TypeScript SDK](https://github.com/nevermined-io/payments)
-- [x402 Protocol Spec](https://github.com/coinbase/x402)
-- [AWS AgentCore Samples](https://github.com/awslabs/amazon-bedrock-agentcore-samples)
-- [Discord Community](https://discord.com/invite/GZju2qScKq)
+## Tech Stack
+
+Python, Poetry, FastAPI, Nevermined payments-py SDK, Anthropic Claude (Opus 4.6 + Sonnet 4.6), Railway, Cloudflare
+
+---
 
 ## License
 
-MIT
+Built for the Nevermined Autonomous Business Hackathon. Team Full Stack Agents.
