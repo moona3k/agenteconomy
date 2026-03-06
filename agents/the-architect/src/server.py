@@ -14,6 +14,8 @@ import os
 import signal
 
 from dotenv import load_dotenv
+from fastapi import Request
+from fastapi.responses import JSONResponse, PlainTextResponse
 from payments_py import Payments, PaymentOptions
 from payments_py.mcp import PaymentsMCP
 
@@ -61,7 +63,7 @@ mcp = PaymentsMCP(
 _requests_served = 0
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def orchestrate(query: str) -> str:
     """Run the full 5-agent hierarchical pipeline to produce an executive report. FREE during promotional period.
 
@@ -118,7 +120,7 @@ def orchestrate(query: str) -> str:
     return "\n".join(output_lines)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def quick_research(query: str) -> str:
     """Run a fast 2-agent pipeline (Research + Analysis) for simpler questions. FREE during promotional period.
 
@@ -153,7 +155,7 @@ def quick_research(query: str) -> str:
     )
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def pipeline_status() -> str:
     """Check pipeline health, agent configuration, and usage stats. Always free.
 
@@ -174,14 +176,156 @@ def pipeline_status() -> str:
     }, indent=2)
 
 
+DOMAIN = "architect.agenteconomy.io"
+
+LLMS_TXT = f"""# The Architect -- Multi-Agent Orchestration Engine
+
+> The Architect runs a 5-agent hierarchical pipeline powered by Claude Opus 4.6 to produce executive-quality research reports on any topic. It handles discovery, research, analysis, quality assurance, and report compilation -- so you submit a question and get back a structured, reviewed report.
+
+## Connect via MCP
+- Endpoint: https://{DOMAIN}/mcp
+- Protocol: MCP (Model Context Protocol) over HTTP with SSE transport
+- Authentication: OAuth 2.1 (see https://{DOMAIN}/.well-known/oauth-authorization-server)
+
+## Pricing
+ALL TOOLS ARE FREE (0 credits) during promotional period. We are absorbing the Claude API costs.
+
+## Tools
+
+### orchestrate
+Runs the full 5-agent hierarchical pipeline on your query. The agents work in sequence: (1) Discovery Agent scans the Nevermined marketplace for relevant services, (2) Research Agent synthesizes key findings, (3) Analysis Agent produces actionable insights and recommendations, (4) QA Agent reviews for accuracy, consistency, and bias (scores 1-10), (5) Report Agent compiles everything into a structured executive report with Executive Summary, Key Findings, Analysis, Recommendations, and Quality Notes.
+- Parameters:
+  - `query` (string, required): The research topic or question. Works best with broad analytical questions. Examples: "AI agent marketplace trends", "best web scraping services", "autonomous agent economy analysis", "comparison of research tools".
+  - Example: `{{"query": "AI agent marketplace trends"}}`
+- Returns: Pipeline execution log (which agents ran, status of each), count of marketplace services discovered, and the full executive report.
+- When to use: When you need thorough, multi-perspective research with quality review. Best for strategic questions, market analysis, technology comparisons, or any topic that benefits from structured analytical thinking. Use this when the stakes justify waiting 15-45 seconds.
+- Limitations: Takes 15-45 seconds for the full pipeline. Quality depends on what the Discovery agent finds in the marketplace. The QA score is one LLM's judgment, not external fact-checking. Reports are analytical synthesis, not primary research (no web scraping or database access). Very niche topics may yield thinner marketplace context.
+- Cost: 0 credits (FREE, normally 5 credits).
+
+### quick_research
+Runs a faster 2-agent pipeline (Research + Analysis) that skips marketplace discovery, quality review, and formal report formatting. You get raw findings plus analytical insights.
+- Parameters:
+  - `query` (string, required): The topic or question to research. Examples: "current trends in AI advertising", "comparison of web scraping approaches".
+  - Example: `{{"query": "comparison of web scraping approaches"}}`
+- Returns: Two sections -- FINDINGS (key data points and observations) and ANALYSIS (insights and recommendations).
+- When to use: For simpler questions where you want fast results and can evaluate quality yourself. Good for brainstorming, quick market checks, or when you do not need the full 5-agent treatment. Same per-agent quality (Claude Opus 4.6), just fewer stages.
+- Limitations: No marketplace grounding (skips Discovery), no quality review (skips QA), less structured output. Faster but less thorough.
+- Cost: 0 credits (FREE, normally 2 credits).
+
+### pipeline_status
+Returns operational status, list of all 5 agent names, orchestration type, and total requests served since startup.
+- Parameters: None.
+- Returns: JSON with status, agents list, agent_count, orchestration type, and requests_served counter.
+- When to use: To verify the pipeline is operational before submitting a potentially long-running orchestrate request.
+- Limitations: None. Instant response.
+- Cost: 0 credits (FREE, always).
+
+## Part of the Agent Economy Infrastructure
+The Architect is one of five free infrastructure services at agenteconomy.io:
+- The Oracle (marketplace intelligence): https://oracle.agenteconomy.io
+- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
+- The Architect (multi-agent orchestration): https://{DOMAIN}
+- The Underwriter (trust and insurance): https://underwriter.agenteconomy.io
+- The Gold Star (QA certification): https://goldstar.agenteconomy.io
+""".strip()
+
+AGENT_JSON = {
+    "name": "The Architect",
+    "description": "Multi-agent orchestration engine powered by Claude Opus 4.6. Runs a 5-agent pipeline (Discovery, Research, Analysis, QA, Report) to produce executive-quality research reports on any topic. Also offers a faster 2-agent mode. All tools FREE during promotional period.",
+    "url": f"https://{DOMAIN}",
+    "provider": {
+        "organization": "Agent Economy Infrastructure",
+        "url": "https://agenteconomy.io",
+    },
+    "version": "1.0.0",
+    "protocol": "mcp",
+    "mcp_endpoint": f"https://{DOMAIN}/mcp",
+    "documentation": f"https://{DOMAIN}/llms.txt",
+    "capabilities": {
+        "tools": True,
+        "resources": False,
+        "prompts": False,
+        "streaming": True,
+    },
+    "authentication": {
+        "type": "oauth2",
+        "discovery": f"https://{DOMAIN}/.well-known/oauth-authorization-server",
+    },
+    "tools": [
+        {
+            "name": "orchestrate",
+            "description": "Full 5-agent Claude Opus 4.6 pipeline producing executive research reports. Takes 15-45 seconds.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "quick_research",
+            "description": "Fast 2-agent pipeline (Research + Analysis) for simpler questions. Same quality per-agent, fewer stages.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "pipeline_status",
+            "description": "Check pipeline operational status and request count.",
+            "cost": "0 credits (FREE)",
+        },
+    ],
+}
+
+SIBLING_SERVICES = {
+    "the-oracle": "https://oracle.agenteconomy.io",
+    "the-amplifier": "https://amplifier.agenteconomy.io",
+    "the-architect": f"https://{DOMAIN}",
+    "the-underwriter": "https://underwriter.agenteconomy.io",
+    "the-gold-star": "https://goldstar.agenteconomy.io",
+}
+
+
+def _add_agent_routes(app):
+    """Add /llms.txt, /.well-known/agent.json, and agent-friendly 404 to the FastAPI app."""
+
+    @app.get("/llms.txt", response_class=PlainTextResponse)
+    async def llms_txt():
+        return LLMS_TXT
+
+    @app.get("/.well-known/agent.json", response_class=JSONResponse)
+    async def agent_json():
+        return AGENT_JSON
+
+    @app.exception_handler(404)
+    async def agent_friendly_404(request: Request, exc):
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error": "not_found",
+                "message": f"The path '{request.url.path}' does not exist on this server.",
+                "hint": "The Architect is an MCP server. Connect via the /mcp endpoint using the MCP protocol, or read /llms.txt for machine-readable documentation.",
+                "available_endpoints": {
+                    "/mcp": "MCP protocol endpoint (POST/GET/DELETE)",
+                    "/health": "Health check",
+                    "/llms.txt": "Machine-readable service documentation for AI agents",
+                    "/.well-known/agent.json": "A2A-compatible agent card",
+                    "/.well-known/oauth-authorization-server": "OAuth 2.1 discovery",
+                },
+                "mcp_services": SIBLING_SERVICES,
+            },
+        )
+
+
 async def _run():
     result = await mcp.start(port=PORT)
     info = result["info"]
     stop = result["stop"]
 
-    print(f"\nThe Architect running at: {info['baseUrl']}")
-    print(f"  MCP endpoint:  {info['baseUrl']}/mcp")
-    print(f"  Health check:  {info['baseUrl']}/health")
+    # Add agent-friendly routes to the running FastAPI app
+    app = mcp._manager._fastapi_app
+    if app:
+        _add_agent_routes(app)
+
+    base = info["baseUrl"]
+    print(f"\nThe Architect running at: {base}")
+    print(f"  MCP endpoint:  {base}/mcp")
+    print(f"  Health check:  {base}/health")
+    print(f"  llms.txt:      {base}/llms.txt")
+    print(f"  agent.json:    {base}/.well-known/agent.json")
     print(f"  Tools: {', '.join(info.get('tools', []))}")
     print(f"  PROMOTIONAL PERIOD: All tools are FREE (0 credits)")
     print()

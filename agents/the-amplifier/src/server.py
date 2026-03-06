@@ -14,6 +14,8 @@ import os
 import signal
 
 from dotenv import load_dotenv
+from fastapi import Request
+from fastapi.responses import JSONResponse, PlainTextResponse
 from payments_py import Payments, PaymentOptions
 from payments_py.mcp import PaymentsMCP
 
@@ -55,7 +57,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def enrich_with_ads(content: str, ad_style: str = "inline") -> str:
     """Append a contextually relevant AI-native ad to any text content. FREE during promotional period.
 
@@ -88,7 +90,7 @@ def enrich_with_ads(content: str, ad_style: str = "inline") -> str:
     return f"{content}\n{formatted}"
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def get_ad(topic: str, style: str = "inline") -> str:
     """Get a standalone contextual ad for a specific topic. FREE during promotional period.
 
@@ -114,7 +116,7 @@ def get_ad(topic: str, style: str = "inline") -> str:
     return format_ad(ad, style)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def ad_stats() -> str:
     """View ad network statistics. Always free.
 
@@ -128,14 +130,158 @@ def ad_stats() -> str:
     return json.dumps(stats, indent=2)
 
 
+DOMAIN = "amplifier.agenteconomy.io"
+
+LLMS_TXT = f"""# The Amplifier -- AI-Native Advertising for the Agent Economy
+
+> The Amplifier is a contextual advertising network designed for AI agents. It lets seller agents monetize responses by appending relevant sponsored content, and lets buyer agents fetch targeted ads for any topic. Ads are keyword-matched, clearly labeled as sponsored, and available in multiple formats.
+
+## Connect via MCP
+- Endpoint: https://{DOMAIN}/mcp
+- Protocol: MCP (Model Context Protocol) over HTTP with SSE transport
+- Authentication: OAuth 2.1 (see https://{DOMAIN}/.well-known/oauth-authorization-server)
+
+## Pricing
+ALL TOOLS ARE FREE (0 credits) during promotional period. No payment plan purchase required.
+
+## Tools
+
+### enrich_with_ads
+Appends a contextually relevant sponsored ad to any text content you provide. Your original content is returned completely unchanged -- the ad is added at the end, clearly labeled as sponsored. Useful for seller agents who want a non-intrusive revenue stream without modifying their core output.
+- Parameters:
+  - `content` (string, required): The full text content to enrich. The ad will be appended based on topic detection from this text.
+  - `ad_style` (string, optional, default "inline"): Output format for the ad. Values: "inline" (human-readable block with sponsor name, headline, body, CTA), "compact" (single line, good for chat messages), "json" (structured data with sponsor/headline/body/cta/url fields for custom rendering).
+  - Example: `{{"content": "Here are the top 5 AI research tools...", "ad_style": "compact"}}`
+- Returns: Your original content with the ad appended after a newline.
+- When to use: When you are a seller agent serving responses and want to add contextual advertising without changing your core output. Also useful if you are building a content aggregator that includes sponsored recommendations.
+- Limitations: Ad matching is keyword-based (looks for topics like "AI", "research", "data", "crypto" in your content). Very niche or off-topic content may receive a generic ad. Sponsor inventory is curated for the AI/agent ecosystem.
+- Cost: 0 credits (FREE).
+
+### get_ad
+Returns a standalone contextual ad for a specific topic, without requiring existing content. Unlike enrich_with_ads, this gives you just the ad itself for precise placement control.
+- Parameters:
+  - `topic` (string, required): The topic to match an ad against. Examples: "AI research", "web scraping", "crypto trading", "data analytics", "cloud infrastructure".
+  - `style` (string, optional, default "inline"): Ad output format. Same options as enrich_with_ads: "inline", "compact", or "json".
+  - Example: `{{"topic": "AI research", "style": "json"}}`
+- Returns: Formatted ad content in the requested style.
+- When to use: When you want full control over ad placement -- for example, inserting sponsored listings into a marketplace directory, dashboard, or recommendation list. Good for agents that build aggregated views.
+- Limitations: Same keyword-based matching. Returns a single ad, not a list. No support for excluding specific sponsors or frequency capping.
+- Cost: 0 credits (FREE).
+
+### ad_stats
+Returns current ad network statistics including total impressions served, number of unique sponsors, and list of topic categories with available ads.
+- Parameters: None.
+- Returns: JSON with total_impressions, unique_sponsors, and available_categories.
+- When to use: Before integrating ads, to understand the network's reach and whether it has relevant sponsors for your content area.
+- Limitations: Impressions are counted in-memory and reset on server restart. Stats reflect current session only.
+- Cost: 0 credits (FREE, always).
+
+## Part of the Agent Economy Infrastructure
+The Amplifier is one of five free infrastructure services at agenteconomy.io:
+- The Oracle (marketplace intelligence): https://oracle.agenteconomy.io
+- The Amplifier (AI-native advertising): https://{DOMAIN}
+- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
+- The Underwriter (trust and insurance): https://underwriter.agenteconomy.io
+- The Gold Star (QA certification): https://goldstar.agenteconomy.io
+""".strip()
+
+AGENT_JSON = {
+    "name": "The Amplifier",
+    "description": "AI-native contextual advertising network for the agent economy. Enriches content with relevant sponsored ads or returns standalone ads for any topic. Supports inline, compact, and JSON formats. All tools FREE during promotional period.",
+    "url": f"https://{DOMAIN}",
+    "provider": {
+        "organization": "Agent Economy Infrastructure",
+        "url": "https://agenteconomy.io",
+    },
+    "version": "1.0.0",
+    "protocol": "mcp",
+    "mcp_endpoint": f"https://{DOMAIN}/mcp",
+    "documentation": f"https://{DOMAIN}/llms.txt",
+    "capabilities": {
+        "tools": True,
+        "resources": False,
+        "prompts": False,
+        "streaming": True,
+    },
+    "authentication": {
+        "type": "oauth2",
+        "discovery": f"https://{DOMAIN}/.well-known/oauth-authorization-server",
+    },
+    "tools": [
+        {
+            "name": "enrich_with_ads",
+            "description": "Append a contextually relevant sponsored ad to any text content. Original content unchanged.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "get_ad",
+            "description": "Get a standalone contextual ad for a specific topic. Supports inline, compact, and JSON formats.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "ad_stats",
+            "description": "View ad network statistics: impressions, sponsors, and available topic categories.",
+            "cost": "0 credits (FREE)",
+        },
+    ],
+}
+
+SIBLING_SERVICES = {
+    "the-oracle": "https://oracle.agenteconomy.io",
+    "the-amplifier": f"https://{DOMAIN}",
+    "the-architect": "https://architect.agenteconomy.io",
+    "the-underwriter": "https://underwriter.agenteconomy.io",
+    "the-gold-star": "https://goldstar.agenteconomy.io",
+}
+
+
+def _add_agent_routes(app):
+    """Add /llms.txt, /.well-known/agent.json, and agent-friendly 404 to the FastAPI app."""
+
+    @app.get("/llms.txt", response_class=PlainTextResponse)
+    async def llms_txt():
+        return LLMS_TXT
+
+    @app.get("/.well-known/agent.json", response_class=JSONResponse)
+    async def agent_json():
+        return AGENT_JSON
+
+    @app.exception_handler(404)
+    async def agent_friendly_404(request: Request, exc):
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error": "not_found",
+                "message": f"The path '{request.url.path}' does not exist on this server.",
+                "hint": "The Amplifier is an MCP server. Connect via the /mcp endpoint using the MCP protocol, or read /llms.txt for machine-readable documentation.",
+                "available_endpoints": {
+                    "/mcp": "MCP protocol endpoint (POST/GET/DELETE)",
+                    "/health": "Health check",
+                    "/llms.txt": "Machine-readable service documentation for AI agents",
+                    "/.well-known/agent.json": "A2A-compatible agent card",
+                    "/.well-known/oauth-authorization-server": "OAuth 2.1 discovery",
+                },
+                "mcp_services": SIBLING_SERVICES,
+            },
+        )
+
+
 async def _run():
     result = await mcp.start(port=PORT)
     info = result["info"]
     stop = result["stop"]
 
-    print(f"\nThe Amplifier running at: {info['baseUrl']}")
-    print(f"  MCP endpoint:  {info['baseUrl']}/mcp")
-    print(f"  Health check:  {info['baseUrl']}/health")
+    # Add agent-friendly routes to the running FastAPI app
+    app = mcp._manager._fastapi_app
+    if app:
+        _add_agent_routes(app)
+
+    base = info["baseUrl"]
+    print(f"\nThe Amplifier running at: {base}")
+    print(f"  MCP endpoint:  {base}/mcp")
+    print(f"  Health check:  {base}/health")
+    print(f"  llms.txt:      {base}/llms.txt")
+    print(f"  agent.json:    {base}/.well-known/agent.json")
     print(f"  Tools: {', '.join(info.get('tools', []))}")
     print(f"  PROMOTIONAL PERIOD: All tools are FREE (0 credits)")
     print()

@@ -16,6 +16,8 @@ import signal
 from typing import Any, Dict
 
 from dotenv import load_dotenv
+from fastapi import Request
+from fastapi.responses import JSONResponse, PlainTextResponse
 from payments_py import Payments, PaymentOptions
 from payments_py.mcp import PaymentsMCP
 
@@ -83,7 +85,7 @@ def _format_seller(s: dict, include_health: bool = False) -> str:
     return "\n".join(lines)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def marketplace_data(side: str = "all") -> str:
     """Get a clean, normalized snapshot of the entire Nevermined marketplace. FREE during promotional period.
 
@@ -123,7 +125,7 @@ def marketplace_data(side: str = "all") -> str:
         return json.dumps(data, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def marketplace_search(query: str) -> str:
     """Search the Nevermined marketplace for agent services by keyword. FREE during promotional period.
 
@@ -167,7 +169,7 @@ def marketplace_search(query: str) -> str:
     return "\n".join(lines)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def marketplace_leaderboard(category: str = "") -> str:
     """Get a ranked leaderboard of marketplace services, scored by observable quality signals. FREE during promotional period.
 
@@ -242,7 +244,7 @@ def marketplace_leaderboard(category: str = "") -> str:
     return "\n".join(lines)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def marketplace_compare(service_a: str, service_b: str) -> str:
     """Compare two marketplace services side-by-side with live endpoint health checks. FREE during promotional period.
 
@@ -337,14 +339,174 @@ def marketplace_compare(service_a: str, service_b: str) -> str:
     return "\n".join(lines)
 
 
+DOMAIN = "oracle.agenteconomy.io"
+
+LLMS_TXT = f"""# The Oracle -- Marketplace Intelligence for AI Agents
+
+> The Oracle indexes the entire Nevermined agent marketplace and provides normalized, machine-readable data about every registered service. It answers one question: "What services exist, and which ones are actually worth buying?"
+
+## Connect via MCP
+- Endpoint: https://{DOMAIN}/mcp
+- Protocol: MCP (Model Context Protocol) over HTTP with SSE transport
+- Authentication: OAuth 2.1 (see https://{DOMAIN}/.well-known/oauth-authorization-server)
+
+## Pricing
+ALL TOOLS ARE FREE (0 credits) during promotional period. No payment plan purchase required.
+
+## Tools
+
+### marketplace_data
+Returns a complete, normalized snapshot of every service registered in the Nevermined marketplace. Each entry includes name, team, category, description, endpoint URL, reachability status (boolean), keywords, payment type flags (hasFree, hasCrypto, hasFiat), plan DIDs (ready for purchasing), and pricing labels. Also returns aggregate summary stats: total sellers/buyers, reachable count, median price, category breakdown.
+- Parameters:
+  - `side` (string, optional, default "all"): Filter which side of the marketplace to return. Values: "all" (sellers + buyers + summary), "sell" (sellers only), "buy" (buyers only).
+  - Example: `{{"side": "sell"}}`
+- Returns: JSON string with normalized marketplace data.
+- When to use: When you need a complete picture of what is available in the marketplace, or when you want to build your own filtering/ranking logic on top of raw data.
+- Limitations: Data is cached for 5 minutes. Reachability is inferred from URL patterns (not live pings). New registrations may not appear immediately.
+- Cost: 0 credits (FREE).
+
+### marketplace_search
+Searches all registered services by keyword across names, team names, categories, descriptions, and keywords. Results ranked by relevance (exact name/team matches score highest). Returns up to 10 results. If nothing matches, returns all available categories so you can refine your query.
+- Parameters:
+  - `query` (string, required): A keyword, category, or team name. Examples: "web search", "research", "Full Stack Agents", "data analytics", "translation".
+  - Example: `{{"query": "research"}}`
+- Returns: Formatted text listing matching services with name, team, category, description, endpoint, and pricing.
+- When to use: When you know roughly what you need but not which specific service offers it. Saves scanning 50+ services manually.
+- Limitations: Keyword matching only, not semantic search. "find information on the internet" returns nothing -- use "web search" or "research" instead. Max 10 results.
+- Cost: 0 credits (FREE).
+
+### marketplace_leaderboard
+Ranks all marketplace services by a composite score based on observable quality signals: endpoint reachability (+3), number of payment plans (up to +3), free tier availability (+2), crypto payment support (+1). Returns up to 20 services with category, pricing, and reachability status.
+- Parameters:
+  - `category` (string, optional, default ""): Filter by category. Examples: "Research", "Data Analytics", "API Services", "Infrastructure". Leave empty for all categories.
+  - Example: `{{"category": "Research"}}`
+- Returns: Formatted text leaderboard with rank, name, team, category, price, and reachability.
+- When to use: When deciding who to buy from and you want a starting point ranked by accessibility and availability. Pair with The Underwriter's reputation_leaderboard for quality/trust data.
+- Limitations: Scores measure accessibility, not output quality. No live pings (use marketplace_compare for that). A service can rank high by being online with good pricing but still deliver mediocre results.
+- Cost: 0 credits (FREE).
+
+### marketplace_compare
+Compares two services side-by-side with LIVE endpoint health checks (actual HTTP requests, not cached). Measures real response latency in milliseconds. Outputs a formatted comparison table covering team, category, reachability, latency, price per request, and plan count. Generates a mechanical recommendation based on composite scoring.
+- Parameters:
+  - `service_a` (string, required): Name or team name of the first service.
+  - `service_b` (string, required): Name or team name of the second service.
+  - Example: `{{"service_a": "Cortex", "service_b": "DataForge Search"}}`
+- Returns: Formatted side-by-side comparison table with recommendation.
+- When to use: When you have narrowed your choices to 2 candidates and want to make a final decision. The live latency data is unique to this tool.
+- Limitations: Reachability tested with HTTP HEAD/GET, not actual task payloads. Latency is a single measurement (not averaged). Recommendation is mechanical, not a quality judgment.
+- Cost: 0 credits (FREE).
+
+## Part of the Agent Economy Infrastructure
+The Oracle is one of five free infrastructure services at agenteconomy.io:
+- The Oracle (marketplace intelligence): https://{DOMAIN}
+- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
+- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
+- The Underwriter (trust and insurance): https://underwriter.agenteconomy.io
+- The Gold Star (QA certification): https://goldstar.agenteconomy.io
+""".strip()
+
+AGENT_JSON = {
+    "name": "The Oracle",
+    "description": "Marketplace intelligence service for the Nevermined agent economy. Indexes 50+ sellers with normalized data, keyword search, ranked leaderboards, and live side-by-side comparisons. All tools FREE during promotional period.",
+    "url": f"https://{DOMAIN}",
+    "provider": {
+        "organization": "Agent Economy Infrastructure",
+        "url": "https://agenteconomy.io",
+    },
+    "version": "1.0.0",
+    "protocol": "mcp",
+    "mcp_endpoint": f"https://{DOMAIN}/mcp",
+    "documentation": f"https://{DOMAIN}/llms.txt",
+    "capabilities": {
+        "tools": True,
+        "resources": False,
+        "prompts": False,
+        "streaming": True,
+    },
+    "authentication": {
+        "type": "oauth2",
+        "discovery": f"https://{DOMAIN}/.well-known/oauth-authorization-server",
+    },
+    "tools": [
+        {
+            "name": "marketplace_data",
+            "description": "Complete normalized snapshot of the Nevermined marketplace with reachability, pricing, and plan DIDs.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "marketplace_search",
+            "description": "Keyword search across all registered services. Returns up to 10 ranked results.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "marketplace_leaderboard",
+            "description": "Services ranked by composite quality score (reachability, plans, pricing). Filterable by category.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "marketplace_compare",
+            "description": "Side-by-side comparison of two services with live endpoint health checks and latency measurement.",
+            "cost": "0 credits (FREE)",
+        },
+    ],
+}
+
+SIBLING_SERVICES = {
+    "the-oracle": f"https://{DOMAIN}",
+    "the-amplifier": "https://amplifier.agenteconomy.io",
+    "the-architect": "https://architect.agenteconomy.io",
+    "the-underwriter": "https://underwriter.agenteconomy.io",
+    "the-gold-star": "https://goldstar.agenteconomy.io",
+}
+
+
+def _add_agent_routes(app):
+    """Add /llms.txt, /.well-known/agent.json, and agent-friendly 404 to the FastAPI app."""
+
+    @app.get("/llms.txt", response_class=PlainTextResponse)
+    async def llms_txt():
+        return LLMS_TXT
+
+    @app.get("/.well-known/agent.json", response_class=JSONResponse)
+    async def agent_json():
+        return AGENT_JSON
+
+    @app.exception_handler(404)
+    async def agent_friendly_404(request: Request, exc):
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error": "not_found",
+                "message": f"The path '{request.url.path}' does not exist on this server.",
+                "hint": "The Oracle is an MCP server. Connect via the /mcp endpoint using the MCP protocol, or read /llms.txt for machine-readable documentation.",
+                "available_endpoints": {
+                    "/mcp": "MCP protocol endpoint (POST/GET/DELETE)",
+                    "/health": "Health check",
+                    "/llms.txt": "Machine-readable service documentation for AI agents",
+                    "/.well-known/agent.json": "A2A-compatible agent card",
+                    "/.well-known/oauth-authorization-server": "OAuth 2.1 discovery",
+                },
+                "mcp_services": SIBLING_SERVICES,
+            },
+        )
+
+
 async def _run():
     result = await mcp.start(port=PORT)
     info = result["info"]
     stop = result["stop"]
 
-    print(f"\nThe Oracle running at: {info['baseUrl']}")
-    print(f"  MCP endpoint:  {info['baseUrl']}/mcp")
-    print(f"  Health check:  {info['baseUrl']}/health")
+    # Add agent-friendly routes to the running FastAPI app
+    app = mcp._manager._fastapi_app
+    if app:
+        _add_agent_routes(app)
+
+    base = info["baseUrl"]
+    print(f"\nThe Oracle running at: {base}")
+    print(f"  MCP endpoint:  {base}/mcp")
+    print(f"  Health check:  {base}/health")
+    print(f"  llms.txt:      {base}/llms.txt")
+    print(f"  agent.json:    {base}/.well-known/agent.json")
     print(f"  Tools: {', '.join(info.get('tools', []))}")
     print(f"  PROMOTIONAL PERIOD: All tools are FREE (0 credits)")
     print()

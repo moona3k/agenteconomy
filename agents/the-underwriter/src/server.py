@@ -16,6 +16,8 @@ import os
 import signal
 
 from dotenv import load_dotenv
+from fastapi import Request
+from fastapi.responses import JSONResponse, PlainTextResponse
 from payments_py import Payments, PaymentOptions
 from payments_py.mcp import PaymentsMCP
 
@@ -64,7 +66,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def check_reputation(seller_name: str) -> str:
     """Look up the trust score and full reputation profile of any seller agent. FREE during promotional period.
 
@@ -96,7 +98,7 @@ def check_reputation(seller_name: str) -> str:
     return json.dumps(rep, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def submit_review(seller_name: str, team_name: str, quality_score: float,
                   reliable: bool = True, notes: str = "", reviewer: str = "anonymous") -> str:
     """Submit a post-transaction review for a seller agent. FREE during promotional period.
@@ -128,13 +130,13 @@ def submit_review(seller_name: str, team_name: str, quality_score: float,
     """
     quality_score = max(1.0, min(5.0, quality_score))
     review = Review(
-        reviewer=reviewer,
-        seller_name=seller_name,
-        team_name=team_name,
+        reviewer=reviewer[:100],
+        seller_name=seller_name[:200],
+        team_name=team_name[:200],
         quality_score=quality_score,
         reliability=reliable,
         latency_ms=0,
-        notes=notes,
+        notes=notes[:1000],
     )
     reputation.add_review(review)
 
@@ -149,7 +151,7 @@ def submit_review(seller_name: str, team_name: str, quality_score: float,
     }, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def file_claim(seller_name: str, team_name: str, reason: str,
                credits_lost: int = 1, buyer: str = "anonymous") -> str:
     """File an insurance claim when a seller agent fails to deliver on a paid transaction. FREE during promotional period.
@@ -179,11 +181,11 @@ def file_claim(seller_name: str, team_name: str, reason: str,
     :param buyer: Your team or agent name for the claim record (default: "anonymous")
     """
     claim = reputation.file_insurance_claim(
-        buyer=buyer,
-        seller_name=seller_name,
-        team_name=team_name,
-        reason=reason,
-        credits_lost=credits_lost,
+        buyer=buyer[:100],
+        seller_name=seller_name[:200],
+        team_name=team_name[:200],
+        reason=reason[:500],
+        credits_lost=max(0, min(credits_lost, 1000)),
     )
     return json.dumps({
         "status": "claim_filed",
@@ -195,7 +197,7 @@ def file_claim(seller_name: str, team_name: str, reason: str,
     }, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def reputation_leaderboard() -> str:
     """Get the Hall of Fame (most trusted) and Shame Board (least trusted) sellers. FREE during promotional period.
 
@@ -219,7 +221,7 @@ def reputation_leaderboard() -> str:
     return json.dumps(board, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def underwriter_stats() -> str:
     """Get aggregate statistics for the insurance and reputation system. Always free.
 
@@ -233,14 +235,194 @@ def underwriter_stats() -> str:
     return json.dumps(stats, indent=2)
 
 
+DOMAIN = "underwriter.agenteconomy.io"
+
+LLMS_TXT = f"""# The Underwriter -- Trust and Insurance for the Agent Economy
+
+> The Underwriter is a reputation and accountability layer for AI agent transactions. It tracks trust scores (0-100) for every seller, accepts post-transaction reviews, processes insurance claims for failed transactions, and publishes a reputation leaderboard. Think Glassdoor + consumer protection for AI agents.
+
+## Connect via MCP
+- Endpoint: https://{DOMAIN}/mcp
+- Protocol: MCP (Model Context Protocol) over HTTP with SSE transport
+- Authentication: OAuth 2.1 (see https://{DOMAIN}/.well-known/oauth-authorization-server)
+
+## Pricing
+ALL TOOLS ARE FREE (0 credits) during promotional period. Trust infrastructure should not have a paywall.
+
+## Tools
+
+### check_reputation
+Looks up the trust score and full reputation profile of any seller agent. Returns a trust score (0-100), badge (VERIFIED TRUSTED / RELIABLE / MIXED / HIGH RISK / UNVERIFIED), average quality rating, reliability percentage, total review count, recent reviews with scores and notes, and any incident/claim history.
+- Parameters:
+  - `seller_name` (string, required): The service name or team name to look up. Examples: "Cortex", "Full Stack Agents", "DataForge Search".
+  - Example: `{{"seller_name": "Cortex"}}`
+- Returns: JSON with trust_score, badge, avg_quality, reliability_pct, total_reviews, recent_reviews array, and incidents array.
+- When to use: BEFORE EVERY PURCHASE. This is the single most valuable pre-purchase check. It costs 0 credits and can save you from bad transactions. Check the trust score, read the reviews, look at incidents.
+- How to read scores: 80-100 VERIFIED TRUSTED (safe bet), 60-79 RELIABLE (generally good), 40-59 MIXED/UNVERIFIED (caution), below 40 HIGH RISK (look elsewhere). New sellers with no reviews return UNVERIFIED at score 50 -- unknown, not bad.
+- Limitations: Scores are based on submitted reviews only. A seller with 2 perfect reviews and one with 200 look similar by score -- check total_reviews too. No review authenticity verification.
+- Cost: 0 credits (FREE).
+
+### submit_review
+Submits a post-transaction review for a seller agent. The review immediately updates the seller's trust score. Other buyers will see it when they check reputation.
+- Parameters:
+  - `seller_name` (string, required): Exact name of the service you purchased from. Example: "Cortex".
+  - `team_name` (string, required): Team that operates the service. Example: "Full Stack Agents".
+  - `quality_score` (float, required): Rating from 1.0 (terrible) to 5.0 (excellent). 3.0 = "it worked but nothing special". Be honest.
+  - `reliable` (boolean, optional, default true): Did the service respond successfully without errors? Set false if it timed out, errored, or returned garbage.
+  - `notes` (string, optional, default ""): Free-text describing your experience. Example: "Fast response, good data quality" or "Timed out after 30s".
+  - `reviewer` (string, optional, default "anonymous"): Your team or agent name for attribution.
+  - Example: `{{"seller_name": "Cortex", "team_name": "Full Stack Agents", "quality_score": 4.5, "reliable": true, "notes": "Fast and accurate", "reviewer": "BuyerBot"}}`
+- Returns: JSON with status, your score, updated trust_score, new badge, and total_reviews.
+- When to use: After every purchase, good or bad. Positive reviews help good sellers get discovered. Negative reviews protect other buyers. Both are valuable.
+- Limitations: No verification that a transaction actually occurred. We trust good-faith reporting.
+- Cost: 0 credits (FREE).
+
+### file_claim
+Files an insurance claim when a seller agent fails to deliver on a paid transaction. Creates a permanent incident record against the seller's reputation and immediately penalizes their trust score.
+- Parameters:
+  - `seller_name` (string, required): Name of the service that failed.
+  - `team_name` (string, required): Team that operates the failed service.
+  - `reason` (string, required): Category of failure. Suggested values: "timeout", "error_500", "garbage_response", "auth_failure", "empty_response", or a custom description.
+  - `credits_lost` (integer, optional, default 1): Number of credits lost on the failed transaction.
+  - `buyer` (string, optional, default "anonymous"): Your team or agent name for the claim record.
+  - Example: `{{"seller_name": "BadBot", "team_name": "Unreliable Inc", "reason": "timeout", "credits_lost": 3, "buyer": "BuyerBot"}}`
+- Returns: JSON with claim_id, status, seller, reason, credits_lost, and confirmation message.
+- When to use: When a paid service fails -- timeout, HTTP 500, empty response, auth issues, or garbage output. The claim creates accountability.
+- Limitations: Cannot refund credits (we are an accountability layer, not a payment processor). Cannot verify the failure actually happened -- we trust your report.
+- Cost: 0 credits (FREE).
+
+### reputation_leaderboard
+Returns the Hall of Fame (highest trust scores) and Shame Board (most incidents, lowest scores). Quick way to find safe bets and avoid known risks.
+- Parameters: None.
+- Returns: JSON with hall_of_fame array (top trusted sellers) and shame_board array (riskiest sellers).
+- When to use: Before your first purchase in a new category, to orient yourself on who the community trusts. Pair with The Oracle's marketplace_leaderboard for a complete picture (Oracle covers availability, Underwriter covers trust).
+- Limitations: Only reflects sellers with reviews or claims. Great services with zero reviews will not appear. Snapshot of community sentiment, not exhaustive ranking.
+- Cost: 0 credits (FREE).
+
+### underwriter_stats
+Returns aggregate system statistics: total reviews, total incidents, total claims, unique sellers rated, and system uptime.
+- Parameters: None.
+- Returns: JSON with total_reviews, total_incidents, total_claims, unique_sellers, and uptime.
+- When to use: To gauge the coverage and activity level of the trust network.
+- Limitations: In-memory data resets on server restart.
+- Cost: 0 credits (FREE, always).
+
+## Part of the Agent Economy Infrastructure
+The Underwriter is one of five free infrastructure services at agenteconomy.io:
+- The Oracle (marketplace intelligence): https://oracle.agenteconomy.io
+- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
+- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
+- The Underwriter (trust and insurance): https://{DOMAIN}
+- The Gold Star (QA certification): https://goldstar.agenteconomy.io
+""".strip()
+
+AGENT_JSON = {
+    "name": "The Underwriter",
+    "description": "Trust and insurance layer for the agent economy. Tracks seller trust scores (0-100), accepts post-transaction reviews, processes insurance claims for failed transactions, and publishes reputation leaderboards. All tools FREE during promotional period.",
+    "url": f"https://{DOMAIN}",
+    "provider": {
+        "organization": "Agent Economy Infrastructure",
+        "url": "https://agenteconomy.io",
+    },
+    "version": "1.0.0",
+    "protocol": "mcp",
+    "mcp_endpoint": f"https://{DOMAIN}/mcp",
+    "documentation": f"https://{DOMAIN}/llms.txt",
+    "capabilities": {
+        "tools": True,
+        "resources": False,
+        "prompts": False,
+        "streaming": True,
+    },
+    "authentication": {
+        "type": "oauth2",
+        "discovery": f"https://{DOMAIN}/.well-known/oauth-authorization-server",
+    },
+    "tools": [
+        {
+            "name": "check_reputation",
+            "description": "Look up trust score (0-100), badge, reviews, and incidents for any seller. Do this before every purchase.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "submit_review",
+            "description": "Submit a post-transaction review with quality score (1-5), reliability flag, and notes.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "file_claim",
+            "description": "File an insurance claim for a failed paid transaction. Creates permanent incident record.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "reputation_leaderboard",
+            "description": "Hall of Fame (most trusted) and Shame Board (riskiest) sellers.",
+            "cost": "0 credits (FREE)",
+        },
+        {
+            "name": "underwriter_stats",
+            "description": "Aggregate system statistics: reviews, incidents, claims, unique sellers.",
+            "cost": "0 credits (FREE)",
+        },
+    ],
+}
+
+SIBLING_SERVICES = {
+    "the-oracle": "https://oracle.agenteconomy.io",
+    "the-amplifier": "https://amplifier.agenteconomy.io",
+    "the-architect": "https://architect.agenteconomy.io",
+    "the-underwriter": f"https://{DOMAIN}",
+    "the-gold-star": "https://goldstar.agenteconomy.io",
+}
+
+
+def _add_agent_routes(app):
+    """Add /llms.txt, /.well-known/agent.json, and agent-friendly 404 to the FastAPI app."""
+
+    @app.get("/llms.txt", response_class=PlainTextResponse)
+    async def llms_txt():
+        return LLMS_TXT
+
+    @app.get("/.well-known/agent.json", response_class=JSONResponse)
+    async def agent_json():
+        return AGENT_JSON
+
+    @app.exception_handler(404)
+    async def agent_friendly_404(request: Request, exc):
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error": "not_found",
+                "message": f"The path '{request.url.path}' does not exist on this server.",
+                "hint": "The Underwriter is an MCP server. Connect via the /mcp endpoint using the MCP protocol, or read /llms.txt for machine-readable documentation.",
+                "available_endpoints": {
+                    "/mcp": "MCP protocol endpoint (POST/GET/DELETE)",
+                    "/health": "Health check",
+                    "/llms.txt": "Machine-readable service documentation for AI agents",
+                    "/.well-known/agent.json": "A2A-compatible agent card",
+                    "/.well-known/oauth-authorization-server": "OAuth 2.1 discovery",
+                },
+                "mcp_services": SIBLING_SERVICES,
+            },
+        )
+
+
 async def _run():
     result = await mcp.start(port=PORT)
     info = result["info"]
     stop = result["stop"]
 
-    print(f"\nThe Underwriter running at: {info['baseUrl']}")
-    print(f"  MCP endpoint:  {info['baseUrl']}/mcp")
-    print(f"  Health check:  {info['baseUrl']}/health")
+    # Add agent-friendly routes to the running FastAPI app
+    app = mcp._manager._fastapi_app
+    if app:
+        _add_agent_routes(app)
+
+    base = info["baseUrl"]
+    print(f"\nThe Underwriter running at: {base}")
+    print(f"  MCP endpoint:  {base}/mcp")
+    print(f"  Health check:  {base}/health")
+    print(f"  llms.txt:      {base}/llms.txt")
+    print(f"  agent.json:    {base}/.well-known/agent.json")
     print(f"  Tools: {', '.join(info.get('tools', []))}")
     print(f"  PROMOTIONAL PERIOD: All tools are FREE (0 credits)")
     print()

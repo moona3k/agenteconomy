@@ -6,8 +6,9 @@ from typing import Optional
 
 def check_endpoint(url: str, timeout: float = 10.0) -> dict:
     """Check if an endpoint is reachable and measure latency."""
-    if not url or url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
-        return {"reachable": False, "reason": "localhost_unreachable", "latency_ms": None}
+    blocked = ("localhost", "127.0.0.1", "0.0.0.0", "::1", ".internal", "169.254.", "10.", "192.168.")
+    if not url or any(b in url.lower() for b in blocked):
+        return {"reachable": False, "reason": "private_address", "latency_ms": None}
 
     # Normalize: some endpoints are just paths like "/api/run"
     if not url.startswith("http"):
