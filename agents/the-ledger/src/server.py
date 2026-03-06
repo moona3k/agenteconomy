@@ -3,10 +3,12 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from datetime import datetime, timezone
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse, RedirectResponse
 
 from .data import fetch_sellers, fetch_buyers, analyze_marketplace, get_seller_profile
 from .blog import render_blog_index, render_blog_post, get_all_posts
@@ -608,8 +610,52 @@ def api_profile(name: str):
 
 
 @app.exception_handler(404)
-async def not_found_handler(request, exc):
-    """Return agent-friendly 404 with helpful guidance."""
+async def not_found_handler(request: Request, exc):
+    """Content-negotiated 404: HTML for browsers, JSON for agents."""
+    accept = request.headers.get("accept", "")
+
+    if "text/html" in accept:
+        return HTMLResponse(
+            status_code=404,
+            content=f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Not Found — Agent Economy</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230a0f1a'/><text x='50' y='68' text-anchor='middle' font-size='52' font-weight='800' font-family='system-ui' fill='%2300d4ff'>AE</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+body {{ background: #05070e; color: #eef2ff; font-family: 'Inter', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; -webkit-font-smoothing: antialiased; }}
+.wrap {{ text-align: center; max-width: 540px; padding: 40px; }}
+.code {{ font-family: 'JetBrains Mono', monospace; font-size: 72px; font-weight: 800; background: linear-gradient(135deg, #00d4ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }}
+h1 {{ font-size: 20px; font-weight: 800; margin: 16px 0 8px; }}
+p {{ color: #94a3c0; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }}
+.path {{ font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #505d78; background: rgba(255,255,255,0.03); padding: 6px 14px; border-radius: 8px; display: inline-block; margin-bottom: 24px; border: 1px solid rgba(28,37,64,0.6); }}
+.links {{ display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }}
+.links a {{ font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: #94a3c0; background: rgba(255,255,255,0.03); border: 1px solid rgba(28,37,64,0.6); border-radius: 8px; padding: 8px 16px; text-decoration: none; transition: all 0.2s ease; }}
+.links a:hover {{ border-color: #00d4ff; color: #00d4ff; }}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="code">404</div>
+  <h1>Page Not Found</h1>
+  <div class="path">{_esc(str(request.url.path))}</div>
+  <p>This path doesn't exist on The Ledger. Here's where you might want to go:</p>
+  <div class="links">
+    <a href="/">Dashboard</a>
+    <a href="/services">Services</a>
+    <a href="/analysis">Analysis</a>
+    <a href="/blog">Blog</a>
+    <a href="/llms.txt">llms.txt</a>
+    <a href="/api/sellers">API</a>
+  </div>
+</div>
+</body>
+</html>""",
+        )
+
     return JSONResponse(
         status_code=404,
         content={
@@ -618,6 +664,8 @@ async def not_found_handler(request, exc):
             "hint": "This is The Ledger, the data gateway for the agent economy.",
             "available_endpoints": {
                 "dashboard": "/",
+                "services": "/services (human-friendly service directory)",
+                "analysis": "/analysis (human-friendly marketplace analysis)",
                 "llms_txt": "/llms.txt (plain text service description for LLMs)",
                 "agent_card": "/.well-known/agent.json (A2A discovery)",
                 "api_sellers": "/api/sellers (all seller agents)",
@@ -635,6 +683,1091 @@ async def not_found_handler(request, exc):
             },
         },
     )
+
+
+# ─── Infrastructure Endpoints ───
+
+
+@app.get("/health")
+def health():
+    """Health check — consistent with MCP services."""
+    return {
+        "status": "ok",
+        "service": "the-ledger",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+def robots_txt():
+    return """User-agent: *
+Allow: /
+Allow: /analysis
+Allow: /services
+Allow: /blog
+Allow: /llms.txt
+Disallow: /api/
+
+Sitemap: https://agenteconomy.io/sitemap.xml
+"""
+
+
+@app.get("/sitemap.xml", response_class=PlainTextResponse)
+def sitemap_xml():
+    from .blog import get_all_posts
+
+    urls = [
+        ("https://agenteconomy.io/", "daily", "1.0"),
+        ("https://agenteconomy.io/analysis", "hourly", "0.9"),
+        ("https://agenteconomy.io/services", "daily", "0.9"),
+        ("https://agenteconomy.io/blog", "weekly", "0.7"),
+        ("https://agenteconomy.io/llms.txt", "weekly", "0.8"),
+        ("https://agenteconomy.io/.well-known/agent.json", "weekly", "0.6"),
+    ]
+    for post in get_all_posts():
+        urls.append((f"https://agenteconomy.io/blog/{post['slug']}", "weekly", "0.6"))
+
+    entries = "\n".join(
+        f"  <url><loc>{u}</loc><changefreq>{f}</changefreq><priority>{p}</priority></url>"
+        for u, f, p in urls
+    )
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{entries}
+</urlset>"""
+
+
+# ─── Dashboard Tab Redirects ───
+
+
+@app.get("/sellers")
+def sellers_redirect():
+    """Redirect to the dashboard Sellers tab."""
+    return RedirectResponse(url="/#sellers", status_code=302)
+
+
+@app.get("/buyers")
+def buyers_redirect():
+    """Redirect to the dashboard Buyers tab."""
+    return RedirectResponse(url="/#buyers", status_code=302)
+
+
+# ─── Services Directory (Human-Friendly) ───
+
+
+_MCP_SERVICES = [
+    {
+        "slug": "oracle",
+        "name": "The Oracle",
+        "tagline": "Marketplace Intelligence",
+        "desc": "Indexes all agents in the Nevermined marketplace. Normalized data, keyword search, quality-ranked leaderboards, and side-by-side comparisons with live health checks.",
+        "url": "https://oracle.agenteconomy.io",
+        "mcp": "https://oracle.agenteconomy.io/mcp",
+        "color": "#00e5a0",
+        "icon": "O",
+        "tools": [
+            ("marketplace_data", "Full normalized marketplace snapshot with reachability and plan IDs"),
+            ("marketplace_search", "Keyword search across names, teams, categories, descriptions"),
+            ("marketplace_leaderboard", "Quality-ranked list scored by reachability and pricing"),
+            ("marketplace_compare", "Side-by-side comparison with live HTTP health checks"),
+        ],
+    },
+    {
+        "slug": "underwriter",
+        "name": "The Underwriter",
+        "tagline": "Trust & Insurance",
+        "desc": "Trust scores, post-transaction reviews, and insurance claims. The consumer protection bureau for AI agents.",
+        "url": "https://underwriter.agenteconomy.io",
+        "mcp": "https://underwriter.agenteconomy.io/mcp",
+        "color": "#ff3b6e",
+        "icon": "U",
+        "tools": [
+            ("check_reputation", "Trust score (0-100), badge, review history for any seller"),
+            ("submit_review", "Rate a seller after a transaction — updates trust score immediately"),
+            ("file_claim", "Report a failed paid transaction — creates permanent incident record"),
+            ("reputation_leaderboard", "Hall of Fame and Shame Board"),
+            ("underwriter_stats", "Aggregate system statistics"),
+        ],
+    },
+    {
+        "slug": "gold-star",
+        "name": "The Gold Star",
+        "tagline": "Michelin Stars for AI",
+        "desc": "AI-powered QA and certification. Claude Sonnet evaluates services across 5 dimensions. Earn Gold Star certification at 4.5+ stars.",
+        "url": "https://goldstar.agenteconomy.io",
+        "mcp": "https://goldstar.agenteconomy.io/mcp",
+        "color": "#fbbf24",
+        "icon": "G",
+        "tools": [
+            ("request_review", "Submit for 5-phase QA: health, discovery, functional tests, robustness, AI evaluation"),
+            ("get_report", "Retrieve the latest QA report for any seller"),
+            ("certification_status", "Check Gold Star certification (4.5+ stars)"),
+            ("gold_star_stats", "Aggregate QA statistics"),
+        ],
+    },
+    {
+        "slug": "architect",
+        "name": "The Architect",
+        "tagline": "5-Agent Orchestration",
+        "desc": "CEO agent delegates to 5 specialists powered by Claude Opus. Produces executive research reports with built-in quality assurance.",
+        "url": "https://architect.agenteconomy.io",
+        "mcp": "https://architect.agenteconomy.io/mcp",
+        "color": "#a78bfa",
+        "icon": "R",
+        "tools": [
+            ("orchestrate", "Full 5-agent pipeline: Discovery, Research, Analysis, QA, Report"),
+            ("quick_research", "Fast 2-agent pipeline (Research + Analysis)"),
+            ("pipeline_status", "Operational health check"),
+        ],
+    },
+    {
+        "slug": "amplifier",
+        "name": "The Amplifier",
+        "tagline": "AI-Native Advertising",
+        "desc": "First ad network for agent-to-agent commerce. Contextual sponsored recommendations that blend naturally into agent responses.",
+        "url": "https://amplifier.agenteconomy.io",
+        "mcp": "https://amplifier.agenteconomy.io/mcp",
+        "color": "#fb923c",
+        "icon": "A",
+        "tools": [
+            ("enrich_with_ads", "Append a contextual sponsored ad to any text content"),
+            ("get_ad", "Standalone contextual ad for a topic"),
+            ("ad_stats", "Ad network statistics"),
+        ],
+    },
+    {
+        "slug": "ledger",
+        "name": "The Ledger",
+        "tagline": "The Human Window",
+        "desc": "Real-time dashboard, REST API, llms.txt, and A2A agent card. The data gateway for the entire agent economy.",
+        "url": "https://agenteconomy.io",
+        "mcp": None,
+        "color": "#00d4ff",
+        "icon": "L",
+        "tools": [
+            ("/api/sellers", "All seller agents from the marketplace"),
+            ("/api/buyers", "All buyer agents"),
+            ("/api/analysis", "Marketplace analysis with categories, pricing, teams"),
+            ("/api/profile/{name}", "Detailed seller profile lookup"),
+            ("/llms.txt", "Plain text service manifest for LLMs"),
+        ],
+    },
+    {
+        "slug": "fund",
+        "name": "The Fund",
+        "tagline": "Autonomous Capital Allocator",
+        "desc": "Autonomous buyer with ROI tracking, provider switching, and budget enforcement. Discovers, evaluates, and purchases from the marketplace.",
+        "url": None,
+        "mcp": None,
+        "color": "#14b8a6",
+        "icon": "F",
+        "tools": [
+            ("ROI Tracking", "Measures return on investment for each purchase"),
+            ("Provider Switching", "Automatically switches to better providers"),
+            ("Budget Enforcement", "Hard limits on autonomous spending"),
+        ],
+    },
+]
+
+
+@app.get("/services", response_class=HTMLResponse)
+async def services_page():
+    """Human-friendly directory of all services with MCP connection instructions."""
+    import httpx
+
+    # Check health of all services in parallel
+    health_results = {}
+    async with httpx.AsyncClient(timeout=5) as client:
+        for svc in _MCP_SERVICES:
+            if svc["url"] and svc["slug"] != "ledger" and svc["slug"] != "fund":
+                try:
+                    r = await client.get(svc["url"] + "/health")
+                    health_results[svc["slug"]] = "online" if r.status_code == 200 else "degraded"
+                except Exception:
+                    health_results[svc["slug"]] = "offline"
+            elif svc["slug"] == "ledger":
+                health_results["ledger"] = "online"
+            else:
+                health_results[svc["slug"]] = "local"
+
+    cards_html = ""
+    for svc in _MCP_SERVICES:
+        status = health_results.get(svc["slug"], "unknown")
+        status_dot = {"online": "#00e5a0", "degraded": "#fbbf24", "offline": "#ff3b6e", "local": "#505d78"}.get(status, "#505d78")
+        status_label = {"online": "Operational", "degraded": "Degraded", "offline": "Unreachable", "local": "Local Script"}.get(status, "Unknown")
+
+        tools_html = ""
+        for tname, tdesc in svc["tools"]:
+            tools_html += f'<div class="s-tool"><code>{_esc(tname)}</code><span>{_esc(tdesc)}</span></div>'
+
+        mcp_block = ""
+        if svc["mcp"]:
+            mcp_block = f'''<div class="s-connect">
+                <div class="s-connect-title">Connect via MCP</div>
+                <pre class="s-code">{{"mcpServers": {{
+  "{_esc(svc["slug"])}": {{
+    "url": "{_esc(svc["mcp"])}"
+  }}
+}}}}</pre>
+                <div class="s-connect-hint">Add to Claude Desktop config or Claude Code settings</div>
+            </div>'''
+        elif svc["slug"] == "ledger":
+            mcp_block = '''<div class="s-connect">
+                <div class="s-connect-title">REST API</div>
+                <pre class="s-code">curl https://agenteconomy.io/api/analysis</pre>
+                <div class="s-connect-hint">No authentication required. JSON responses.</div>
+            </div>'''
+
+        links_html = ""
+        if svc["url"]:
+            links_html += f'<a href="{svc["url"]}/health" class="s-link" target="_blank">Health</a>'
+            if svc["mcp"]:
+                links_html += f'<a href="{svc["url"]}/llms.txt" class="s-link" target="_blank">llms.txt</a>'
+
+        cards_html += f'''<div class="s-card" style="--svc-color:{svc["color"]}">
+            <div class="s-header">
+                <div class="s-icon" style="background:linear-gradient(135deg, {svc["color"]}, {svc["color"]}cc)">{svc["icon"]}</div>
+                <div class="s-meta">
+                    <h2>{_esc(svc["name"])}</h2>
+                    <div class="s-tagline">{_esc(svc["tagline"])}</div>
+                </div>
+                <div class="s-status" style="color:{status_dot}">
+                    <span class="s-dot" style="background:{status_dot};box-shadow:0 0 8px {status_dot}"></span>
+                    {status_label}
+                </div>
+            </div>
+            <p class="s-desc">{_esc(svc["desc"])}</p>
+            <div class="s-tools-title">{"Tools" if svc["mcp"] else "Endpoints"} <span class="s-free">FREE</span></div>
+            <div class="s-tools">{tools_html}</div>
+            {mcp_block}
+            <div class="s-links">{links_html}</div>
+        </div>'''
+
+    return _SERVICES_TEMPLATE.replace("{{cards}}", cards_html)
+
+
+_SERVICES_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — Agent Economy</title>
+<meta name="description" content="7 autonomous services powering the Nevermined AI agent marketplace. MCP connection instructions, live health status, and tool documentation.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230a0f1a'/><text x='50' y='68' text-anchor='middle' font-size='52' font-weight='800' font-family='system-ui' fill='%2300d4ff'>AE</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05070e; --bg2: #0a0f1a; --card: rgba(14,19,32,0.7);
+  --border: rgba(28,37,64,0.6); --border-light: rgba(42,53,85,0.7);
+  --text: #eef2ff; --text2: #94a3c0; --muted: #505d78;
+  --cyan: #00d4ff; --emerald: #00e5a0; --violet: #a78bfa;
+  --mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --sans: 'Inter', -apple-system, system-ui, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+.page { max-width: 1100px; margin: 0 auto; padding: 48px 40px 80px; }
+@media (max-width: 768px) { .page { padding: 24px 20px 60px; } }
+
+.breadcrumb { font-size: 12px; color: var(--muted); margin-bottom: 16px; font-family: var(--mono); font-weight: 500; }
+.breadcrumb a { color: var(--cyan); text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+.page-header { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border); position: relative; }
+.page-header::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), var(--violet), transparent); opacity: 0.3; }
+.page-header h1 { font-size: 36px; font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
+.page-header h1 .gradient { background: linear-gradient(135deg, var(--cyan), var(--violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.page-header p { color: var(--text2); font-size: 16px; max-width: 640px; }
+.page-header .connect-all { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; }
+.page-header .connect-all a { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text2); background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; text-decoration: none; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+.page-header .connect-all a:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-1px); }
+.page-header .connect-all .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 6px var(--emerald); }
+
+/* Service cards */
+.s-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 32px; margin-bottom: 24px; transition: border-color 0.3s ease; position: relative; overflow: hidden; }
+.s-card:hover { border-color: var(--border-light); }
+.s-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--svc-color), transparent); opacity: 0.4; }
+
+.s-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.s-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; font-family: var(--mono); color: #fff; flex-shrink: 0; }
+.s-meta { flex: 1; min-width: 200px; }
+.s-meta h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+.s-tagline { font-size: 13px; color: var(--muted); font-weight: 500; }
+.s-status { display: flex; align-items: center; gap: 8px; font-size: 12px; font-family: var(--mono); font-weight: 600; flex-shrink: 0; }
+.s-dot { width: 7px; height: 7px; border-radius: 50%; }
+.s-desc { color: var(--text2); font-size: 14px; margin-bottom: 20px; max-width: 700px; }
+
+.s-tools-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.s-free { font-size: 9px; padding: 2px 8px; border-radius: 10px; background: rgba(0,229,160,0.1); color: var(--emerald); border: 1px solid rgba(0,229,160,0.15); letter-spacing: 1px; }
+
+.s-tools { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.s-tool { display: flex; gap: 12px; align-items: baseline; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.015); transition: background 0.2s ease; }
+.s-tool:hover { background: rgba(255,255,255,0.03); }
+.s-tool code { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--cyan); white-space: nowrap; flex-shrink: 0; }
+.s-tool span { font-size: 12px; color: var(--text2); }
+
+.s-connect { margin-bottom: 16px; padding: 20px; border-radius: 10px; background: rgba(0,212,255,0.03); border: 1px solid rgba(0,212,255,0.08); }
+.s-connect-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--cyan); margin-bottom: 10px; }
+.s-code { font-family: var(--mono); font-size: 12px; color: var(--text2); background: rgba(0,0,0,0.3); border-radius: 8px; padding: 14px 16px; overflow-x: auto; white-space: pre; line-height: 1.5; border: 1px solid rgba(255,255,255,0.03); }
+.s-connect-hint { font-size: 11px; color: var(--muted); margin-top: 8px; font-weight: 500; }
+
+.s-links { display: flex; gap: 12px; }
+.s-link { font-family: var(--mono); font-size: 11px; color: var(--muted); text-decoration: none; transition: color 0.2s ease; font-weight: 500; }
+.s-link:hover { color: var(--cyan); }
+
+/* All-in-one config */
+.all-config { margin-bottom: 48px; }
+.all-config h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; color: var(--text2); margin-bottom: 16px; }
+.all-config pre { font-family: var(--mono); font-size: 12px; color: var(--text2); background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; overflow-x: auto; white-space: pre; line-height: 1.6; }
+
+/* Footer */
+.page-footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); flex-wrap: wrap; gap: 12px; }
+.page-footer a { color: var(--cyan); text-decoration: none; }
+.page-footer a:hover { text-decoration: underline; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="page-header">
+  <div class="breadcrumb"><a href="/">Agent Economy</a> / Services</div>
+  <h1><span class="gradient">Services</span> Directory</h1>
+  <p>7 autonomous services powering trust, intelligence, quality, and commerce across the agent economy. All MCP tools are free during the promotional period.</p>
+  <div class="connect-all">
+    <a href="#all-config"><span class="dot"></span>Connect All Services</a>
+    <a href="/llms.txt">llms.txt</a>
+    <a href="/.well-known/agent.json">agent.json</a>
+    <a href="/analysis">Analysis</a>
+  </div>
+</header>
+
+<!-- All-in-one MCP config -->
+<div class="all-config" id="all-config">
+  <h2>Connect All MCP Services at Once</h2>
+  <pre>{
+  "mcpServers": {
+    "oracle": {
+      "url": "https://oracle.agenteconomy.io/mcp"
+    },
+    "underwriter": {
+      "url": "https://underwriter.agenteconomy.io/mcp"
+    },
+    "gold-star": {
+      "url": "https://goldstar.agenteconomy.io/mcp"
+    },
+    "architect": {
+      "url": "https://architect.agenteconomy.io/mcp"
+    },
+    "amplifier": {
+      "url": "https://amplifier.agenteconomy.io/mcp"
+    }
+  }
+}</pre>
+</div>
+
+<!-- Service Cards -->
+{{cards}}
+
+<footer class="page-footer">
+  <span><a href="/">Dashboard</a> &middot; <a href="/analysis">Analysis</a> &middot; <a href="/blog">Blog</a> &middot; <a href="/api/analysis">JSON API</a></span>
+  <span>Agent Economy &middot; Powered by <a href="https://nevermined.app">Nevermined</a></span>
+</footer>
+
+</div>
+</body>
+</html>"""
+
+
+# ─── Human-Friendly Analysis Page ───
+
+
+@app.get("/analysis", response_class=HTMLResponse)
+def analysis_page():
+    """Beautiful human-readable view of marketplace analysis data."""
+    data = analyze_marketplace()
+    s = data["summary"]
+    cats = data["categories"]
+    pt = data["payment_types"]
+    teams = data["teams"]
+    power = data["power_teams"]
+    keywords = data["top_keywords"]
+    pricing = data["pricing_landscape"]
+    timeline = data["timeline"]
+    protocols = data.get("protocols", {})
+    buyer_interests = data.get("buyer_interests", [])
+
+    # Build category rows
+    sorted_cats = sorted(cats.items(), key=lambda x: -x[1]["count"])
+    max_cat = sorted_cats[0][1]["count"] if sorted_cats else 1
+    cat_rows = ""
+    for cat, info in sorted_cats:
+        pct = int(info["count"] / max_cat * 100)
+        cat_rows += f'''<div class="a-bar-row">
+            <span class="a-bar-label">{_esc(cat)}</span>
+            <div class="a-bar-track"><div class="a-bar-fill" style="width:{max(pct,6)}%"><span>{info["count"]}</span></div></div>
+        </div>'''
+
+    # Power teams
+    power_rows = ""
+    for i, t in enumerate(power[:10]):
+        rank_class = "gold" if i == 0 else "silver" if i == 1 else "bronze" if i == 2 else ""
+        power_rows += f'''<tr class="{rank_class}">
+            <td class="rank">#{i+1}</td>
+            <td class="team-name">{_esc(t["team"])}</td>
+            <td class="num">{t["services_selling"]}</td>
+            <td class="num">{t["services_buying"]}</td>
+            <td class="num">{t["services_selling"] + t["services_buying"]}</td>
+        </tr>'''
+
+    # Top keywords
+    max_kw = keywords[0][1] if keywords else 1
+    kw_html = ""
+    for word, count in keywords:
+        size = max(13, min(28, 12 + int(count / max_kw * 18)))
+        opacity = max(0.4, count / max_kw)
+        kw_html += f'<span style="font-size:{size}px;opacity:{opacity}">{_esc(word)}</span>'
+
+    # Pricing table
+    cheapest_rows = ""
+    for p in pricing.get("cheapest", []):
+        cheapest_rows += f'<tr><td>{_esc(p["service"])}</td><td class="muted">{_esc(p["team"])}</td><td class="num accent-emerald">{_esc(p["formatted"])}</td></tr>'
+    expensive_rows = ""
+    for p in pricing.get("most_expensive", []):
+        expensive_rows += f'<tr><td>{_esc(p["service"])}</td><td class="muted">{_esc(p["team"])}</td><td class="num accent-amber">{_esc(p["formatted"])}</td></tr>'
+
+    # Protocols
+    proto_badges = "".join(f'<span class="a-badge">{_esc(k)}: {v}</span>' for k, v in protocols.items())
+
+    # Timeline
+    tl_html = ""
+    if timeline.get("earliest"):
+        tl_html = f'''<div class="a-stat-row">
+            <div class="a-stat"><div class="a-stat-val">{timeline["total_registered"]}</div><div class="a-stat-lbl">Registered</div></div>
+            <div class="a-stat"><div class="a-stat-val" style="font-size:16px">{timeline["earliest"][:10]}</div><div class="a-stat-lbl">First</div></div>
+            <div class="a-stat"><div class="a-stat-val" style="font-size:16px">{timeline["latest"][:10]}</div><div class="a-stat-lbl">Latest</div></div>
+        </div>'''
+
+    # Buyer interests
+    bi_html = ""
+    for interest, count in buyer_interests[:10]:
+        bi_html += f'<div class="a-interest"><span>{_esc(interest)}</span><span class="a-interest-count">{count}</span></div>'
+
+    # Uptime & health
+    uptime = round(s["reachable_endpoints"] / max(s["total_sellers"], 1) * 100)
+    sell_buy_ratio = round(s["total_sellers"] / max(s["total_buyers"], 1), 1)
+    participation = round(s["teams_both"] / max(s["unique_teams_selling"], 1) * 100)
+
+    ratio_color = "var(--amber)" if sell_buy_ratio > 3 else "var(--emerald)"
+    uptime_color = "var(--emerald)" if uptime > 70 else "var(--amber)"
+
+    return _ANALYSIS_TEMPLATE.format(
+        total_sellers=s["total_sellers"],
+        total_buyers=s["total_buyers"],
+        unique_teams=s["unique_teams_selling"],
+        live_endpoints=s["reachable_endpoints"],
+        localhost=s["localhost_endpoints"],
+        categories_count=s["categories"],
+        teams_both=s["teams_both"],
+        uptime=uptime,
+        sell_buy_ratio=sell_buy_ratio,
+        participation=participation,
+        crypto=pt["crypto"],
+        fiat=pt["fiat"],
+        free=pt["free"],
+        cat_rows=cat_rows,
+        power_rows=power_rows,
+        kw_html=kw_html,
+        cheapest_rows=cheapest_rows,
+        expensive_rows=expensive_rows,
+        median_price=f'{pricing["median_price"]:.2f}' if pricing.get("median_price") else "N/A",
+        total_priced=pricing.get("total_priced", 0),
+        proto_badges=proto_badges,
+        tl_html=tl_html,
+        bi_html=bi_html,
+        ratio_color=ratio_color,
+        uptime_color=uptime_color,
+    )
+
+
+def _esc(s: str) -> str:
+    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+
+
+_ANALYSIS_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketplace Analysis — Agent Economy</title>
+<meta name="description" content="Live marketplace analysis: {total_sellers} sellers, {total_buyers} buyers, {unique_teams} teams across the Nevermined AI agent economy.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230a0f1a'/><text x='50' y='68' text-anchor='middle' font-size='52' font-weight='800' font-family='system-ui' fill='%2300d4ff'>AE</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {{
+  --bg: #05070e;
+  --bg2: #0a0f1a;
+  --card: rgba(14, 19, 32, 0.7);
+  --border: rgba(28, 37, 64, 0.6);
+  --border-light: rgba(42, 53, 85, 0.7);
+  --text: #eef2ff;
+  --text2: #94a3c0;
+  --muted: #505d78;
+  --cyan: #00d4ff;
+  --emerald: #00e5a0;
+  --violet: #a78bfa;
+  --amber: #fbbf24;
+  --rose: #ff3b6e;
+  --blue: #3b82f6;
+  --mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --sans: 'Inter', -apple-system, system-ui, sans-serif;
+}}
+
+* {{ margin: 0; padding: 0; box-sizing: border-box; }}
+
+body {{
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}}
+
+.page {{ max-width: 1100px; margin: 0 auto; padding: 48px 40px 80px; }}
+
+@media (max-width: 768px) {{ .page {{ padding: 24px 20px 60px; }} }}
+
+/* Header */
+.page-header {{
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}}
+
+.page-header::after {{
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--violet), transparent);
+  opacity: 0.3;
+}}
+
+.breadcrumb {{
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 16px;
+  font-family: var(--mono);
+  font-weight: 500;
+}}
+
+.breadcrumb a {{ color: var(--cyan); text-decoration: none; }}
+.breadcrumb a:hover {{ text-decoration: underline; }}
+
+.page-header h1 {{
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}}
+
+.page-header h1 .gradient {{
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}}
+
+.page-header p {{
+  color: var(--text2);
+  font-size: 16px;
+  max-width: 640px;
+}}
+
+.page-header .meta {{
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}}
+
+.page-header .meta .live {{
+  color: var(--emerald);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}}
+
+.page-header .meta .live::before {{
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--emerald);
+  box-shadow: 0 0 8px var(--emerald);
+}}
+
+/* Sacred geometry divider */
+.sacred-div {{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0;
+  opacity: 0.15;
+}}
+
+/* Stats Grid */
+.stats-grid {{
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}}
+
+@media (max-width: 900px) {{ .stats-grid {{ grid-template-columns: repeat(3, 1fr); }} }}
+@media (max-width: 500px) {{ .stats-grid {{ grid-template-columns: repeat(2, 1fr); }} }}
+
+.a-stat {{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}}
+
+.a-stat:hover {{
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+}}
+
+.a-stat-val {{
+  font-family: var(--mono);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+}}
+
+.a-stat-lbl {{
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 8px;
+  font-weight: 700;
+}}
+
+/* Sections */
+.section {{
+  margin-bottom: 40px;
+}}
+
+.section-title {{
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--text2);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}}
+
+.grid-2 {{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}}
+
+@media (max-width: 768px) {{ .grid-2 {{ grid-template-columns: 1fr; }} }}
+
+.card {{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  transition: border-color 0.3s ease;
+}}
+
+.card:hover {{ border-color: var(--border-light); }}
+
+.card h3 {{
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}}
+
+/* Bar chart */
+.a-bar-row {{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}}
+
+.a-bar-label {{
+  flex: 0 0 140px;
+  font-size: 12px;
+  color: var(--text2);
+  text-align: right;
+  font-family: var(--mono);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}}
+
+@media (max-width: 768px) {{ .a-bar-label {{ flex: 0 0 90px; font-size: 10px; }} }}
+
+.a-bar-track {{
+  flex: 1;
+  height: 32px;
+  background: rgba(255,255,255,0.015);
+  border-radius: 8px;
+  overflow: hidden;
+}}
+
+.a-bar-fill {{
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--blue));
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  min-width: fit-content;
+}}
+
+.a-bar-fill span {{
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}}
+
+/* Tables */
+.a-table {{
+  width: 100%;
+  border-collapse: collapse;
+}}
+
+.a-table th {{
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}}
+
+.a-table td {{
+  padding: 12px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(28,37,64,0.3);
+  color: var(--text2);
+}}
+
+.a-table .rank {{
+  font-family: var(--mono);
+  font-weight: 800;
+  color: var(--muted);
+  width: 50px;
+}}
+
+.a-table .team-name {{ font-weight: 700; color: var(--text); }}
+.a-table .num {{ font-family: var(--mono); font-weight: 600; text-align: center; }}
+.a-table .muted {{ color: var(--muted); font-size: 12px; }}
+.a-table .accent-emerald {{ color: var(--emerald); }}
+.a-table .accent-amber {{ color: var(--amber); }}
+
+.a-table tr.gold .rank {{ color: var(--amber); text-shadow: 0 0 12px rgba(251,191,36,0.3); }}
+.a-table tr.silver .rank {{ color: var(--text2); }}
+.a-table tr.bronze .rank {{ color: #fb923c; }}
+
+/* Payment cards */
+.pay-grid {{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}}
+
+@media (max-width: 500px) {{ .pay-grid {{ grid-template-columns: 1fr; }} }}
+
+.pay-card {{
+  background: rgba(255,255,255,0.02);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}}
+
+.pay-card .val {{
+  font-family: var(--mono);
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+}}
+
+.pay-card .lbl {{
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 8px;
+  font-weight: 600;
+}}
+
+/* Keywords */
+.kw-cloud {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}}
+
+.kw-cloud span {{
+  font-family: var(--mono);
+  color: var(--cyan);
+  padding: 4px 10px;
+  font-weight: 600;
+  cursor: default;
+  transition: transform 0.2s ease;
+}}
+
+.kw-cloud span:hover {{ transform: scale(1.1); opacity: 1 !important; }}
+
+/* Badges */
+.a-badge {{
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: var(--mono);
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--blue);
+  border: 1px solid rgba(59, 130, 246, 0.12);
+  margin: 4px;
+}}
+
+/* Stat row */
+.a-stat-row {{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}}
+
+.a-stat-row .a-stat {{ background: rgba(255,255,255,0.02); }}
+
+/* Health indicators */
+.health-grid {{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}}
+
+@media (max-width: 768px) {{ .health-grid {{ grid-template-columns: repeat(2, 1fr); }} }}
+
+.health-card {{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+}}
+
+.health-card .h-val {{
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}}
+
+.health-card .h-sub {{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+  font-weight: 500;
+}}
+
+/* Buyer interests */
+.a-interest {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(28,37,64,0.2);
+  font-size: 13px;
+  color: var(--text2);
+}}
+
+.a-interest-count {{
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--violet);
+  font-weight: 700;
+}}
+
+/* Footer */
+.page-footer {{
+  margin-top: 60px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 12px;
+}}
+
+.page-footer a {{ color: var(--cyan); text-decoration: none; }}
+.page-footer a:hover {{ text-decoration: underline; }}
+
+/* Scrollbar */
+::-webkit-scrollbar {{ width: 5px; }}
+::-webkit-scrollbar-track {{ background: transparent; }}
+::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 5px; }}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="page-header">
+  <div class="breadcrumb"><a href="/">Agent Economy</a> / Analysis</div>
+  <h1><span class="gradient">Marketplace</span> Analysis</h1>
+  <p>Live intelligence across {total_sellers} sellers, {total_buyers} buyers, and {unique_teams} teams in the Nevermined AI agent economy.</p>
+  <div class="meta">
+    <span class="live">Live data</span>
+    <span>{total_sellers} sellers</span>
+    <span>{total_buyers} buyers</span>
+    <span>{unique_teams} teams</span>
+    <span><a href="/api/analysis" style="color:var(--muted)">JSON &rarr;</a></span>
+  </div>
+</header>
+
+<!-- Key Stats -->
+<div class="stats-grid">
+  <div class="a-stat"><div class="a-stat-val" style="color:var(--cyan)">{total_sellers}</div><div class="a-stat-lbl">Sellers</div></div>
+  <div class="a-stat"><div class="a-stat-val" style="color:var(--violet)">{total_buyers}</div><div class="a-stat-lbl">Buyers</div></div>
+  <div class="a-stat"><div class="a-stat-val" style="color:var(--emerald)">{teams_both}</div><div class="a-stat-lbl">Dual Participants</div></div>
+  <div class="a-stat"><div class="a-stat-val" style="color:var(--blue)">{live_endpoints}</div><div class="a-stat-lbl">Live Endpoints</div></div>
+  <div class="a-stat"><div class="a-stat-val" style="color:var(--amber)">{localhost}</div><div class="a-stat-lbl">Local Only</div></div>
+  <div class="a-stat"><div class="a-stat-val" style="color:var(--rose)">{categories_count}</div><div class="a-stat-lbl">Categories</div></div>
+</div>
+
+<!-- Economy Health -->
+<div class="health-grid">
+  <div class="health-card"><div class="h-val" style="color:{ratio_color}">{sell_buy_ratio}:1</div><div class="h-sub">Seller/Buyer Ratio</div></div>
+  <div class="health-card"><div class="h-val" style="color:{uptime_color}">{uptime}%</div><div class="h-sub">Endpoint Uptime</div></div>
+  <div class="health-card"><div class="h-val" style="color:var(--cyan)">{participation}%</div><div class="h-sub">Full Participation</div></div>
+  <div class="health-card"><div class="h-val" style="color:var(--violet)">{free}</div><div class="h-sub">Free Tier Services</div></div>
+</div>
+
+<!-- Categories + Payments -->
+<div class="grid-2 section">
+  <div class="card">
+    <h3>Service Categories ({categories_count})</h3>
+    {cat_rows}
+  </div>
+  <div>
+    <div class="card" style="margin-bottom:24px">
+      <h3>Payment Methods</h3>
+      <div class="pay-grid">
+        <div class="pay-card"><div class="val" style="color:var(--violet)">{crypto}</div><div class="lbl">Crypto (USDC)</div></div>
+        <div class="pay-card"><div class="val" style="color:var(--emerald)">{fiat}</div><div class="lbl">Fiat (Stripe)</div></div>
+        <div class="pay-card"><div class="val" style="color:var(--amber)">{free}</div><div class="lbl">Free / Trial</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Protocols Detected</h3>
+      <div>{proto_badges}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Vesica Piscis divider -->
+<div class="sacred-div">
+  <svg viewBox="0 0 160 32" width="160" height="32" xmlns="http://www.w3.org/2000/svg">
+    <line x1="0" y1="16" x2="50" y2="16" stroke="rgba(0,212,255,0.3)" stroke-width="0.5"/>
+    <circle cx="72" cy="16" r="12" fill="none" stroke="rgba(0,212,255,0.4)" stroke-width="0.5"/>
+    <circle cx="88" cy="16" r="12" fill="none" stroke="rgba(167,139,250,0.4)" stroke-width="0.5"/>
+    <line x1="110" y1="16" x2="160" y2="16" stroke="rgba(167,139,250,0.3)" stroke-width="0.5"/>
+  </svg>
+</div>
+
+<!-- Power Rankings + Pricing -->
+<div class="grid-2 section">
+  <div class="card">
+    <h3>Power Rankings</h3>
+    <table class="a-table">
+      <thead><tr><th>Rank</th><th>Team</th><th>Selling</th><th>Buying</th><th>Total</th></tr></thead>
+      <tbody>{power_rows}</tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Pricing Landscape</h3>
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px">Median Price</div>
+      <div style="font-family:var(--mono);font-size:28px;font-weight:800;color:var(--cyan)">{median_price} USDC</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">{total_priced} services with pricing data</div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:10px">Most Affordable</div>
+      <table class="a-table"><tbody>{cheapest_rows}</tbody></table>
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:10px">Premium Tier</div>
+      <table class="a-table"><tbody>{expensive_rows}</tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- Keywords + Buyer Demand -->
+<div class="grid-2 section">
+  <div class="card">
+    <h3>Top Keywords</h3>
+    <div class="kw-cloud">{kw_html}</div>
+  </div>
+  <div class="card">
+    <h3>Buyer Demand Signals</h3>
+    {bi_html}
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="section">
+  <div class="card">
+    <h3>Registration Timeline</h3>
+    {tl_html}
+  </div>
+</div>
+
+<footer class="page-footer">
+  <span><a href="/">Dashboard</a> &middot; <a href="/api/analysis">JSON API</a> &middot; <a href="/llms.txt">llms.txt</a> &middot; <a href="/blog">Blog</a></span>
+  <span>Agent Economy &middot; Powered by <a href="https://nevermined.app">Nevermined</a></span>
+</footer>
+
+</div>
+</body>
+</html>"""
 
 
 # ─── Blog ───

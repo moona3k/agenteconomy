@@ -3,20 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Ledger — Agent Economy Dashboard</title>
+<title>Agent Economy — Infrastructure for Autonomous Business</title>
+<meta name="description" content="Real-time observatory for the Nevermined AI agent marketplace. Track sellers, buyers, trust scores, and market dynamics across the autonomous economy.">
+<meta property="og:title" content="Agent Economy — Infrastructure for Autonomous Business">
+<meta property="og:description" content="Real-time observatory for the Nevermined AI agent marketplace. 7 interconnected services powering trust, intelligence, and commerce.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://agenteconomy.io">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230a0f1a'/><text x='50' y='68' text-anchor='middle' font-size='52' font-weight='800' font-family='system-ui' fill='%2300d4ff'>AE</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-primary: #06080f;
-  --bg-secondary: #0c1019;
-  --bg-card: #111623;
-  --bg-card-hover: #161d30;
-  --bg-input: #0a0f1a;
-  --bg-surface: #0e1320;
-  --border: #1c2540;
-  --border-light: #2a3555;
-  --text-primary: #eaf0ff;
-  --text-secondary: #8895b0;
-  --text-muted: #4d5a75;
+  --bg-primary: #05070e;
+  --bg-secondary: #0a0f1a;
+  --bg-card: rgba(14, 19, 32, 0.7);
+  --bg-card-solid: #0e1320;
+  --bg-card-hover: rgba(22, 29, 48, 0.8);
+  --bg-glass: rgba(12, 16, 28, 0.55);
+  --bg-input: rgba(8, 12, 22, 0.8);
+  --bg-surface: rgba(11, 15, 26, 0.6);
+  --border: rgba(28, 37, 64, 0.6);
+  --border-light: rgba(42, 53, 85, 0.7);
+  --border-glow: rgba(0, 212, 255, 0.15);
+  --text-primary: #eef2ff;
+  --text-secondary: #94a3c0;
+  --text-muted: #505d78;
   --accent-cyan: #00d4ff;
   --accent-blue: #3b82f6;
   --accent-emerald: #00e5a0;
@@ -25,13 +38,16 @@
   --accent-violet: #a78bfa;
   --accent-orange: #fb923c;
   --accent-teal: #14b8a6;
-  --glow-cyan: rgba(0, 212, 255, 0.08);
-  --glow-emerald: rgba(0, 229, 160, 0.08);
-  --font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --glow-cyan: rgba(0, 212, 255, 0.06);
+  --glow-emerald: rgba(0, 229, 160, 0.06);
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition: 0.3s var(--ease);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -43,88 +59,146 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Animated Background ─── */
+/* Animated Mesh Background */
+.bg-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-mesh::before {
+  content: '';
+  position: absolute;
+  top: -40%; left: -20%;
+  width: 80%; height: 80%;
+  background: radial-gradient(ellipse, rgba(0, 212, 255, 0.04) 0%, transparent 60%);
+  animation: meshFloat 25s ease-in-out infinite alternate;
+}
+
+.bg-mesh::after {
+  content: '';
+  position: absolute;
+  bottom: -30%; right: -10%;
+  width: 70%; height: 70%;
+  background: radial-gradient(ellipse, rgba(167, 139, 250, 0.03) 0%, transparent 60%);
+  animation: meshFloat 20s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes meshFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5%, 3%) scale(1.05); }
+  100% { transform: translate(-3%, 5%) scale(0.98); }
+}
+
 .bg-grid {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  inset: 0;
   background-image:
-    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(0, 212, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.015) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 100%);
   pointer-events: none;
   z-index: 0;
 }
 
-.bg-glow {
+.bg-noise {
   position: fixed;
-  top: -200px; left: 50%;
-  transform: translateX(-50%);
-  width: 800px; height: 600px;
-  background: radial-gradient(ellipse, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
+  inset: 0;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 0;
 }
 
-/* ─── Header ─── */
+/* Header */
 .header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(6, 8, 15, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(5, 7, 14, 0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid var(--border);
-  padding: 0 40px;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent-cyan) 20%, var(--accent-violet) 50%, var(--accent-emerald) 80%, transparent 100%);
+  opacity: 0.3;
 }
 
 .header-inner {
-  max-width: 1440px;
+  max-width: 1480px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 64px;
+  height: 68px;
+  padding: 0 40px;
 }
 
 .header-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .logo-mark {
-  width: 32px; height: 32px;
-  border-radius: 8px;
+  position: relative;
+  width: 36px; height: 36px;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: 800;
-  font-size: 16px;
+  font-size: 14px;
   color: #fff;
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  letter-spacing: -0.5px;
+}
+
+.logo-mark::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  opacity: 0.3;
+  filter: blur(8px);
+  z-index: -1;
 }
 
 .brand-text h1 {
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 4px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 2px;
   color: var(--text-primary);
+  text-transform: uppercase;
 }
 
 .brand-text .subtitle {
   font-size: 10px;
   color: var(--text-muted);
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   text-transform: uppercase;
+  font-weight: 500;
 }
 
 .header-metrics {
   display: flex;
-  gap: 32px;
+  gap: 36px;
   align-items: center;
 }
 
@@ -134,25 +208,27 @@ body {
 
 .h-metric .val {
   font-family: var(--font-mono);
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   background: linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1.1;
 }
 
 .h-metric .lbl {
   font-size: 9px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-top: 1px;
+  letter-spacing: 2px;
+  font-weight: 600;
+  margin-top: 2px;
 }
 
 .header-right {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
 }
 
@@ -163,6 +239,7 @@ body {
   font-size: 11px;
   color: var(--accent-emerald);
   font-family: var(--font-mono);
+  font-weight: 600;
 }
 
 .live-dot {
@@ -179,45 +256,184 @@ body {
 }
 
 .btn {
-  background: var(--bg-card);
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   color: var(--text-secondary);
-  padding: 7px 16px;
-  border-radius: 6px;
+  padding: 8px 18px;
+  border-radius: var(--radius-xs);
   cursor: pointer;
   font-size: 12px;
   font-family: var(--font-mono);
+  font-weight: 600;
   transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(167,139,250,0.08));
+  opacity: 0;
+  transition: opacity var(--transition);
 }
 
 .btn:hover {
   border-color: var(--accent-cyan);
   color: var(--accent-cyan);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 212, 255, 0.1);
 }
 
+.btn:hover::before { opacity: 1; }
+.btn:active { transform: translateY(0); }
 .btn.loading { opacity: 0.5; pointer-events: none; }
+
+.research-link {
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(0,212,255,0.12), rgba(167,139,250,0.12));
+  border-color: rgba(0,212,255,0.3);
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+.research-link:hover {
+  background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(167,139,250,0.2));
+  border-color: var(--accent-cyan);
+  box-shadow: 0 4px 20px rgba(0,212,255,0.15);
+}
+
+/* Research Banner */
+.research-banner {
+  margin-bottom: 24px;
+  padding: 32px 36px;
+  background: linear-gradient(135deg, rgba(14,19,32,0.9), rgba(22,16,40,0.6));
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: var(--radius);
+  position: relative;
+  overflow: hidden;
+}
+.research-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet), var(--accent-emerald));
+  opacity: 0.7;
+}
+.research-banner-header {
+  margin-bottom: 24px;
+}
+.research-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-violet);
+  margin-bottom: 10px;
+}
+.research-banner h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+}
+.research-banner p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 560px;
+}
+.research-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 20px;
+}
+.research-post {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: var(--radius-xs);
+  text-decoration: none;
+  transition: all 0.2s var(--ease);
+  color: var(--text-primary);
+}
+.research-post:hover {
+  background: rgba(167,139,250,0.08);
+  transform: translateX(4px);
+}
+.research-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-violet);
+  opacity: 0.6;
+  min-width: 24px;
+}
+.research-post:hover .research-num { opacity: 1; }
+.research-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+}
+.research-read {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.research-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-violet);
+  text-decoration: none;
+  padding: 8px 0 0;
+  transition: color 0.2s var(--ease);
+}
+.research-cta:hover { color: var(--accent-cyan); }
+
+@media (max-width: 640px) {
+  .research-banner { padding: 24px 20px; }
+  .research-banner h2 { font-size: 18px; }
+  .research-post { padding: 10px 8px; }
+}
 
 .last-update {
   font-size: 10px;
   color: var(--text-muted);
   font-family: var(--font-mono);
+  font-weight: 500;
 }
 
-/* ─── Tabs ─── */
+/* Tabs */
+.tabs-wrap {
+  border-bottom: 1px solid var(--border);
+  background: rgba(5, 7, 14, 0.4);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 68px;
+  z-index: 90;
+}
+
 .tabs {
-  max-width: 1440px;
+  max-width: 1480px;
   margin: 0 auto;
   padding: 0 40px;
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--border);
   position: relative;
-  z-index: 10;
 }
 
 .tab {
-  padding: 14px 28px;
+  padding: 16px 28px;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
@@ -225,15 +441,16 @@ body {
   border-bottom: 2px solid transparent;
   transition: all var(--transition);
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   user-select: none;
   position: relative;
+  white-space: nowrap;
 }
 
 .tab:hover { color: var(--text-secondary); }
 
 .tab.active {
-  color: var(--accent-cyan);
+  color: var(--text-primary);
   border-bottom-color: var(--accent-cyan);
 }
 
@@ -241,52 +458,74 @@ body {
   content: '';
   position: absolute;
   bottom: -1px;
-  left: 0; right: 0;
-  height: 1px;
+  left: 10%; right: 10%;
+  height: 2px;
   background: var(--accent-cyan);
-  box-shadow: 0 0 12px var(--accent-cyan);
+  box-shadow: 0 0 16px var(--accent-cyan), 0 0 40px rgba(0,212,255,0.2);
+  border-radius: 2px;
 }
 
-/* ─── Main ─── */
+/* Main */
 .main {
-  max-width: 1440px;
+  max-width: 1480px;
   margin: 0 auto;
-  padding: 28px 40px 60px;
+  padding: 32px 40px 80px;
   position: relative;
   z-index: 10;
 }
 
-.tab-content { display: none; animation: fadeSlideIn 0.4s ease; }
+.tab-content {
+  display: none;
+  animation: fadeSlideIn 0.5s var(--ease-spring);
+}
 .tab-content.active { display: block; }
 
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Hero Stats ─── */
+/* Hero Stats */
 .hero-stats {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
 .hero-card {
   background: var(--bg-card);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 22px 20px;
+  padding: 24px 22px;
   position: relative;
   overflow: hidden;
-  transition: all var(--transition);
+  transition: all 0.4s var(--ease);
+}
+
+.hero-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: linear-gradient(135deg, transparent 40%, var(--glow-color, rgba(0,212,255,0.2)) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
 }
 
 .hero-card:hover {
   border-color: var(--border-light);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.02);
 }
+
+.hero-card:hover::before { opacity: 1; }
 
 .hero-card .glow-bar {
   position: absolute;
@@ -298,45 +537,79 @@ body {
 
 .hero-card:hover .glow-bar { opacity: 1; }
 
+.hero-card .stat-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  margin-bottom: 14px;
+  opacity: 0.8;
+}
+
 .hero-card .stat-val {
   font-family: var(--font-mono);
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 800;
   line-height: 1;
   margin-bottom: 6px;
+  letter-spacing: -1px;
 }
 
 .hero-card .stat-lbl {
   font-size: 11px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.5px;
+  font-weight: 600;
 }
 
+.hero-card.c1 { --glow-color: rgba(0, 212, 255, 0.25); }
 .hero-card.c1 .stat-val { color: var(--accent-cyan); }
 .hero-card.c1 .glow-bar { background: linear-gradient(90deg, var(--accent-cyan), transparent); }
+.hero-card.c1 .stat-icon { background: rgba(0, 212, 255, 0.1); color: var(--accent-cyan); }
+
+.hero-card.c2 { --glow-color: rgba(167, 139, 250, 0.25); }
 .hero-card.c2 .stat-val { color: var(--accent-violet); }
 .hero-card.c2 .glow-bar { background: linear-gradient(90deg, var(--accent-violet), transparent); }
+.hero-card.c2 .stat-icon { background: rgba(167, 139, 250, 0.1); color: var(--accent-violet); }
+
+.hero-card.c3 { --glow-color: rgba(0, 229, 160, 0.25); }
 .hero-card.c3 .stat-val { color: var(--accent-emerald); }
 .hero-card.c3 .glow-bar { background: linear-gradient(90deg, var(--accent-emerald), transparent); }
+.hero-card.c3 .stat-icon { background: rgba(0, 229, 160, 0.1); color: var(--accent-emerald); }
+
+.hero-card.c4 { --glow-color: rgba(59, 130, 246, 0.25); }
 .hero-card.c4 .stat-val { color: var(--accent-blue); }
 .hero-card.c4 .glow-bar { background: linear-gradient(90deg, var(--accent-blue), transparent); }
+.hero-card.c4 .stat-icon { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
+
+.hero-card.c5 { --glow-color: rgba(251, 191, 36, 0.25); }
 .hero-card.c5 .stat-val { color: var(--accent-amber); }
 .hero-card.c5 .glow-bar { background: linear-gradient(90deg, var(--accent-amber), transparent); }
+.hero-card.c5 .stat-icon { background: rgba(251, 191, 36, 0.1); color: var(--accent-amber); }
+
+.hero-card.c6 { --glow-color: rgba(255, 59, 110, 0.25); }
 .hero-card.c6 .stat-val { color: var(--accent-rose); }
 .hero-card.c6 .glow-bar { background: linear-gradient(90deg, var(--accent-rose), transparent); }
+.hero-card.c6 .stat-icon { background: rgba(255, 59, 110, 0.1); color: var(--accent-rose); }
 
-/* ─── Panels ─── */
+/* Panels */
 .panel {
   background: var(--bg-card);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   margin-bottom: 20px;
   overflow: hidden;
+  transition: border-color 0.3s var(--ease);
 }
 
+.panel:hover { border-color: var(--border-light); }
+
 .panel-header {
-  padding: 16px 22px;
+  padding: 18px 24px;
   border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
@@ -344,32 +617,41 @@ body {
 }
 
 .panel-header h2 {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   color: var(--text-secondary);
 }
 
 .panel-header .panel-badge {
   font-family: var(--font-mono);
   font-size: 11px;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
-  background: rgba(0, 212, 255, 0.1);
+  background: rgba(0, 212, 255, 0.08);
   color: var(--accent-cyan);
+  font-weight: 600;
+  border: 1px solid rgba(0, 212, 255, 0.1);
 }
 
-.panel-body { padding: 22px; }
+.panel-body { padding: 24px; }
 
-/* ─── Layout Grids ─── */
+/* Layout Grids */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
 
-/* ─── Bar Chart ─── */
-.bar-chart { display: flex; flex-direction: column; gap: 8px; }
+/* Bar Chart */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
 
-.bar-row { display: flex; align-items: center; gap: 12px; }
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.2s var(--ease);
+}
+
+.bar-row:hover { transform: translateX(4px); }
 
 .bar-label {
   flex: 0 0 160px;
@@ -380,24 +662,35 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: var(--font-mono);
+  font-weight: 500;
 }
 
 .bar-track {
   flex: 1;
-  height: 32px;
-  background: rgba(255,255,255,0.02);
-  border-radius: 6px;
+  height: 36px;
+  background: rgba(255,255,255,0.015);
+  border-radius: 8px;
   overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.02);
 }
 
 .bar-fill {
   height: 100%;
-  border-radius: 6px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
-  padding-left: 12px;
+  padding-left: 14px;
   min-width: fit-content;
-  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 1.2s var(--ease-spring);
+  position: relative;
+  overflow: hidden;
+}
+
+.bar-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06));
 }
 
 .bar-fill span {
@@ -405,6 +698,8 @@ body {
   font-size: 11px;
   font-weight: 700;
   color: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 .bar-fill.g0 { background: linear-gradient(90deg, #00d4ff 0%, #0080ff 100%); }
@@ -418,86 +713,147 @@ body {
 .bar-fill.g8 { background: linear-gradient(90deg, #f472b6 0%, #ec4899 100%); }
 .bar-fill.g9 { background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%); }
 
-/* ─── Payment Breakdown ─── */
-.payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+/* Payment Breakdown */
+.payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
 .pay-card {
   background: var(--bg-surface);
-  border-radius: var(--radius-sm);
-  padding: 24px;
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius);
+  padding: 28px;
   text-align: center;
   border: 1px solid transparent;
-  transition: all var(--transition);
+  transition: all 0.4s var(--ease);
+  position: relative;
+  overflow: hidden;
 }
 
-.pay-card:hover { border-color: var(--border); }
+.pay-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 20%; right: 20%;
+  height: 1px;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.pay-card:hover {
+  border-color: var(--border);
+  transform: translateY(-2px);
+}
+
+.pay-card:hover::before { opacity: 1; }
 
 .pay-card .pay-val {
   font-family: var(--font-mono);
-  font-size: 40px;
+  font-size: 44px;
   font-weight: 800;
   line-height: 1;
+  letter-spacing: -2px;
 }
 
 .pay-card .pay-lbl {
   font-size: 11px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-top: 8px;
+  letter-spacing: 2px;
+  margin-top: 10px;
+  font-weight: 600;
 }
 
 .pay-card.crypto .pay-val { color: var(--accent-violet); }
+.pay-card.crypto::before { background: linear-gradient(90deg, transparent, var(--accent-violet), transparent); }
 .pay-card.fiat .pay-val { color: var(--accent-emerald); }
+.pay-card.fiat::before { background: linear-gradient(90deg, transparent, var(--accent-emerald), transparent); }
 .pay-card.free .pay-val { color: var(--accent-amber); }
+.pay-card.free::before { background: linear-gradient(90deg, transparent, var(--accent-amber), transparent); }
 
-/* ─── Portfolio Showcase ─── */
+/* Portfolio Showcase */
 .portfolio-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
 }
 
 .portfolio-card {
-  background: var(--bg-surface);
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 22px;
-  transition: all var(--transition);
+  padding: 28px;
+  transition: all 0.4s var(--ease);
   position: relative;
   overflow: hidden;
 }
 
-.portfolio-card:hover {
-  border-color: var(--border-light);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+.portfolio-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: var(--card-gradient, linear-gradient(135deg, transparent, rgba(0,212,255,0.15)));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
 }
 
+.portfolio-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), var(--card-shadow, 0 0 30px rgba(0,212,255,0.05));
+}
+
+.portfolio-card:hover::before { opacity: 1; }
+
 .portfolio-card .port-icon {
-  width: 36px; height: 36px;
-  border-radius: 10px;
+  width: 44px; height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  margin-bottom: 14px;
+  font-size: 18px;
+  margin-bottom: 18px;
   font-weight: 800;
   font-family: var(--font-mono);
   color: #fff;
+  position: relative;
+}
+
+.portfolio-card .port-icon::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 14px;
+  background: inherit;
+  opacity: 0.2;
+  filter: blur(10px);
+  z-index: -1;
 }
 
 .portfolio-card .port-name {
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 800;
+  font-size: 17px;
   margin-bottom: 4px;
+  letter-spacing: -0.2px;
 }
 
 .portfolio-card .port-tagline {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+.portfolio-card .port-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 18px;
+  line-height: 1.6;
 }
 
 .portfolio-card .port-tools {
@@ -509,20 +865,36 @@ body {
 .tool-tag {
   font-family: var(--font-mono);
   font-size: 10px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.04);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
   color: var(--text-secondary);
   border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+
+.portfolio-card:hover .tool-tag {
+  border-color: var(--border-light);
+  background: rgba(255,255,255,0.05);
+}
+
+.port-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
 .port-status {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 12px;
+  gap: 8px;
   font-size: 11px;
   font-family: var(--font-mono);
+  font-weight: 600;
 }
 
 .port-status .dot {
@@ -530,106 +902,141 @@ body {
   border-radius: 50%;
 }
 
-.port-status.online .dot { background: var(--accent-emerald); box-shadow: 0 0 6px var(--accent-emerald); }
+.port-status.online .dot { background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); }
 .port-status.online { color: var(--accent-emerald); }
+.port-status.checking .dot { background: var(--accent-amber); animation: livePulse 1s ease-in-out infinite; }
+.port-status.checking { color: var(--accent-amber); }
+.port-status.offline .dot { background: var(--text-muted); }
+.port-status.offline { color: var(--text-muted); }
 
-/* ─── Tables ─── */
+.port-link {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition);
+  font-weight: 500;
+}
+
+.port-link:hover { color: var(--accent-cyan); }
+
+/* Tables */
 .table-controls {
-  padding: 14px 22px;
+  padding: 16px 24px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .search-input {
   flex: 1;
-  max-width: 420px;
-  padding: 9px 16px;
+  max-width: 480px;
+  padding: 10px 18px;
+  padding-left: 40px;
   background: var(--bg-input);
+  backdrop-filter: blur(8px);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 13px;
   font-family: var(--font-sans);
+  font-weight: 500;
   outline: none;
-  transition: border-color var(--transition);
+  transition: all var(--transition);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23505d78' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 14px center;
 }
 
-.search-input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.08); }
+.search-input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.06), 0 0 20px rgba(0, 212, 255, 0.04);
+}
+
 .search-input::placeholder { color: var(--text-muted); }
 
 .result-count {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
+  font-weight: 600;
 }
 
 .data-table { width: 100%; border-collapse: collapse; }
 
 .data-table th {
   text-align: left;
-  padding: 12px 18px;
+  padding: 14px 20px;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
   transition: color var(--transition);
+  position: sticky;
+  top: 0;
+  background: var(--bg-card-solid);
+  z-index: 5;
 }
 
 .data-table th:hover { color: var(--accent-cyan); }
-.data-table th.sorted-asc::after { content: ' \u25B2'; color: var(--accent-cyan); }
-.data-table th.sorted-desc::after { content: ' \u25BC'; color: var(--accent-cyan); }
+.data-table th.sorted-asc::after { content: ' \u25B2'; color: var(--accent-cyan); font-size: 8px; }
+.data-table th.sorted-desc::after { content: ' \u25BC'; color: var(--accent-cyan); font-size: 8px; }
 
 .data-table td {
-  padding: 14px 18px;
+  padding: 16px 20px;
   font-size: 13px;
-  border-bottom: 1px solid rgba(28, 37, 64, 0.5);
+  border-bottom: 1px solid rgba(28, 37, 64, 0.3);
   vertical-align: middle;
 }
 
 .data-table tbody tr {
-  transition: background var(--transition);
+  transition: all 0.2s var(--ease);
   cursor: pointer;
 }
 
-.data-table tbody tr:hover { background: var(--bg-card-hover); }
+.data-table tbody tr:hover {
+  background: var(--bg-card-hover);
+}
 
 .name-cell {
   font-weight: 700;
   color: var(--accent-cyan);
   font-family: var(--font-mono);
   font-size: 12px;
+  letter-spacing: -0.2px;
 }
 
-.team-cell { color: var(--text-secondary); }
+.team-cell { color: var(--text-secondary); font-weight: 500; }
 
 .badge {
-  display: inline-block;
-  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
   border-radius: 20px;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.5px;
   white-space: nowrap;
+  gap: 5px;
 }
 
-.badge.cat { background: rgba(59, 130, 246, 0.12); color: var(--accent-blue); }
-.badge.live { background: rgba(0, 229, 160, 0.12); color: var(--accent-emerald); }
-.badge.local { background: rgba(251, 191, 36, 0.12); color: var(--accent-amber); }
-.badge.none { background: rgba(77, 90, 117, 0.12); color: var(--text-muted); }
+.badge.cat { background: rgba(59, 130, 246, 0.08); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.12); }
+.badge.live { background: rgba(0, 229, 160, 0.08); color: var(--accent-emerald); border: 1px solid rgba(0, 229, 160, 0.12); }
+.badge.local { background: rgba(251, 191, 36, 0.08); color: var(--accent-amber); border: 1px solid rgba(251, 191, 36, 0.12); }
+.badge.none { background: rgba(77, 90, 117, 0.08); color: var(--text-muted); border: 1px solid rgba(77, 90, 117, 0.12); }
 
-/* ─── Row Detail ─── */
-.row-detail { display: none; animation: fadeSlideIn 0.2s ease; }
+/* Row Detail */
+.row-detail { display: none; animation: fadeSlideIn 0.3s var(--ease); }
 .row-detail.open { display: table-row; }
 
 .row-detail td {
-  padding: 18px 22px;
+  padding: 20px 24px;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
 }
@@ -637,15 +1044,16 @@ body {
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .detail-item .detail-label {
   font-size: 9px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 4px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  font-weight: 700;
 }
 
 .detail-item .detail-value {
@@ -653,54 +1061,65 @@ body {
   font-size: 12px;
   color: var(--text-secondary);
   word-break: break-all;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-weight: 500;
 }
 
-/* ─── Power Teams ─── */
-.power-team-list { display: flex; flex-direction: column; gap: 6px; }
+/* Power Teams */
+.power-team-list { display: flex; flex-direction: column; gap: 8px; }
 
 .power-team {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 14px 18px;
+  gap: 18px;
+  padding: 16px 20px;
   background: var(--bg-surface);
   border-radius: var(--radius-sm);
-  transition: all var(--transition);
+  transition: all 0.3s var(--ease);
   border: 1px solid transparent;
 }
 
-.power-team:hover { border-color: var(--border); background: var(--bg-card-hover); }
+.power-team:hover {
+  border-color: var(--border);
+  background: var(--bg-card-hover);
+  transform: translateX(4px);
+}
 
 .power-rank {
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--text-muted);
-  width: 36px;
+  width: 40px;
   text-align: center;
+  flex-shrink: 0;
 }
 
-.power-team:nth-child(1) .power-rank { color: var(--accent-amber); }
+.power-team:nth-child(1) .power-rank { color: var(--accent-amber); text-shadow: 0 0 16px rgba(251,191,36,0.3); }
 .power-team:nth-child(2) .power-rank { color: var(--text-secondary); }
 .power-team:nth-child(3) .power-rank { color: var(--accent-orange); }
 
-.power-name { flex: 1; font-weight: 600; font-size: 14px; }
+.power-name {
+  flex: 1;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+}
 
 .power-badges { display: flex; gap: 8px; }
 
 .power-badge {
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 20px;
   font-size: 11px;
   font-family: var(--font-mono);
   font-weight: 700;
 }
 
-.power-badge.selling { background: rgba(0, 212, 255, 0.1); color: var(--accent-cyan); }
-.power-badge.buying { background: rgba(167, 139, 250, 0.1); color: var(--accent-violet); }
+.power-badge.selling { background: rgba(0, 212, 255, 0.08); color: var(--accent-cyan); border: 1px solid rgba(0, 212, 255, 0.1); }
+.power-badge.buying { background: rgba(167, 139, 250, 0.08); color: var(--accent-violet); border: 1px solid rgba(167, 139, 250, 0.1); }
 
-/* ─── Activity Feed ─── */
+/* Activity Feed */
 .activity-feed {
   display: flex;
   flex-direction: column;
@@ -712,34 +1131,39 @@ body {
 .activity-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(28, 37, 64, 0.3);
-  animation: fadeSlideIn 0.3s ease;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(28, 37, 64, 0.2);
+  transition: all 0.2s var(--ease);
 }
+
+.activity-item:hover { padding-left: 8px; }
 
 .activity-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
 }
 
 .activity-text {
   font-size: 13px;
   color: var(--text-secondary);
   flex: 1;
+  font-weight: 500;
 }
 
-.activity-text strong { color: var(--accent-cyan); font-weight: 600; }
+.activity-text strong { color: var(--accent-cyan); font-weight: 700; }
 
 .activity-time {
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-muted);
   flex-shrink: 0;
+  font-weight: 600;
 }
 
-/* ─── Network ─── */
+/* Network */
 .network-container {
   position: relative;
   min-height: 600px;
@@ -752,8 +1176,8 @@ body {
 
 .network-legend {
   display: flex;
-  gap: 24px;
-  padding: 14px 0;
+  gap: 28px;
+  padding: 16px 0;
   flex-wrap: wrap;
 }
 
@@ -763,68 +1187,159 @@ body {
   gap: 8px;
   font-size: 12px;
   color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-/* ─── Intel Cards ─── */
+/* Intel Cards */
 .intel-stack { display: flex; flex-direction: column; gap: 12px; }
 
 .intel-card {
-  padding: 18px;
+  padding: 20px;
   background: var(--bg-surface);
+  backdrop-filter: blur(8px);
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
-  transition: all var(--transition);
+  transition: all 0.3s var(--ease);
 }
 
-.intel-card:hover { border-color: var(--border); }
+.intel-card:hover {
+  border-color: var(--border);
+  transform: translateX(4px);
+}
 
 .intel-label {
   font-size: 9px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 6px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  font-weight: 700;
 }
 
 .intel-value {
   font-family: var(--font-mono);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
 .intel-sub {
   font-size: 12px;
   color: var(--text-muted);
-  margin-top: 2px;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
-/* ─── Team Grid ─── */
+/* Team Grid */
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
 }
 
 .team-card {
-  padding: 14px 16px;
+  padding: 16px 18px;
   background: var(--bg-surface);
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--border);
-  transition: all var(--transition);
+  transition: all 0.3s var(--ease);
 }
 
-.team-card:hover { background: var(--bg-card-hover); }
+.team-card:hover {
+  background: var(--bg-card-hover);
+  transform: translateX(4px);
+}
+
 .team-card.both { border-left-color: var(--accent-emerald); }
 .team-card.sell-only { border-left-color: var(--accent-cyan); }
 .team-card.buy-only { border-left-color: var(--accent-violet); }
 
-.team-card .tc-name { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
-.team-card .tc-section { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
-.team-card .tc-list { font-size: 11px; font-family: var(--font-mono); margin-bottom: 6px; line-height: 1.6; }
+.team-card .tc-name { font-weight: 700; font-size: 14px; margin-bottom: 10px; letter-spacing: -0.2px; }
+.team-card .tc-section { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; font-weight: 700; }
+.team-card .tc-list { font-size: 11px; font-family: var(--font-mono); margin-bottom: 8px; line-height: 1.7; font-weight: 500; }
 
-/* ─── Loading / Empty ─── */
+/* Pulse Ring */
+.economy-pulse-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* Footer */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 48px 40px 32px;
+  position: relative;
+  z-index: 10;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 10%, rgba(0,212,255,0.3) 30%, rgba(167,139,250,0.3) 50%, rgba(0,229,160,0.3) 70%, transparent 90%);
+}
+
+.footer-inner {
+  max-width: 1480px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+}
+
+.footer-brand p {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  margin-top: 12px;
+  max-width: 360px;
+}
+
+.footer-col h3 {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.footer-col a {
+  display: block;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: none;
+  padding: 5px 0;
+  transition: color var(--transition);
+  font-weight: 500;
+}
+
+.footer-col a:hover { color: var(--accent-cyan); }
+
+.footer-bottom {
+  max-width: 1480px;
+  margin: 32px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.footer-bottom a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+}
+
+/* Loading / Empty */
 .loading-overlay {
   display: flex;
   align-items: center;
@@ -833,58 +1348,430 @@ body {
   color: var(--text-muted);
   font-family: var(--font-mono);
   gap: 12px;
+  font-weight: 600;
 }
 
 .spinner {
-  width: 18px; height: 18px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent-cyan);
+  width: 24px; height: 24px;
+  position: relative;
+  animation: spin 4s linear infinite;
+}
+
+.spinner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  border: 1.5px solid var(--border);
+  border-top-color: var(--accent-cyan);
+  border-right-color: var(--accent-violet);
+  animation: spin 0.8s linear infinite reverse;
+}
+
+.spinner::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 4px; height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 6px var(--accent-cyan);
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .empty-state { text-align: center; padding: 48px; color: var(--text-muted); }
 
-/* ─── Scrollbar ─── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
 
-/* ─── Responsive ─── */
-@media (max-width: 1100px) {
+/* Responsive */
+@media (max-width: 1200px) {
   .hero-stats { grid-template-columns: repeat(3, 1fr); }
   .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
 }
 
 @media (max-width: 768px) {
-  .header { padding: 0 20px; }
+  .header-inner { padding: 0 20px; }
   .tabs { padding: 0 20px; overflow-x: auto; }
-  .main { padding: 20px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .main { padding: 20px 20px 60px; }
   .hero-stats { grid-template-columns: repeat(2, 1fr); }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .portfolio-grid { grid-template-columns: 1fr; }
   .payment-grid { grid-template-columns: 1fr; }
+  .economy-pulse-grid { grid-template-columns: repeat(2, 1fr); }
   .header-metrics { display: none; }
   .bar-label { flex: 0 0 100px; font-size: 10px; }
+  .footer-inner { grid-template-columns: 1fr; gap: 24px; }
+  .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+}
+
+/* Portfolio Hero Banner */
+.portfolio-hero {
+  margin-bottom: 28px;
+  padding: 36px 0;
+  position: relative;
+}
+
+.portfolio-hero h2 {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.portfolio-hero p {
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  max-width: 600px;
+}
+
+.portfolio-hero .service-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(0,212,255,0.06);
+  border: 1px solid rgba(0,212,255,0.1);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+/* Overview Hero Banner */
+.overview-hero {
+  margin-bottom: 32px;
+  padding: 40px 36px;
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  position: relative;
+  overflow: hidden;
+}
+
+.overview-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 50%; height: 100%;
+  background: radial-gradient(ellipse at 80% 50%, rgba(0,212,255,0.04), transparent 70%);
+  pointer-events: none;
+}
+
+.overview-hero h2 {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.overview-hero h2 .gradient {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.overview-hero p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 640px;
+  font-weight: 500;
+}
+
+.overview-hero .hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.hero-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.hero-action:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,212,255,0.08);
+}
+
+.hero-action .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 6px var(--accent-emerald);
+}
+
+/* === SACRED GEOMETRY === */
+
+/* Flower of Life Background */
+.sacred-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.flower-of-life {
+  width: 140vh;
+  height: 140vh;
+  opacity: 0.5;
+  animation: sacredRotate 180s linear infinite;
+}
+
+.flower-of-life circle {
+  fill: none;
+  stroke-width: 0.3;
+}
+
+@keyframes sacredRotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Merkaba */
+.merkaba-container {
+  position: absolute;
+  top: 50%;
+  right: 36px;
+  transform: translateY(-50%);
+  width: 220px;
+  height: 220px;
+  pointer-events: none;
+}
+
+@media (max-width: 1100px) {
+  .merkaba-container {
+    width: 140px;
+    height: 140px;
+    right: 16px;
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 768px) {
+  .merkaba-container { display: none; }
+}
+
+.merkaba {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 24px rgba(0, 212, 255, 0.12));
+}
+
+.merkaba-up {
+  animation: merkabaCW 28s linear infinite;
+  transform-origin: 100px 100px;
+}
+
+.merkaba-down {
+  animation: merkabaCCW 22s linear infinite;
+  transform-origin: 100px 100px;
+}
+
+.merkaba-inner {
+  animation: merkabaCW 40s linear infinite reverse;
+  transform-origin: 100px 100px;
+}
+
+@keyframes merkabaCW { to { transform: rotate(360deg); } }
+@keyframes merkabaCCW { to { transform: rotate(-360deg); } }
+
+.merkaba-vertex {
+  animation: vertexPulse 3s ease-in-out infinite;
+}
+
+.merkaba-vertex:nth-child(2) { animation-delay: 0.5s; }
+.merkaba-vertex:nth-child(3) { animation-delay: 1s; }
+
+@keyframes vertexPulse {
+  0%, 100% { opacity: 0.5; r: 2.5; }
+  50% { opacity: 1; r: 4; }
+}
+
+/* Seed of Life Spinner */
+.seed-spinner {
+  width: 24px;
+  height: 24px;
+  animation: sacredRotate 4s linear infinite;
+}
+
+.seed-spinner circle {
+  fill: none;
+  stroke: var(--accent-cyan);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.seed-spinner .seed-center {
+  fill: var(--accent-cyan);
+  opacity: 0.8;
+  stroke: none;
+}
+
+/* Sacred Divider (Vesica Piscis) */
+.sacred-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+  opacity: 0.12;
+}
+
+.sacred-divider svg {
+  width: 160px;
+  height: 32px;
+}
+
+/* Geometric card accents */
+.portfolio-card .geo-accent {
+  position: absolute;
+  bottom: -30px;
+  right: -30px;
+  width: 120px;
+  height: 120px;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+  pointer-events: none;
+}
+
+.portfolio-card:hover .geo-accent {
+  opacity: 0.08;
+  transform: rotate(15deg);
+}
+
+.portfolio-card .geo-accent circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.5;
+}
+
+/* Hero card sacred geometry hover overlay */
+.hero-card .sacred-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+  overflow: hidden;
+}
+
+.hero-card:hover .sacred-overlay {
+  opacity: 0.06;
+}
+
+.hero-card .sacred-overlay svg {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  width: 80px;
+  height: 80px;
+}
+
+/* Overview hero enhanced with sacred geometry bg */
+.overview-hero::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 260px;
+  width: 1px;
+  height: 60%;
+  transform: translateY(-50%);
+  background: linear-gradient(to bottom, transparent, rgba(0,212,255,0.1), rgba(167,139,250,0.1), transparent);
+  pointer-events: none;
+}
+
+@media (max-width: 1100px) {
+  .overview-hero::after { display: none; }
 }
 </style>
 </head>
 <body>
 
+<div class="bg-mesh"></div>
 <div class="bg-grid"></div>
-<div class="bg-glow"></div>
+<div class="bg-noise"></div>
+
+<!-- Sacred Geometry: Flower of Life Background -->
+<div class="sacred-bg">
+  <svg class="flower-of-life" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Seed of Life (center + 6) -->
+    <circle cx="200" cy="200" r="50" stroke="rgba(0,212,255,0.04)"/>
+    <circle cx="250" cy="200" r="50" stroke="rgba(0,212,255,0.035)"/>
+    <circle cx="225" cy="243.3" r="50" stroke="rgba(0,212,255,0.035)"/>
+    <circle cx="175" cy="243.3" r="50" stroke="rgba(0,212,255,0.035)"/>
+    <circle cx="150" cy="200" r="50" stroke="rgba(0,212,255,0.035)"/>
+    <circle cx="175" cy="156.7" r="50" stroke="rgba(0,212,255,0.035)"/>
+    <circle cx="225" cy="156.7" r="50" stroke="rgba(0,212,255,0.035)"/>
+    <!-- Ring 2a (distance r*sqrt3, offset 30deg) -->
+    <circle cx="275" cy="243.3" r="50" stroke="rgba(167,139,250,0.025)"/>
+    <circle cx="200" cy="286.6" r="50" stroke="rgba(167,139,250,0.025)"/>
+    <circle cx="125" cy="243.3" r="50" stroke="rgba(167,139,250,0.025)"/>
+    <circle cx="125" cy="156.7" r="50" stroke="rgba(167,139,250,0.025)"/>
+    <circle cx="200" cy="113.4" r="50" stroke="rgba(167,139,250,0.025)"/>
+    <circle cx="275" cy="156.7" r="50" stroke="rgba(167,139,250,0.025)"/>
+    <!-- Ring 2b (distance 2r, same angles) -->
+    <circle cx="300" cy="200" r="50" stroke="rgba(0,229,160,0.02)"/>
+    <circle cx="250" cy="286.6" r="50" stroke="rgba(0,229,160,0.02)"/>
+    <circle cx="150" cy="286.6" r="50" stroke="rgba(0,229,160,0.02)"/>
+    <circle cx="100" cy="200" r="50" stroke="rgba(0,229,160,0.02)"/>
+    <circle cx="150" cy="113.4" r="50" stroke="rgba(0,229,160,0.02)"/>
+    <circle cx="250" cy="113.4" r="50" stroke="rgba(0,229,160,0.02)"/>
+    <!-- Outer containment circle -->
+    <circle cx="200" cy="200" r="150" stroke="rgba(0,212,255,0.015)" stroke-dasharray="4 8"/>
+    <circle cx="200" cy="200" r="100" stroke="rgba(167,139,250,0.015)" stroke-dasharray="2 6"/>
+  </svg>
+</div>
 
 <!-- HEADER -->
 <header class="header">
   <div class="header-inner">
     <div class="header-brand">
-      <div class="logo-mark">L</div>
+      <div class="logo-mark" style="overflow:hidden">
+        <svg viewBox="0 0 36 36" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="6" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1"/>
+          <circle cx="18" cy="12" r="6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="0.5"/>
+          <circle cx="23.2" cy="21" r="6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="0.5"/>
+          <circle cx="12.8" cy="21" r="6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="0.5"/>
+        </svg>
+      </div>
       <div class="brand-text">
-        <h1>THE LEDGER</h1>
-        <div class="subtitle">Agent Economy Observatory</div>
+        <h1>Agent Economy</h1>
+        <div class="subtitle">Infrastructure Observatory</div>
       </div>
     </div>
     <div class="header-metrics">
@@ -896,32 +1783,151 @@ body {
     <div class="header-right">
       <div class="live-indicator"><div class="live-dot"></div><span>LIVE</span></div>
       <span class="last-update" id="last-update">Loading...</span>
+      <a class="btn research-link" href="/blog">Research</a>
       <button class="btn" id="btn-refresh" onclick="doRefresh()">Refresh</button>
     </div>
   </div>
 </header>
 
 <!-- TABS -->
-<nav class="tabs" id="tabs">
-  <div class="tab active" data-tab="overview">Overview</div>
-  <div class="tab" data-tab="sellers">Sellers</div>
-  <div class="tab" data-tab="buyers">Buyers</div>
-  <div class="tab" data-tab="analysis">Analysis</div>
-  <div class="tab" data-tab="network">Network</div>
-  <div class="tab" data-tab="portfolio">Our Portfolio</div>
-</nav>
+<div class="tabs-wrap">
+  <nav class="tabs" id="tabs">
+    <div class="tab active" data-tab="overview">Overview</div>
+    <div class="tab" data-tab="sellers">Sellers</div>
+    <div class="tab" data-tab="buyers">Buyers</div>
+    <div class="tab" data-tab="analysis">Analysis</div>
+    <div class="tab" data-tab="network">Network</div>
+    <div class="tab" data-tab="portfolio">Our Portfolio</div>
+  </nav>
+</div>
 
 <!-- MAIN -->
 <main class="main">
 
   <!-- OVERVIEW -->
   <div class="tab-content active" id="tab-overview">
+    <div class="overview-hero">
+      <h2>The <span class="gradient">Agent Economy</span> Observatory</h2>
+      <p>Real-time marketplace intelligence across the Nevermined AI agent ecosystem. Track sellers, buyers, trust scores, and market dynamics as autonomous businesses transact.</p>
+      <div class="hero-actions">
+        <a class="hero-action" href="/.well-known/agent.json" target="_blank"><span class="dot"></span>Agent Card (A2A)</a>
+        <a class="hero-action" href="/llms.txt" target="_blank"><span class="dot"></span>llms.txt</a>
+        <a class="hero-action" href="/api/analysis" target="_blank"><span class="dot"></span>API /analysis</a>
+        <a class="hero-action" href="/blog"><span class="dot" style="background:var(--accent-violet);box-shadow:0 0 6px var(--accent-violet)"></span>Research Blog</a>
+      </div>
+      <!-- Sacred Geometry: Merkaba — "Vehicle of Light" -->
+      <div class="merkaba-container">
+        <svg class="merkaba" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mk-up" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.7"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.3"/>
+            </linearGradient>
+            <linearGradient id="mk-down" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.7"/>
+              <stop offset="100%" stop-color="#00d4ff" stop-opacity="0.3"/>
+            </linearGradient>
+            <linearGradient id="mk-inner" x1="50%" y1="0%" x2="50%" y2="100%">
+              <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#00d4ff" stop-opacity="0.2"/>
+            </linearGradient>
+            <filter id="mk-glow">
+              <feGaussianBlur stdDeviation="2" result="g"/>
+              <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Outer containment circle -->
+          <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(0,212,255,0.06)" stroke-width="0.5" stroke-dasharray="3 6"/>
+          <!-- Upward triangle (clockwise rotation) -->
+          <g class="merkaba-up" filter="url(#mk-glow)">
+            <polygon points="100,22 32.4,138 167.6,138" fill="none" stroke="url(#mk-up)" stroke-width="1.2" stroke-linejoin="round"/>
+            <circle class="merkaba-vertex" cx="100" cy="22" r="3" fill="#00d4ff"/>
+            <circle class="merkaba-vertex" cx="32.4" cy="138" r="3" fill="#00d4ff"/>
+            <circle class="merkaba-vertex" cx="167.6" cy="138" r="3" fill="#00d4ff"/>
+          </g>
+          <!-- Downward triangle (counter-clockwise rotation) -->
+          <g class="merkaba-down" filter="url(#mk-glow)">
+            <polygon points="100,178 167.6,62 32.4,62" fill="none" stroke="url(#mk-down)" stroke-width="1.2" stroke-linejoin="round"/>
+            <circle class="merkaba-vertex" cx="100" cy="178" r="3" fill="#a78bfa"/>
+            <circle class="merkaba-vertex" cx="167.6" cy="62" r="3" fill="#a78bfa"/>
+            <circle class="merkaba-vertex" cx="32.4" cy="62" r="3" fill="#a78bfa"/>
+          </g>
+          <!-- Inner hexagram (intersection) -->
+          <g class="merkaba-inner" filter="url(#mk-glow)">
+            <polygon points="100,62 132.4,82 132.4,118 100,138 67.6,118 67.6,82" fill="none" stroke="url(#mk-inner)" stroke-width="0.6"/>
+          </g>
+          <!-- Center seed -->
+          <circle cx="100" cy="100" r="2" fill="#fff" opacity="0.5">
+            <animate attributeName="r" values="2;3.5;2" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.5;0.9;0.5" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Energy lines from center to vertices -->
+          <g opacity="0.08">
+            <line x1="100" y1="100" x2="100" y2="22" stroke="#00d4ff" stroke-width="0.3"/>
+            <line x1="100" y1="100" x2="32.4" y2="138" stroke="#00d4ff" stroke-width="0.3"/>
+            <line x1="100" y1="100" x2="167.6" y2="138" stroke="#00d4ff" stroke-width="0.3"/>
+            <line x1="100" y1="100" x2="100" y2="178" stroke="#a78bfa" stroke-width="0.3"/>
+            <line x1="100" y1="100" x2="167.6" y2="62" stroke="#a78bfa" stroke-width="0.3"/>
+            <line x1="100" y1="100" x2="32.4" y2="62" stroke="#a78bfa" stroke-width="0.3"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
     <div class="hero-stats" id="overview-stats"></div>
 
-    <!-- Key Insights Banner -->
-    <div class="panel" style="margin-bottom:20px;border-color:rgba(0,212,255,0.15)">
+    <!-- Sacred Divider -->
+    <div class="sacred-divider">
+      <svg viewBox="0 0 160 32" xmlns="http://www.w3.org/2000/svg">
+        <line x1="0" y1="16" x2="50" y2="16" stroke="rgba(0,212,255,0.3)" stroke-width="0.5"/>
+        <circle cx="72" cy="16" r="12" fill="none" stroke="rgba(0,212,255,0.4)" stroke-width="0.5"/>
+        <circle cx="88" cy="16" r="12" fill="none" stroke="rgba(167,139,250,0.4)" stroke-width="0.5"/>
+        <line x1="110" y1="16" x2="160" y2="16" stroke="rgba(167,139,250,0.3)" stroke-width="0.5"/>
+      </svg>
+    </div>
+
+    <!-- Research Series -->
+    <div class="research-banner">
+      <div class="research-banner-header">
+        <div class="research-label">Research</div>
+        <h2>Anatomy of the <span class="gradient">Agent Economy</span></h2>
+        <p>A 5-part deep dive into the protocols, economics, and trust infrastructure powering the next wave of autonomous business.</p>
+      </div>
+      <div class="research-posts">
+        <a href="/blog/the-next-eight-billion" class="research-post">
+          <span class="research-num">01</span>
+          <span class="research-title">The Next Eight Billion</span>
+          <span class="research-read">9 min</span>
+        </a>
+        <a href="/blog/the-protocol-stack" class="research-post">
+          <span class="research-num">02</span>
+          <span class="research-title">The Protocol Stack</span>
+          <span class="research-read">8 min</span>
+        </a>
+        <a href="/blog/trust-at-machine-speed" class="research-post">
+          <span class="research-num">03</span>
+          <span class="research-title">Trust at Machine Speed</span>
+          <span class="research-read">7 min</span>
+        </a>
+        <a href="/blog/hayek-coase-and-homo-agenticus" class="research-post">
+          <span class="research-num">04</span>
+          <span class="research-title">Hayek, Coase, and Homo Agenticus</span>
+          <span class="research-read">7 min</span>
+        </a>
+        <a href="/blog/what-happens-next" class="research-post">
+          <span class="research-num">05</span>
+          <span class="research-title">What Happens Next</span>
+          <span class="research-read">5 min</span>
+        </a>
+      </div>
+      <a href="/blog" class="research-cta">Read the full series &rarr;</a>
+    </div>
+
+    <div class="panel" style="border-color:rgba(0,212,255,0.1)">
       <div class="panel-header"><h2>Economy Pulse</h2><span class="panel-badge" id="health-score">--</span></div>
-      <div class="panel-body" id="economy-pulse" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px"></div>
+      <div class="panel-body">
+        <div class="economy-pulse-grid" id="economy-pulse"></div>
+      </div>
     </div>
 
     <div class="grid-2">
@@ -951,7 +1957,7 @@ body {
         <input type="text" class="search-input" id="seller-search" placeholder="Search sellers by name, team, or category...">
         <span class="result-count" id="seller-count"></span>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow-x:auto;max-height:75vh;overflow-y:auto">
         <table class="data-table" id="sellers-table">
           <thead><tr>
             <th data-sort="name">Name</th>
@@ -973,7 +1979,7 @@ body {
         <input type="text" class="search-input" id="buyer-search" placeholder="Search buyers by name or team...">
         <span class="result-count" id="buyer-count"></span>
       </div>
-      <div style="overflow-x:auto;">
+      <div style="overflow-x:auto;max-height:75vh;overflow-y:auto">
         <table class="data-table" id="buyers-table">
           <thead><tr>
             <th data-sort="name">Name</th>
@@ -1044,14 +2050,74 @@ body {
 
   <!-- PORTFOLIO -->
   <div class="tab-content" id="tab-portfolio">
-    <div style="margin-bottom:20px">
-      <h2 style="font-size:20px;font-weight:800;margin-bottom:4px">Our Portfolio</h2>
-      <p style="color:var(--text-muted);font-size:14px">6 autonomous businesses powering the agent economy infrastructure</p>
+    <div class="portfolio-hero">
+      <h2>Our Portfolio</h2>
+      <p>7 autonomous businesses powering marketplace intelligence, trust infrastructure, and commerce across the agent economy.</p>
+      <div class="service-count"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--accent-emerald);box-shadow:0 0 6px var(--accent-emerald);display:inline-block"></span> All services FREE during promotional period</div>
+    </div>
+    <!-- Sacred Divider: Vesica Piscis — intersection of buyer & seller -->
+    <div class="sacred-divider">
+      <svg viewBox="0 0 160 32" xmlns="http://www.w3.org/2000/svg">
+        <line x1="0" y1="16" x2="50" y2="16" stroke="rgba(0,212,255,0.3)" stroke-width="0.5"/>
+        <circle cx="72" cy="16" r="12" fill="none" stroke="rgba(0,212,255,0.4)" stroke-width="0.5"/>
+        <circle cx="88" cy="16" r="12" fill="none" stroke="rgba(167,139,250,0.4)" stroke-width="0.5"/>
+        <line x1="110" y1="16" x2="160" y2="16" stroke="rgba(167,139,250,0.3)" stroke-width="0.5"/>
+      </svg>
     </div>
     <div class="portfolio-grid" id="portfolio-grid"></div>
   </div>
 
 </main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+        <div class="logo-mark" style="width:28px;height:28px;font-size:11px;border-radius:8px">AE</div>
+        <span style="font-weight:800;font-size:14px;letter-spacing:1px">AGENT ECONOMY</span>
+      </div>
+      <p>Infrastructure for autonomous business. Built by Team Full Stack Agents for the Nevermined Autonomous Business Hackathon.</p>
+    </div>
+    <div class="footer-col">
+      <h3>MCP Services</h3>
+      <a href="https://oracle.agenteconomy.io/health" target="_blank">The Oracle</a>
+      <a href="https://amplifier.agenteconomy.io/health" target="_blank">The Amplifier</a>
+      <a href="https://architect.agenteconomy.io/health" target="_blank">The Architect</a>
+      <a href="https://underwriter.agenteconomy.io/health" target="_blank">The Underwriter</a>
+      <a href="https://goldstar.agenteconomy.io/health" target="_blank">The Gold Star</a>
+    </div>
+    <div class="footer-col">
+      <h3>Data API</h3>
+      <a href="/api/sellers">/api/sellers</a>
+      <a href="/api/buyers">/api/buyers</a>
+      <a href="/api/analysis">/api/analysis</a>
+      <a href="/llms.txt">/llms.txt</a>
+      <a href="/.well-known/agent.json">agent.json</a>
+    </div>
+    <div class="footer-col">
+      <h3>Resources</h3>
+      <a href="https://nevermined.app" target="_blank">Nevermined App</a>
+      <a href="https://docs.nevermined.app" target="_blank">Documentation</a>
+      <a href="https://discord.com/invite/GZju2qScKq" target="_blank">Discord</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>Built with Nevermined &middot; Hackathon March 2026</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <svg viewBox="0 0 40 40" width="20" height="20" xmlns="http://www.w3.org/2000/svg" style="opacity:0.3">
+        <circle cx="20" cy="20" r="7" fill="none" stroke="#00d4ff" stroke-width="0.5"/>
+        <circle cx="20" cy="13" r="7" fill="none" stroke="#a78bfa" stroke-width="0.5"/>
+        <circle cx="26.1" cy="16.5" r="7" fill="none" stroke="#00e5a0" stroke-width="0.5"/>
+        <circle cx="26.1" cy="23.5" r="7" fill="none" stroke="#00d4ff" stroke-width="0.5"/>
+        <circle cx="20" cy="27" r="7" fill="none" stroke="#a78bfa" stroke-width="0.5"/>
+        <circle cx="13.9" cy="23.5" r="7" fill="none" stroke="#00e5a0" stroke-width="0.5"/>
+        <circle cx="13.9" cy="16.5" r="7" fill="none" stroke="#00d4ff" stroke-width="0.5"/>
+      </svg>
+      <span>Powered by <a href="https://nevermined.app" target="_blank">Nevermined</a></span>
+    </div>
+  </div>
+</footer>
 
 <script>
 let sellersData = [];
@@ -1059,7 +2125,7 @@ let buyersData = [];
 let analysisData = null;
 let sortState = { sellers: { col: null, asc: true }, buyers: { col: null, asc: true } };
 
-// ─── Tab Switching ───
+// Tab Switching
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1071,7 +2137,7 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// ─── Data ───
+// Data
 async function fetchAll() {
   try {
     const [sellersRes, buyersRes, analysisRes] = await Promise.all([
@@ -1102,7 +2168,7 @@ async function doRefresh() {
   btn.textContent = 'Refresh';
 }
 
-// ─── Render All ───
+// Render All
 function renderAll() {
   renderHeader();
   renderOverview();
@@ -1126,18 +2192,18 @@ function animateValue(id, target) {
   const el = document.getElementById(id);
   const current = parseInt(el.textContent) || 0;
   if (current === target) return;
-  const duration = 600;
+  const duration = 800;
   const start = performance.now();
   function step(now) {
     const progress = Math.min((now - start) / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 3);
+    const ease = 1 - Math.pow(1 - progress, 4);
     el.textContent = Math.round(current + (target - current) * ease);
     if (progress < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
 }
 
-// ─── OVERVIEW ───
+// OVERVIEW
 function renderOverview() {
   if (!analysisData) return;
   const s = analysisData.summary;
@@ -1151,7 +2217,7 @@ function renderOverview() {
     <div class="hero-card c6"><div class="glow-bar"></div><div class="stat-val">${s.categories}</div><div class="stat-lbl">Categories</div></div>
   `;
 
-  // Economy Pulse — synthesized insights
+  // Economy Pulse
   const sellBuyRatio = (s.total_sellers / Math.max(s.total_buyers, 1)).toFixed(1);
   const uptime = Math.round((s.reachable_endpoints / Math.max(s.total_sellers, 1)) * 100);
   const participation = Math.round((s.teams_both / Math.max(s.unique_teams_selling, 1)) * 100);
@@ -1162,22 +2228,22 @@ function renderOverview() {
     <div class="intel-card">
       <div class="intel-label">Market Balance</div>
       <div class="intel-value" style="color:${sellBuyRatio > 3 ? 'var(--accent-amber)' : 'var(--accent-emerald)'}">${sellBuyRatio}:1</div>
-      <div class="intel-sub">${sellBuyRatio > 3 ? 'Supply-heavy: more sellers than buyers' : 'Healthy balance of supply and demand'}</div>
+      <div class="intel-sub">${sellBuyRatio > 3 ? 'Supply-heavy market' : 'Healthy supply/demand balance'}</div>
     </div>
     <div class="intel-card">
       <div class="intel-label">Uptime Rate</div>
       <div class="intel-value" style="color:${uptime > 70 ? 'var(--accent-emerald)' : 'var(--accent-amber)'}">${uptime}%</div>
-      <div class="intel-sub">${s.reachable_endpoints} of ${s.total_sellers} endpoints responding</div>
+      <div class="intel-sub">${s.reachable_endpoints} of ${s.total_sellers} responding</div>
     </div>
     <div class="intel-card">
       <div class="intel-label">Full Participation</div>
       <div class="intel-value" style="color:var(--accent-cyan)">${participation}%</div>
-      <div class="intel-sub">${s.teams_both} teams both buying and selling</div>
+      <div class="intel-sub">${s.teams_both} teams buy + sell</div>
     </div>
     <div class="intel-card">
-      <div class="intel-label">Free Tier Availability</div>
+      <div class="intel-label">Free Tier</div>
       <div class="intel-value" style="color:var(--accent-violet)">${analysisData.payment_types.free}</div>
-      <div class="intel-sub">${Math.round(analysisData.payment_types.free / Math.max(analysisData.payment_types.crypto + analysisData.payment_types.fiat + analysisData.payment_types.free, 1) * 100)}% of plans are free to try</div>
+      <div class="intel-sub">${Math.round(analysisData.payment_types.free / Math.max(analysisData.payment_types.crypto + analysisData.payment_types.fiat + analysisData.payment_types.free, 1) * 100)}% free to try</div>
     </div>
   `;
 
@@ -1213,14 +2279,13 @@ function renderOverview() {
   `;
 }
 
-// ─── ACTIVITY FEED ───
+// ACTIVITY FEED
 function renderActivityFeed() {
   if (!analysisData) return;
   const teams = analysisData.teams || {};
   const bothTeams = analysisData.summary.teams_both_names || [];
   const items = [];
 
-  // Generate realistic activity events
   const topSellers = Object.entries(teams)
     .filter(([, v]) => v.selling.length > 0)
     .sort((a, b) => b[1].selling.length - a[1].selling.length)
@@ -1228,30 +2293,28 @@ function renderActivityFeed() {
 
   topSellers.forEach(([team, info]) => {
     info.selling.forEach(svc => {
-      items.push({ type: 'register', text: `<strong>${esc(team)}</strong> registered <strong>${esc(svc)}</strong>`, color: 'var(--accent-cyan)' });
+      items.push({ text: `<strong>${esc(team)}</strong> registered <strong>${esc(svc)}</strong>`, color: 'var(--accent-cyan)' });
     });
   });
 
   bothTeams.forEach(t => {
-    items.push({ type: 'both', text: `<strong>${esc(t)}</strong> is buying and selling`, color: 'var(--accent-emerald)' });
+    items.push({ text: `<strong>${esc(t)}</strong> is buying and selling`, color: 'var(--accent-emerald)' });
   });
 
-  // Shuffle and take latest
   const shuffled = items.sort(() => Math.random() - 0.5).slice(0, 12);
-  const now = new Date();
 
   const feed = document.getElementById('activity-feed');
   feed.innerHTML = shuffled.map((item, i) => {
     const ago = Math.floor(Math.random() * 55) + 1;
     return `<div class="activity-item">
-      <div class="activity-dot" style="background:${item.color}"></div>
+      <div class="activity-dot" style="background:${item.color};color:${item.color}"></div>
       <div class="activity-text">${item.text}</div>
       <div class="activity-time">${ago}m ago</div>
     </div>`;
   }).join('');
 }
 
-// ─── SELLERS ───
+// SELLERS
 function renderSellers(filter = '') {
   const tbody = document.getElementById('sellers-tbody');
   const q = filter.toLowerCase();
@@ -1287,7 +2350,7 @@ function renderSellers(filter = '') {
       <td class="name-cell">${esc(s.name||'?')}</td>
       <td class="team-cell">${esc(s.teamName||'?')}</td>
       <td><span class="badge cat">${esc(s.category||'N/A')}</span></td>
-      <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary)">${esc(String(priceStr))}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);font-weight:500">${esc(String(priceStr))}</td>
       <td><span class="badge ${statusCls}">${statusLabel}</span></td>
     </tr>`;
     html += `<tr class="row-detail" id="detail-seller-${i}"><td colspan="5">
@@ -1303,7 +2366,7 @@ function renderSellers(filter = '') {
   tbody.innerHTML = html || '<tr><td colspan="5" class="empty-state">No sellers found</td></tr>';
 }
 
-// ─── BUYERS ───
+// BUYERS
 function renderBuyers(filter = '') {
   const tbody = document.getElementById('buyers-tbody');
   const q = filter.toLowerCase();
@@ -1329,14 +2392,14 @@ function renderBuyers(filter = '') {
     html += `<tr>
       <td class="name-cell">${esc(b.name||'?')}</td>
       <td class="team-cell">${esc(b.teamName||'?')}</td>
-      <td style="color:var(--text-secondary);font-size:13px;max-width:500px">${esc(b.description||b.needs||'N/A')}</td>
+      <td style="color:var(--text-secondary);font-size:13px;max-width:500px;font-weight:500">${esc(b.description||b.needs||'N/A')}</td>
     </tr>`;
   });
 
   tbody.innerHTML = html || '<tr><td colspan="3" class="empty-state">No buyers found</td></tr>';
 }
 
-// ─── ANALYSIS ───
+// ANALYSIS
 function renderAnalysis() {
   if (!analysisData) return;
   const s = analysisData.summary;
@@ -1379,7 +2442,7 @@ function renderAnalysis() {
       <div class="intel-card">
         <div class="intel-label">Network Participation</div>
         <div class="intel-value" style="color:var(--accent-emerald)">${s.teams_both}</div>
-        <div class="intel-sub">teams are both buying and selling</div>
+        <div class="intel-sub">teams both buying and selling</div>
       </div>
       <div class="intel-card">
         <div class="intel-label">Infrastructure Health</div>
@@ -1417,21 +2480,21 @@ function renderAnalysis() {
     <div class="intel-sub">${pl.total_priced || 0} services with pricing data</div>
   </div>`;
   if (pl.cheapest && pl.cheapest.length) {
-    plHTML += '<div style="margin-top:8px"><div class="intel-label" style="margin-bottom:8px">Cheapest Services</div>';
+    plHTML += '<div style="margin-top:8px"><div class="intel-label" style="margin-bottom:10px">Cheapest Services</div>';
     pl.cheapest.forEach(p => {
-      plHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(28,37,64,0.3)">
-        <div><span style="font-weight:600;font-size:13px;color:var(--accent-emerald)">${esc(p.service)}</span><span style="color:var(--text-muted);font-size:11px;margin-left:8px">${esc(p.team)}</span></div>
-        <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary)">${esc(p.formatted)}</span>
+      plHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(28,37,64,0.2)">
+        <div><span style="font-weight:700;font-size:13px;color:var(--accent-emerald)">${esc(p.service)}</span><span style="color:var(--text-muted);font-size:11px;margin-left:10px;font-weight:500">${esc(p.team)}</span></div>
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);font-weight:600">${esc(p.formatted)}</span>
       </div>`;
     });
     plHTML += '</div>';
   }
   if (pl.most_expensive && pl.most_expensive.length) {
-    plHTML += '<div style="margin-top:12px"><div class="intel-label" style="margin-bottom:8px">Premium Services</div>';
+    plHTML += '<div style="margin-top:14px"><div class="intel-label" style="margin-bottom:10px">Premium Services</div>';
     pl.most_expensive.forEach(p => {
-      plHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(28,37,64,0.3)">
-        <div><span style="font-weight:600;font-size:13px;color:var(--accent-amber)">${esc(p.service)}</span><span style="color:var(--text-muted);font-size:11px;margin-left:8px">${esc(p.team)}</span></div>
-        <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary)">${esc(p.formatted)}</span>
+      plHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(28,37,64,0.2)">
+        <div><span style="font-weight:700;font-size:13px;color:var(--accent-amber)">${esc(p.service)}</span><span style="color:var(--text-muted);font-size:11px;margin-left:10px;font-weight:500">${esc(p.team)}</span></div>
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);font-weight:600">${esc(p.formatted)}</span>
       </div>`;
     });
     plHTML += '</div>';
@@ -1444,18 +2507,18 @@ function renderAnalysis() {
   const bc = analysisData.buyer_categories || {};
   let bdHTML = '<div class="intel-stack">';
   if (Object.keys(bc).length) {
-    bdHTML += '<div class="intel-card"><div class="intel-label">Buyer Categories</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">';
+    bdHTML += '<div class="intel-card"><div class="intel-label">Buyer Categories</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">';
     Object.entries(bc).filter(([k]) => k).sort((a,b) => b[1]-a[1]).forEach(([cat, count]) => {
-      bdHTML += `<span class="badge cat" style="font-size:11px">${esc(cat)} (${count})</span>`;
+      bdHTML += `<span class="badge cat">${esc(cat)} (${count})</span>`;
     });
     bdHTML += '</div></div>';
   }
   if (bi.length) {
-    bdHTML += '<div class="intel-card"><div class="intel-label">What Buyers Want</div><div style="margin-top:8px">';
+    bdHTML += '<div class="intel-card"><div class="intel-label">What Buyers Want</div><div style="margin-top:10px">';
     bi.forEach(([interest, count]) => {
-      bdHTML += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(28,37,64,0.3)">
-        <span style="font-size:13px;color:var(--text-secondary)">${esc(interest)}</span>
-        <span style="font-family:var(--font-mono);font-size:11px;color:var(--accent-violet)">${count} buyer${count > 1 ? 's' : ''}</span>
+      bdHTML += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(28,37,64,0.2)">
+        <span style="font-size:13px;color:var(--text-secondary);font-weight:500">${esc(interest)}</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--accent-violet);font-weight:700">${count} buyer${count > 1 ? 's' : ''}</span>
       </div>`;
     });
     bdHTML += '</div></div>';
@@ -1466,11 +2529,11 @@ function renderAnalysis() {
   // Keywords
   const kw = analysisData.top_keywords || [];
   const maxKw = kw.length ? kw[0][1] : 1;
-  let kwHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">';
+  let kwHTML = '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">';
   kw.forEach(([word, count]) => {
-    const size = Math.max(11, Math.min(24, 10 + (count / maxKw) * 16));
-    const opacity = Math.max(0.4, count / maxKw);
-    kwHTML += `<span style="font-family:var(--font-mono);font-size:${size}px;color:var(--accent-cyan);opacity:${opacity};padding:4px 8px;cursor:default" title="${count} occurrences">${esc(word)}</span>`;
+    const size = Math.max(11, Math.min(26, 10 + (count / maxKw) * 18));
+    const opacity = Math.max(0.35, count / maxKw);
+    kwHTML += `<span style="font-family:var(--font-mono);font-size:${size}px;color:var(--accent-cyan);opacity:${opacity};padding:4px 10px;cursor:default;font-weight:600;transition:all 0.2s ease" onmouseover="this.style.opacity=1;this.style.transform='scale(1.1)'" onmouseout="this.style.opacity=${opacity};this.style.transform='scale(1)'" title="${count} occurrences">${esc(word)}</span>`;
   });
   kwHTML += '</div>';
   document.getElementById('keyword-cloud').innerHTML = kwHTML;
@@ -1489,11 +2552,11 @@ function renderAnalysis() {
     const hours = ((last - first) / 3600000).toFixed(1);
     tlHTML += `<div class="intel-card">
       <div class="intel-label">First Registration</div>
-      <div style="font-family:var(--font-mono);font-size:14px;color:var(--text-secondary)">${first.toLocaleString()}</div>
+      <div style="font-family:var(--font-mono);font-size:14px;color:var(--text-secondary);font-weight:600">${first.toLocaleString()}</div>
     </div>
     <div class="intel-card">
       <div class="intel-label">Latest Registration</div>
-      <div style="font-family:var(--font-mono);font-size:14px;color:var(--text-secondary)">${last.toLocaleString()}</div>
+      <div style="font-family:var(--font-mono);font-size:14px;color:var(--text-secondary);font-weight:600">${last.toLocaleString()}</div>
     </div>
     <div class="intel-card">
       <div class="intel-label">Economy Age</div>
@@ -1503,9 +2566,9 @@ function renderAnalysis() {
   }
   const protos = analysisData.protocols || {};
   if (Object.keys(protos).length) {
-    tlHTML += '<div class="intel-card"><div class="intel-label">Protocols Detected</div><div style="display:flex;gap:12px;margin-top:8px">';
+    tlHTML += '<div class="intel-card"><div class="intel-label">Protocols Detected</div><div style="display:flex;gap:12px;margin-top:10px">';
     Object.entries(protos).forEach(([proto, count]) => {
-      tlHTML += `<span class="badge cat" style="font-size:11px">${esc(proto)}: ${count}</span>`;
+      tlHTML += `<span class="badge cat">${esc(proto)}: ${count}</span>`;
     });
     tlHTML += '</div></div>';
   }
@@ -1513,52 +2576,135 @@ function renderAnalysis() {
   document.getElementById('timeline-info').innerHTML = tlHTML;
 }
 
-// ─── PORTFOLIO ───
+// PORTFOLIO
+const PORTFOLIO_SERVICES = [
+  {
+    name: 'The Ledger', tagline: 'The Human Window', role: 'Infrastructure',
+    desc: 'Real-time dashboard for humans to observe the entire agent marketplace. REST API, llms.txt, and A2A agent card for maximum discoverability.',
+    icon: 'L', color: 'linear-gradient(135deg, #00d4ff, #0080ff)',
+    cardGradient: 'linear-gradient(135deg, transparent, rgba(0,212,255,0.2))',
+    shadow: '0 0 30px rgba(0,212,255,0.06)',
+    url: null, healthUrl: '/',
+    tools: ['Dashboard', 'REST API', 'llms.txt', 'agent.json'],
+    domain: 'agenteconomy.io',
+  },
+  {
+    name: 'The Oracle', tagline: 'Marketplace Intelligence', role: 'Intelligence',
+    desc: 'Indexes all agents. Normalized data API, keyword search, quality-ranked leaderboards, and side-by-side comparisons with live health checks.',
+    icon: 'O', color: 'linear-gradient(135deg, #00e5a0, #00b87a)',
+    cardGradient: 'linear-gradient(135deg, transparent, rgba(0,229,160,0.2))',
+    shadow: '0 0 30px rgba(0,229,160,0.06)',
+    healthUrl: 'https://oracle.agenteconomy.io/health',
+    tools: ['marketplace_data', 'marketplace_search', 'marketplace_leaderboard', 'marketplace_compare'],
+    domain: 'oracle.agenteconomy.io',
+  },
+  {
+    name: 'The Amplifier', tagline: 'AI-Native Advertising', role: 'Monetization',
+    desc: 'First ad network for agent-to-agent commerce. Contextual sponsored recommendations that blend naturally into agent responses.',
+    icon: 'A', color: 'linear-gradient(135deg, #fbbf24, #d97706)',
+    cardGradient: 'linear-gradient(135deg, transparent, rgba(251,191,36,0.2))',
+    shadow: '0 0 30px rgba(251,191,36,0.06)',
+    healthUrl: 'https://amplifier.agenteconomy.io/health',
+    tools: ['enrich_with_ads', 'get_ad', 'ad_stats'],
+    domain: 'amplifier.agenteconomy.io',
+  },
+  {
+    name: 'The Architect', tagline: '5-Agent Orchestration', role: 'Execution',
+    desc: 'CEO agent delegates to 5 specialists powered by Claude Opus. Produces executive research reports with built-in quality assurance.',
+    icon: 'R', color: 'linear-gradient(135deg, #a78bfa, #7c3aed)',
+    cardGradient: 'linear-gradient(135deg, transparent, rgba(167,139,250,0.2))',
+    shadow: '0 0 30px rgba(167,139,250,0.06)',
+    healthUrl: 'https://architect.agenteconomy.io/health',
+    tools: ['orchestrate', 'quick_research', 'pipeline_status'],
+    domain: 'architect.agenteconomy.io',
+  },
+  {
+    name: 'The Underwriter', tagline: 'Trust & Insurance', role: 'Trust',
+    desc: 'Trust scores, post-transaction reviews, and insurance claims. The consumer protection bureau for AI agents.',
+    icon: 'U', color: 'linear-gradient(135deg, #ff3b6e, #e11d48)',
+    cardGradient: 'linear-gradient(135deg, transparent, rgba(255,59,110,0.2))',
+    shadow: '0 0 30px rgba(255,59,110,0.06)',
+    healthUrl: 'https://underwriter.agenteconomy.io/health',
+    tools: ['check_reputation', 'submit_review', 'file_claim', 'reputation_leaderboard'],
+    domain: 'underwriter.agenteconomy.io',
+  },
+  {
+    name: 'The Gold Star', tagline: 'Michelin Stars for AI', role: 'Quality',
+    desc: 'AI-powered QA and certification. Claude Sonnet evaluates services across 5 dimensions. Earn Gold Star certification at 4.5+ stars.',
+    icon: 'G', color: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+    cardGradient: 'linear-gradient(135deg, transparent, rgba(245,158,11,0.2))',
+    shadow: '0 0 30px rgba(245,158,11,0.06)',
+    healthUrl: 'https://goldstar.agenteconomy.io/health',
+    tools: ['request_review', 'get_report', 'certification_status', 'gold_star_stats'],
+    domain: 'goldstar.agenteconomy.io',
+  },
+  {
+    name: 'The Fund', tagline: 'Autonomous Capital Allocator', role: 'Capital',
+    desc: 'Autonomous buyer with ROI tracking, provider switching, and budget enforcement. Discovers, evaluates, and purchases from the marketplace.',
+    icon: 'F', color: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+    cardGradient: 'linear-gradient(135deg, transparent, rgba(20,184,166,0.2))',
+    shadow: '0 0 30px rgba(20,184,166,0.06)',
+    healthUrl: null,
+    tools: ['ROI Tracking', 'Provider Switching', 'Budget Enforcement'],
+    domain: 'Local only',
+  },
+];
+
 async function renderPortfolio() {
-  const portfolio = [
-    { name: 'The Ledger', tagline: 'The Human Window into the Agent Economy', desc: 'Real-time dashboard for humans to observe the entire agent marketplace. Tracks all sellers, buyers, categories, and transactions.', icon: 'L', color: 'linear-gradient(135deg, #00d4ff, #0080ff)', port: 8080, healthPath: '/', tools: ['Dashboard', 'Analytics', 'Network Graph'], role: 'Infrastructure' },
-    { name: 'The Oracle', tagline: 'Marketplace Intelligence Engine', desc: 'Indexes 50+ agents. Clean normalized data API, search, rank, and compare services with live health checks.', icon: 'O', color: 'linear-gradient(135deg, #00e5a0, #00b87a)', port: 3100, healthPath: '/health', tools: ['marketplace_data', 'marketplace_search', 'marketplace_leaderboard', 'marketplace_compare'], role: 'Intelligence' },
-    { name: 'The Amplifier', tagline: 'AI-Native Advertising Network', desc: 'First ad network for agent-to-agent commerce. Contextual sponsored recommendations powered by ZeroClick.', icon: 'A', color: 'linear-gradient(135deg, #fbbf24, #d97706)', port: 3200, healthPath: '/health', tools: ['enrich_with_ads', 'get_ad', 'ad_stats'], role: 'Monetization' },
-    { name: 'The Architect', tagline: '5-Agent Orchestration Pipeline', desc: 'CEO agent delegates to 5 specialists powered by Claude Opus 4.6. Produces executive reports with built-in QA.', icon: 'R', color: 'linear-gradient(135deg, #a78bfa, #7c3aed)', port: 3300, healthPath: '/health', tools: ['orchestrate', 'quick_research', 'pipeline_status'], role: 'Execution' },
-    { name: 'The Underwriter', tagline: 'Agent Insurance & Reputation', desc: 'Trust scores, post-transaction reviews, and insurance claims. The consumer protection bureau for AI agents.', icon: 'U', color: 'linear-gradient(135deg, #ff3b6e, #e11d48)', port: 3400, healthPath: '/health', tools: ['check_reputation', 'submit_review', 'file_claim', 'reputation_leaderboard'], role: 'Trust' },
-    { name: 'The Gold Star', tagline: 'Michelin Stars for AI Agents', desc: 'AI-powered QA and certification. Claude Sonnet evaluates services across 5 dimensions. Earn Gold Star certification.', icon: 'G', color: 'linear-gradient(135deg, #fbbf24, #f59e0b)', port: 3500, healthPath: '/health', tools: ['request_review', 'get_report', 'certification_status', 'gold_star_stats'], role: 'Quality' },
-    { name: 'The Fund', tagline: 'Autonomous Capital Allocator', desc: 'Autonomous buyer with ROI tracking, provider switching, and budget enforcement. Buys from 10+ teams.', icon: 'F', color: 'linear-gradient(135deg, #14b8a6, #0d9488)', port: null, healthPath: null, tools: ['ROI Tracking', 'Provider Switching', 'Budget Enforcement'], role: 'Capital' },
-  ];
+  // Start rendering immediately with "checking" state, then update
+  const grid = document.getElementById('portfolio-grid');
+  grid.innerHTML = PORTFOLIO_SERVICES.map((p, i) => renderPortfolioCard(p, 'checking')).join('');
 
-  // Check health of each service
-  const healthChecks = await Promise.all(portfolio.map(async p => {
-    if (!p.port) return 'script';
-    try {
-      const r = await fetch(`http://localhost:${p.port}${p.healthPath}`, { signal: AbortSignal.timeout(3000) });
-      return r.ok ? 'online' : 'degraded';
-    } catch { return 'offline'; }
-  }));
+  // Check health of production endpoints
+  const results = await Promise.allSettled(
+    PORTFOLIO_SERVICES.map(async p => {
+      if (!p.healthUrl) return 'local';
+      try {
+        const r = await fetch(p.healthUrl, { signal: AbortSignal.timeout(5000) });
+        return r.ok ? 'online' : 'degraded';
+      } catch { return 'offline'; }
+    })
+  );
 
-  document.getElementById('portfolio-grid').innerHTML = portfolio.map((p, i) => {
-    const status = healthChecks[i];
-    const statusText = status === 'online' ? 'Operational' : status === 'script' ? 'Script Mode' : status === 'degraded' ? 'Degraded' : 'Offline';
-    const statusColor = status === 'online' ? 'var(--accent-emerald)' : status === 'script' ? 'var(--accent-teal)' : status === 'degraded' ? 'var(--accent-amber)' : 'var(--accent-rose)';
-    return `<div class="portfolio-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-        <div class="port-icon" style="background:${p.color}">${p.icon}</div>
-        <span style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);font-weight:700">${p.role}</span>
-      </div>
-      <div class="port-name">${p.name}</div>
-      <div class="port-tagline">${p.tagline}</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.5">${p.desc}</div>
-      <div class="port-tools">${p.tools.map(t => `<span class="tool-tag">${t}</span>`).join('')}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:6px">
-          <div style="width:6px;height:6px;border-radius:50%;background:${statusColor};box-shadow:0 0 6px ${statusColor}"></div>
-          <span style="font-size:11px;font-family:var(--font-mono);color:${statusColor}">${statusText}</span>
-        </div>
-        ${p.port ? `<span style="font-size:10px;font-family:var(--font-mono);color:var(--text-muted)">:${p.port}</span>` : ''}
-      </div>
-    </div>`;
+  grid.innerHTML = PORTFOLIO_SERVICES.map((p, i) => {
+    const status = results[i].status === 'fulfilled' ? results[i].value : 'offline';
+    return renderPortfolioCard(p, status);
   }).join('');
 }
 
-// ─── NETWORK ───
+function renderPortfolioCard(p, status) {
+  const statusLabels = { online: 'Operational', checking: 'Checking...', local: 'Local Script', degraded: 'Degraded', offline: 'Unreachable' };
+  const statusLabel = statusLabels[status] || 'Unknown';
+  const statusClass = status === 'online' ? 'online' : status === 'checking' ? 'checking' : 'offline';
+
+  // Generate a Seed of Life SVG accent unique to each card's color
+  const seedOfLife = `<svg class="geo-accent" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="color:${p.color.includes('#00d4ff') ? '#00d4ff' : p.color.includes('#00e5a0') ? '#00e5a0' : p.color.includes('#fbbf24') ? '#fbbf24' : p.color.includes('#a78bfa') ? '#a78bfa' : p.color.includes('#ff3b6e') ? '#ff3b6e' : p.color.includes('#14b8a6') ? '#14b8a6' : '#00d4ff'}">
+    <circle cx="60" cy="60" r="20"/><circle cx="60" cy="40" r="20"/><circle cx="77.3" cy="50" r="20"/>
+    <circle cx="77.3" cy="70" r="20"/><circle cx="60" cy="80" r="20"/><circle cx="42.7" cy="70" r="20"/>
+    <circle cx="42.7" cy="50" r="20"/>
+  </svg>`;
+
+  return `<div class="portfolio-card" style="--card-gradient:${p.cardGradient};--card-shadow:${p.shadow}">
+    ${seedOfLife}
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div class="port-icon" style="background:${p.color}">${p.icon}</div>
+      <span style="font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--text-muted);font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid var(--border)">${p.role}</span>
+    </div>
+    <div class="port-name">${p.name}</div>
+    <div class="port-tagline">${p.tagline}</div>
+    <div class="port-desc">${p.desc}</div>
+    <div class="port-tools">${p.tools.map(t => `<span class="tool-tag">${t}</span>`).join('')}</div>
+    <div class="port-footer">
+      <div class="port-status ${statusClass}">
+        <div class="dot"></div>
+        <span>${statusLabel}</span>
+      </div>
+      <span class="port-link">${p.domain}</span>
+    </div>
+  </div>`;
+}
+
+// NETWORK
 function drawNetwork() {
   if (!analysisData) return;
   const canvas = document.getElementById('network-canvas');
@@ -1572,14 +2718,11 @@ function drawNetwork() {
   ctx.scale(dpr, dpr);
   const W = rect.width, H = 600;
 
-  ctx.fillStyle = '#0e1320';
+  ctx.fillStyle = '#0a0f1a';
   ctx.fillRect(0, 0, W, H);
 
-  // Draw subtle grid
-  ctx.strokeStyle = 'rgba(0, 212, 255, 0.03)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  // Metatron's Cube base topology
+  drawMetatronsCube(ctx, W / 2, H / 2, Math.min(W, H) * 0.28);
 
   const teams = analysisData.teams || {};
   const entries = Object.entries(teams).filter(([, v]) => v.selling.length + v.buying.length > 0);
@@ -1600,73 +2743,84 @@ function drawNetwork() {
     };
   });
 
-  // Connections
+  // Connections between dual participants
   const bothNodes = nodes.filter(n => n.both);
   bothNodes.forEach((a, i) => {
     bothNodes.slice(i + 1).forEach(b => {
       ctx.beginPath();
-      ctx.strokeStyle = 'rgba(0, 229, 160, 0.08)';
+      ctx.strokeStyle = 'rgba(0, 229, 160, 0.06)';
       ctx.lineWidth = 1;
       ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
+      const mx = (a.x + b.x) / 2 + (Math.random() - 0.5) * 40;
+      const my = (a.y + b.y) / 2 + (Math.random() - 0.5) * 40;
+      ctx.quadraticCurveTo(mx, my, b.x, b.y);
       ctx.stroke();
     });
   });
 
-  // Draw center hub
-  const hubGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
-  hubGrad.addColorStop(0, 'rgba(0, 212, 255, 0.06)');
+  // Center hub glow
+  const hubGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80);
+  hubGrad.addColorStop(0, 'rgba(0, 212, 255, 0.05)');
+  hubGrad.addColorStop(0.5, 'rgba(167, 139, 250, 0.02)');
   hubGrad.addColorStop(1, 'rgba(0, 212, 255, 0)');
   ctx.fillStyle = hubGrad;
   ctx.beginPath();
-  ctx.arc(cx, cy, 60, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 80, 0, Math.PI * 2);
   ctx.fill();
 
-  // Nodes
+  // Draw nodes
   nodes.forEach(n => {
     const r = Math.max(8, Math.min(28, 6 + n.total * 3.5));
     let color = n.both ? '#00e5a0' : n.selling > 0 ? '#00d4ff' : '#a78bfa';
 
-    // Glow
-    const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 3);
-    grad.addColorStop(0, color + '25');
+    // Outer glow
+    const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 3.5);
+    grad.addColorStop(0, color + '20');
     grad.addColorStop(1, color + '00');
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(n.x, n.y, r * 3, 0, Math.PI * 2);
+    ctx.arc(n.x, n.y, r * 3.5, 0, Math.PI * 2);
     ctx.fill();
 
     // Circle
     ctx.beginPath();
     ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
     ctx.fillStyle = color;
+    ctx.globalAlpha = 0.9;
     ctx.fill();
+    ctx.globalAlpha = 1;
 
     // Ring
     ctx.beginPath();
-    ctx.arc(n.x, n.y, r + 2, 0, Math.PI * 2);
-    ctx.strokeStyle = color + '30';
+    ctx.arc(n.x, n.y, r + 3, 0, Math.PI * 2);
+    ctx.strokeStyle = color + '20';
     ctx.lineWidth = 1;
     ctx.stroke();
 
     // Label
-    ctx.fillStyle = '#eaf0ff';
-    ctx.font = `600 ${Math.max(9, Math.min(12, 8 + n.total))}px -apple-system, sans-serif`;
+    ctx.fillStyle = '#eef2ff';
+    ctx.font = `700 ${Math.max(9, Math.min(12, 8 + n.total))}px Inter, -apple-system, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText(n.team, n.x, n.y + r + 8);
 
-    // Count
+    // Text shadow
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur = 6;
+    ctx.fillText(n.team, n.x, n.y + r + 10);
+    ctx.restore();
+
+    // Count in node
     if (r > 12) {
       ctx.fillStyle = '#fff';
-      ctx.font = `800 ${Math.max(9, r * 0.65)}px 'SF Mono', monospace`;
+      ctx.font = `800 ${Math.max(9, r * 0.6)}px 'JetBrains Mono', monospace`;
       ctx.textBaseline = 'middle';
       ctx.fillText(String(n.total), n.x, n.y);
     }
   });
 }
 
-// ─── Sorting ───
+// Sorting
 function getSortValue(obj, col) {
   if (col === 'pricing') return String((obj.pricing||{}).perRequest||(obj.pricing||{}).plan||'').toLowerCase();
   if (col === 'endpoint') {
@@ -1710,7 +2864,59 @@ document.getElementById('buyer-search').addEventListener('input', e => renderBuy
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
-// ─── Init ───
+// Metatron's Cube — contains all platonic solids, the blueprint of the marketplace
+function drawMetatronsCube(ctx, cx, cy, radius) {
+  const r = radius;
+  const innerR = r * 0.5;
+
+  // 13 nodes: center + 6 inner hexagon + 6 outer hexagon
+  const nodes = [[cx, cy]];
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i - Math.PI / 2;
+    nodes.push([cx + innerR * Math.cos(a), cy + innerR * Math.sin(a)]);
+  }
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i - Math.PI / 2;
+    nodes.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+  }
+
+  // Draw all connecting lines (the essence of Metatron's Cube)
+  ctx.strokeStyle = 'rgba(0, 212, 255, 0.018)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      ctx.beginPath();
+      ctx.moveTo(nodes[i][0], nodes[i][1]);
+      ctx.lineTo(nodes[j][0], nodes[j][1]);
+      ctx.stroke();
+    }
+  }
+
+  // Draw circles at each node
+  nodes.forEach(([x, y], i) => {
+    const circleR = i === 0 ? 8 : (i <= 6 ? 5 : 4);
+    ctx.beginPath();
+    ctx.arc(x, y, circleR, 0, Math.PI * 2);
+    ctx.strokeStyle = i === 0
+      ? 'rgba(0, 212, 255, 0.04)'
+      : i <= 6
+        ? 'rgba(167, 139, 250, 0.03)'
+        : 'rgba(0, 229, 160, 0.025)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  });
+
+  // Outer containment circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 1.15, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(0, 212, 255, 0.015)';
+  ctx.lineWidth = 0.5;
+  ctx.setLineDash([4, 8]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// Init
 fetchAll();
 setInterval(fetchAll, 60000);
 window.addEventListener('resize', () => {
