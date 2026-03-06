@@ -110,6 +110,15 @@ class QAEngine:
     async def run_review(self, seller_name: str, team_name: str,
                          endpoint_url: str) -> QAReport:
         """Run a full QA review: collect data, then have Claude evaluate."""
+        # Basic SSRF protection: only allow public HTTP(S) URLs
+        url_lower = endpoint_url.lower().strip()
+        if not url_lower.startswith(("http://", "https://")):
+            raise ValueError("endpoint_url must be an HTTP or HTTPS URL")
+        blocked = ("localhost", "127.0.0.1", "0.0.0.0", "::1",
+                   ".internal", "169.254.", "10.", "192.168.", "172.16.")
+        if any(b in url_lower for b in blocked):
+            raise ValueError("endpoint_url must be a public URL, not internal/private")
+
         report_id = self._next_id()
         base = endpoint_url.rstrip("/")
         tests: list[TestResult] = []
