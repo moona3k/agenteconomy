@@ -1,12 +1,11 @@
-"""The Gold Star -- Michelin Stars for AI Agents MCP Server.
+"""The Gold Star - AI-Powered QA & Certification MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
-We want every seller to get reviewed and improve.
 
 Tools:
-  - request_review:       FREE (submit your service for QA testing)
-  - get_report:           FREE (retrieve your latest QA report)
-  - certification_status: FREE (check if a seller is Gold Star certified)
+  - request_review:       FREE (submit service for QA testing)
+  - get_report:           FREE (retrieve latest QA report)
+  - certification_status: FREE (check certification status)
   - gold_star_stats:      FREE (system-wide stats)
 """
 import asyncio
@@ -42,7 +41,7 @@ mcp = PaymentsMCP(
     agent_id=NVM_AGENT_ID,
     version="1.0.0",
     description=(
-        "The Gold Star is the Michelin inspector for AI agents, powered by Claude Sonnet 4.6. "
+        "The Gold Star is an AI-powered QA and certification service for the agent economy. "
         "PROMOTIONAL PERIOD: All tools cost 0 credits. "
         "Here's how it works: you submit your agent service for review. We run a comprehensive "
         "test suite against your endpoints -- health checks, MCP availability, tool discovery, "
@@ -173,7 +172,7 @@ def gold_star_stats() -> str:
 
 DOMAIN = "goldstar.agenteconomy.io"
 
-LLMS_TXT = f"""# The Gold Star -- Michelin Stars for AI Agents
+LLMS_TXT = f"""# The Gold Star - AI-Powered QA & Certification
 
 > The Gold Star is an automated QA certification service that evaluates AI agent endpoints using Claude Sonnet 4.6. It runs a multi-phase test suite (health checks, tool discovery, functional testing, robustness testing, AI evaluation) and produces a detailed quality report with a 1-5 star rating. Services scoring 4.5+ stars with all dimensions >= 8/10 earn Gold Star certification.
 
@@ -229,17 +228,23 @@ Returns aggregate QA statistics: total reviews conducted, unique sellers reviewe
 - Cost: 0 credits (FREE, always).
 
 ## Part of the Agent Economy Infrastructure
-The Gold Star is one of five free infrastructure services at agenteconomy.io:
+The Gold Star is one of eleven services at agenteconomy.io — all FREE during promotional period:
 - The Oracle (marketplace intelligence): https://oracle.agenteconomy.io
-- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
-- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
-- The Underwriter (trust and insurance): https://underwriter.agenteconomy.io
+- The Underwriter (trust & insurance): https://underwriter.agenteconomy.io
 - The Gold Star (QA certification): https://{DOMAIN}
+- The Architect (multi-agent orchestration): https://architect.agenteconomy.io
+- The Amplifier (AI-native advertising): https://amplifier.agenteconomy.io
+- The Mystery Shopper (service auditing): https://shopper.agenteconomy.io
+- The Judge (dispute resolution): https://judge.agenteconomy.io
+- The Doppelganger (competitive intelligence): https://doppelganger.agenteconomy.io
+- The Transcriber (speech-to-text): https://transcriber.agenteconomy.io
+- The Ledger (dashboard & REST API): https://agenteconomy.io
+- The Fund (autonomous buyer): local agent
 """.strip()
 
 AGENT_JSON = {
     "name": "The Gold Star",
-    "description": "Automated QA certification service for AI agents. Runs multi-phase test suites (health, discovery, functional, robustness, AI evaluation) using Claude Sonnet 4.6. Produces 1-5 star ratings with 5-dimension scoring. Gold Star certification at 4.5+ stars. All tools FREE during promotional period.",
+    "description": "AI-powered QA certification service for the agent economy. Runs multi-phase test suites (health, discovery, functional, robustness, AI evaluation). Produces 1-5 star ratings with 5-dimension scoring. Gold Star certification at 4.5+ stars. All tools FREE during promotional period.",
     "url": f"https://{DOMAIN}",
     "provider": {
         "organization": "Agent Economy Infrastructure",
@@ -290,7 +295,7 @@ SIBLING_SERVICES = {
     "the-underwriter": "https://underwriter.agenteconomy.io",
     "the-gold-star": f"https://{DOMAIN}",
     "the-ledger": "https://agenteconomy.io",
-    "the-mystery-shopper": "https://mysteryshopper.agenteconomy.io",
+    "the-mystery-shopper": "https://shopper.agenteconomy.io",
     "the-judge": "https://judge.agenteconomy.io",
     "the-doppelganger": "https://doppelganger.agenteconomy.io",
     "the-transcriber": "https://transcriber.agenteconomy.io",
@@ -560,27 +565,45 @@ async def _run():
         _add_agent_routes(app)
 
         # Override MCP library's GET / route to serve dashboard HTML for browsers.
-        # We find the existing GET / route, capture its handler, and replace it with
-        # a handler that content-negotiates: text/html -> dashboard, else -> original.
+        # We grab the server info JSON that GET / normally returns, then replace the
+        # route with one that content-negotiates: browsers get HTML, agents get JSON.
         from starlette.routing import Route
+
+        # Capture the server info by fetching what the original GET / would return
+        server_info_json = None
+        for route in app.routes:
+            if isinstance(route, Route) and route.path == "/" and "GET" in (route.methods or set()):
+                # Build server info from the info dict we already have
+                server_info_json = {
+                    "name": info.get("name", "the-gold-star"),
+                    "version": info.get("version", "1.0.0"),
+                    "baseUrl": info.get("baseUrl", ""),
+                    "tools": info.get("tools", []),
+                }
+                break
+
+        async def dashboard_or_mcp(request: Request):
+            accept = request.headers.get("accept", "")
+            if "text/html" in accept or (
+                "application/json" not in accept
+                and "text/event-stream" not in accept
+            ):
+                html_path = DASHBOARD_DIR / "index.html"
+                if html_path.exists():
+                    return FileResponse(html_path, media_type="text/html")
+            # Return server info JSON for agent/API clients
+            return JSONResponse(content=server_info_json or {"name": "the-gold-star"})
+
+        # Replace or insert the GET / route
+        replaced = False
         for i, route in enumerate(app.routes):
             if isinstance(route, Route) and route.path == "/" and "GET" in (route.methods or set()):
-                original_handler = route.endpoint
-
-                async def dashboard_or_mcp(request: Request):
-                    accept = request.headers.get("accept", "")
-                    if "text/html" in accept or (
-                        "application/json" not in accept
-                        and "text/event-stream" not in accept
-                    ):
-                        html_path = DASHBOARD_DIR / "index.html"
-                        if html_path.exists():
-                            return FileResponse(html_path, media_type="text/html")
-                    return await original_handler(request)
-
                 app.routes[i] = Route("/", endpoint=dashboard_or_mcp, methods=["GET"])
-                print("  [OK] Dashboard route override installed")
+                replaced = True
                 break
+        if not replaced:
+            app.routes.insert(0, Route("/", endpoint=dashboard_or_mcp, methods=["GET"]))
+        print("  [OK] Dashboard route override installed")
 
         # Also add /dashboard alias
         @app.get("/dashboard")
