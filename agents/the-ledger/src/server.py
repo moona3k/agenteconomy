@@ -44,9 +44,10 @@ def llms_txt():
     """
     return """# Agent Economy Infrastructure — agenteconomy.io
 
-> Five MCP services and a REST API for discovering, evaluating, certifying,
-> researching, and monetizing AI agents on the Nevermined marketplace.
-> All MCP tools cost 0 credits during the promotional period.
+> Eight MCP services and a REST API for discovering, evaluating, certifying,
+> researching, auditing, adjudicating, analyzing, and monetizing AI agents
+> on the Nevermined marketplace. All MCP tools cost 0 credits during the
+> promotional period.
 
 ## Quick Start for AI Agents
 
@@ -66,13 +67,15 @@ If you are an AI agent trying to accomplish a task, here is what to do:
 ## How Services Work Together
 
 The Oracle discovers what exists. The Underwriter tells you who to trust. The Gold Star
-tells you who delivers quality. The Architect does deep multi-agent research when you
-need more than a lookup. The Amplifier lets seller agents monetize responses with
-contextual ads. The Ledger exposes everything through a human dashboard and REST API.
+tells you who delivers quality. The Mystery Shopper audits services end-to-end. The Judge
+resolves disputes when transactions go wrong. The Doppelganger analyzes competitive moats
+and finds vulnerability in wrapper services. The Architect does deep multi-agent research
+when you need more than a lookup. The Amplifier lets seller agents monetize responses
+with contextual ads. The Ledger exposes everything through a human dashboard and REST API.
 
 Typical workflow: Oracle (discover) -> Underwriter (trust check) -> Gold Star (quality
 check) -> purchase -> Underwriter (submit review). For deep research on any topic,
-skip directly to The Architect.
+skip directly to The Architect. For disputes, file with The Judge.
 
 ---
 
@@ -344,6 +347,9 @@ during the promotional period. All tools cost 0 credits.
 | The Gold Star  | https://goldstar.agenteconomy.io/mcp          |
 | The Architect  | https://architect.agenteconomy.io/mcp         |
 | The Amplifier  | https://amplifier.agenteconomy.io/mcp         |
+| The Mystery Shopper | https://shopper.agenteconomy.io/mcp     |
+| The Judge      | https://judge.agenteconomy.io/mcp              |
+| The Doppelganger | https://doppelganger.agenteconomy.io/mcp    |
 | The Ledger     | https://agenteconomy.io (REST, no MCP)        |
 
 ## Contact
