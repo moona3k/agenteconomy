@@ -65,7 +65,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 async def request_review(seller_name: str, team_name: str, endpoint_url: str) -> str:
     """Submit your agent service for AI-powered QA review. FREE during promotional period.
 
@@ -103,7 +103,7 @@ async def request_review(seller_name: str, team_name: str, endpoint_url: str) ->
     return json.dumps(result, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def get_report(seller_name: str) -> str:
     """Retrieve the latest QA report for any seller. FREE during promotional period.
 
@@ -126,7 +126,7 @@ def get_report(seller_name: str) -> str:
     return json.dumps(report, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def certification_status(seller_name: str = "") -> str:
     """Check Gold Star certification status. FREE.
 
@@ -158,7 +158,7 @@ def certification_status(seller_name: str = "") -> str:
         }, indent=2)
 
 
-@mcp.tool(credits=1)
+@mcp.tool(credits=0)
 def gold_star_stats() -> str:
     """Get aggregate QA statistics. Always free.
 
@@ -289,6 +289,11 @@ SIBLING_SERVICES = {
     "the-architect": "https://architect.agenteconomy.io",
     "the-underwriter": "https://underwriter.agenteconomy.io",
     "the-gold-star": f"https://{DOMAIN}",
+    "the-ledger": "https://agenteconomy.io",
+    "the-mystery-shopper": "https://mysteryshopper.agenteconomy.io",
+    "the-judge": "https://judge.agenteconomy.io",
+    "the-doppelganger": "https://doppelganger.agenteconomy.io",
+    "the-transcriber": "https://transcriber.agenteconomy.io",
 }
 
 # ─── Snapshot Data Loading ───
@@ -554,44 +559,36 @@ async def _run():
     if app:
         _add_agent_routes(app)
 
-        # Wrap ASGI app to intercept GET / for dashboard HTML.
-        # add_middleware() doesn't work after startup, so we wrap the ASGI callable.
-        inner_app = app.router.app if hasattr(app.router, "app") else None
-        from starlette.responses import Response as StarletteResponse
+        # Override MCP library's GET / route to serve dashboard HTML for browsers.
+        # We find the existing GET / route, capture its handler, and replace it with
+        # a handler that content-negotiates: text/html -> dashboard, else -> original.
+        from starlette.routing import Route
+        for i, route in enumerate(app.routes):
+            if isinstance(route, Route) and route.path == "/" and "GET" in (route.methods or set()):
+                original_handler = route.endpoint
 
-        original_asgi = app.__call__
+                async def dashboard_or_mcp(request: Request):
+                    accept = request.headers.get("accept", "")
+                    if "text/html" in accept or (
+                        "application/json" not in accept
+                        and "text/event-stream" not in accept
+                    ):
+                        html_path = DASHBOARD_DIR / "index.html"
+                        if html_path.exists():
+                            return FileResponse(html_path, media_type="text/html")
+                    return await original_handler(request)
 
-        async def dashboard_asgi(scope, receive, send):
-            if (
-                scope["type"] == "http"
-                and scope["method"] == "GET"
-                and scope["path"] in ("/", "/dashboard")
-            ):
-                headers = dict(scope.get("headers", []))
-                accept = headers.get(b"accept", b"").decode()
-                if "text/html" in accept or (
-                    "application/json" not in accept
-                    and "text/event-stream" not in accept
-                ):
-                    html_path = DASHBOARD_DIR / "index.html"
-                    if html_path.exists():
-                        body = html_path.read_bytes()
-                        await send({
-                            "type": "http.response.start",
-                            "status": 200,
-                            "headers": [
-                                [b"content-type", b"text/html; charset=utf-8"],
-                                [b"content-length", str(len(body)).encode()],
-                            ],
-                        })
-                        await send({
-                            "type": "http.response.body",
-                            "body": body,
-                        })
-                        return
-            await original_asgi(scope, receive, send)
+                app.routes[i] = Route("/", endpoint=dashboard_or_mcp, methods=["GET"])
+                print("  [OK] Dashboard route override installed")
+                break
 
-        app.__call__ = dashboard_asgi
+        # Also add /dashboard alias
+        @app.get("/dashboard")
+        async def dashboard_page():
+            html_path = DASHBOARD_DIR / "index.html"
+            if html_path.exists():
+                return FileResponse(html_path, media_type="text/html")
+            return JSONResponse(status_code=404, content={"error": "Dashboard not found"})
 
     base = info["baseUrl"]
     print(f"\nThe Gold Star running at: {base}")
