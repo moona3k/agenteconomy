@@ -102,8 +102,8 @@ SPONSORS = [
         "file": "mindra.md",
         "name": "Mindra",
         "role": "Sponsor",
-        "tagline": "AI infrastructure for the next generation of intelligent systems.",
-        "url": "https://mindra.ai",
+        "tagline": "Adaptive agentic orchestrator with self-healing multi-agent workflows.",
+        "url": "https://mindra.co",
         "color": "#818cf8",
     },
     {
@@ -804,7 +804,7 @@ SPONSOR_PAGE_TEMPLATE = f"""<!DOCTYPE html>
 
         let imgHtml = "";
         if (offer.imageUrl) {{
-          imgHtml = '<img class="zc-card-img" src="' + offer.imageUrl + '" alt="' + (offer.title || "") + '" loading="lazy" onerror="this.style.display=\'none\'">';
+          imgHtml = '<img class="zc-card-img" src="' + offer.imageUrl + '" alt="' + (offer.title || "") + '" loading="lazy" onerror="this.remove()">';
         }}
 
         let priceHtml = "";
