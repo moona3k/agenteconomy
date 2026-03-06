@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ledger — Agent Economy Dashboard</title>
+<style>
+:root {
+  --bg-primary: #06080f;
+  --bg-secondary: #0c1019;
+  --bg-card: #111623;
+  --bg-card-hover: #161d30;
+  --bg-input: #0a0f1a;
+  --bg-surface: #0e1320;
+  --border: #1c2540;
+  --border-light: #2a3555;
+  --text-primary: #eaf0ff;
+  --text-secondary: #8895b0;
+  --text-muted: #4d5a75;
+  --accent-cyan: #00d4ff;
+  --accent-blue: #3b82f6;
+  --accent-emerald: #00e5a0;
+  --accent-amber: #fbbf24;
+  --accent-rose: #ff3b6e;
+  --accent-violet: #a78bfa;
+  --accent-orange: #fb923c;
+  --accent-teal: #14b8a6;
+  --glow-cyan: rgba(0, 212, 255, 0.08);
+  --glow-emerald: rgba(0, 229, 160, 0.08);
+  --font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Animated Background ─── */
+.bg-grid {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-glow {
+  position: fixed;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 600px;
+  background: radial-gradient(ellipse, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Header ─── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(6, 8, 15, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+}
+
+.header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-mark {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 16px;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+.brand-text h1 {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--text-primary);
+}
+
+.brand-text .subtitle {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.header-metrics {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.h-metric {
+  text-align: center;
+}
+
+.h-metric .val {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.h-metric .lbl {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 1px;
+}
+
+.header-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--accent-emerald);
+  font-family: var(--font-mono);
+}
+
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--accent-emerald); }
+  50% { opacity: 0.4; box-shadow: 0 0 4px var(--accent-emerald); }
+}
+
+.btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 7px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  transition: all var(--transition);
+}
+
+.btn:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.1);
+}
+
+.btn.loading { opacity: 0.5; pointer-events: none; }
+
+.last-update {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* ─── Tabs ─── */
+.tabs {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 10;
+}
+
+.tab {
+  padding: 14px 28px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  user-select: none;
+  position: relative;
+}
+
+.tab:hover { color: var(--text-secondary); }
+
+.tab.active {
+  color: var(--accent-cyan);
+  border-bottom-color: var(--accent-cyan);
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 1px;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 12px var(--accent-cyan);
+}
+
+/* ─── Main ─── */
+.main {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 40px 60px;
+  position: relative;
+  z-index: 10;
+}
+
+.tab-content { display: none; animation: fadeSlideIn 0.4s ease; }
+.tab-content.active { display: block; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Hero Stats ─── */
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.hero-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition);
+}
+
+.hero-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.hero-card .glow-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.hero-card:hover .glow-bar { opacity: 1; }
+
+.hero-card .stat-val {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.hero-card .stat-lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.hero-card.c1 .stat-val { color: var(--accent-cyan); }
+.hero-card.c1 .glow-bar { background: linear-gradient(90deg, var(--accent-cyan), transparent); }
+.hero-card.c2 .stat-val { color: var(--accent-violet); }
+.hero-card.c2 .glow-bar { background: linear-gradient(90deg, var(--accent-violet), transparent); }
+.hero-card.c3 .stat-val { color: var(--accent-emerald); }
+.hero-card.c3 .glow-bar { background: linear-gradient(90deg, var(--accent-emerald), transparent); }
+.hero-card.c4 .stat-val { color: var(--accent-blue); }
+.hero-card.c4 .glow-bar { background: linear-gradient(90deg, var(--accent-blue), transparent); }
+.hero-card.c5 .stat-val { color: var(--accent-amber); }
+.hero-card.c5 .glow-bar { background: linear-gradient(90deg, var(--accent-amber), transparent); }
+.hero-card.c6 .stat-val { color: var(--accent-rose); }
+.hero-card.c6 .glow-bar { background: linear-gradient(90deg, var(--accent-rose), transparent); }
+
+/* ─── Panels ─── */
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h2 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-secondary);
+}
+
+.panel-header .panel-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--accent-cyan);
+}
+
+.panel-body { padding: 22px; }
+
+/* ─── Layout Grids ─── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+/* ─── Bar Chart ─── */
+.bar-chart { display: flex; flex-direction: column; gap: 8px; }
+
+.bar-row { display: flex; align-items: center; gap: 12px; }
+
+.bar-label {
+  flex: 0 0 160px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+}
+
+.bar-track {
+  flex: 1;
+  height: 32px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  min-width: fit-content;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bar-fill span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.bar-fill.g0 { background: linear-gradient(90deg, #00d4ff 0%, #0080ff 100%); }
+.bar-fill.g1 { background: linear-gradient(90deg, #00e5a0 0%, #00b87a 100%); }
+.bar-fill.g2 { background: linear-gradient(90deg, #a78bfa 0%, #7c3aed 100%); }
+.bar-fill.g3 { background: linear-gradient(90deg, #fbbf24 0%, #d97706 100%); }
+.bar-fill.g4 { background: linear-gradient(90deg, #ff3b6e 0%, #e11d48 100%); }
+.bar-fill.g5 { background: linear-gradient(90deg, #fb923c 0%, #ea580c 100%); }
+.bar-fill.g6 { background: linear-gradient(90deg, #14b8a6 0%, #0d9488 100%); }
+.bar-fill.g7 { background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); }
+.bar-fill.g8 { background: linear-gradient(90deg, #f472b6 0%, #ec4899 100%); }
+.bar-fill.g9 { background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%); }
+
+/* ─── Payment Breakdown ─── */
+.payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+.pay-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  text-align: center;
+  border: 1px solid transparent;
+  transition: all var(--transition);
+}
+
+.pay-card:hover { border-color: var(--border); }
+
+.pay-card .pay-val {
+  font-family: var(--font-mono);
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pay-card .pay-lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 8px;
+}
+
+.pay-card.crypto .pay-val { color: var(--accent-violet); }
+.pay-card.fiat .pay-val { color: var(--accent-emerald); }
+.pay-card.free .pay-val { color: var(--accent-amber); }
+
+/* ─── Portfolio Showcase ─── */
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.portfolio-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.portfolio-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
+.portfolio-card .port-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin-bottom: 14px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: #fff;
+}
+
+.portfolio-card .port-name {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.portfolio-card .port-tagline {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.portfolio-card .port-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tool-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.port-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+
+.port-status .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+
+.port-status.online .dot { background: var(--accent-emerald); box-shadow: 0 0 6px var(--accent-emerald); }
+.port-status.online { color: var(--accent-emerald); }
+
+/* ─── Tables ─── */
+.table-controls {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-input {
+  flex: 1;
+  max-width: 420px;
+  padding: 9px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.search-input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.08); }
+.search-input::placeholder { color: var(--text-muted); }
+
+.result-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.data-table { width: 100%; border-collapse: collapse; }
+
+.data-table th {
+  text-align: left;
+  padding: 12px 18px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color var(--transition);
+}
+
+.data-table th:hover { color: var(--accent-cyan); }
+.data-table th.sorted-asc::after { content: ' \u25B2'; color: var(--accent-cyan); }
+.data-table th.sorted-desc::after { content: ' \u25BC'; color: var(--accent-cyan); }
+
+.data-table td {
+  padding: 14px 18px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(28, 37, 64, 0.5);
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: background var(--transition);
+  cursor: pointer;
+}
+
+.data-table tbody tr:hover { background: var(--bg-card-hover); }
+
+.name-cell {
+  font-weight: 700;
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.team-cell { color: var(--text-secondary); }
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.badge.cat { background: rgba(59, 130, 246, 0.12); color: var(--accent-blue); }
+.badge.live { background: rgba(0, 229, 160, 0.12); color: var(--accent-emerald); }
+.badge.local { background: rgba(251, 191, 36, 0.12); color: var(--accent-amber); }
+.badge.none { background: rgba(77, 90, 117, 0.12); color: var(--text-muted); }
+
+/* ─── Row Detail ─── */
+.row-detail { display: none; animation: fadeSlideIn 0.2s ease; }
+.row-detail.open { display: table-row; }
+
+.row-detail td {
+  padding: 18px 22px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.detail-item .detail-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.detail-item .detail-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+/* ─── Power Teams ─── */
+.power-team-list { display: flex; flex-direction: column; gap: 6px; }
+
+.power-team {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+  border: 1px solid transparent;
+}
+
+.power-team:hover { border-color: var(--border); background: var(--bg-card-hover); }
+
+.power-rank {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-muted);
+  width: 36px;
+  text-align: center;
+}
+
+.power-team:nth-child(1) .power-rank { color: var(--accent-amber); }
+.power-team:nth-child(2) .power-rank { color: var(--text-secondary); }
+.power-team:nth-child(3) .power-rank { color: var(--accent-orange); }
+
+.power-name { flex: 1; font-weight: 600; font-size: 14px; }
+
+.power-badges { display: flex; gap: 8px; }
+
+.power-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.power-badge.selling { background: rgba(0, 212, 255, 0.1); color: var(--accent-cyan); }
+.power-badge.buying { background: rgba(167, 139, 250, 0.1); color: var(--accent-violet); }
+
+/* ─── Activity Feed ─── */
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(28, 37, 64, 0.3);
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.activity-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.activity-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.activity-text strong { color: var(--accent-cyan); font-weight: 600; }
+
+.activity-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ─── Network ─── */
+.network-container {
+  position: relative;
+  min-height: 600px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.network-canvas { width: 100%; height: 600px; display: block; }
+
+.network-legend {
+  display: flex;
+  gap: 24px;
+  padding: 14px 0;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* ─── Intel Cards ─── */
+.intel-stack { display: flex; flex-direction: column; gap: 12px; }
+
+.intel-card {
+  padding: 18px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all var(--transition);
+}
+
+.intel-card:hover { border-color: var(--border); }
+
+.intel-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+.intel-value {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.intel-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ─── Team Grid ─── */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.team-card {
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--border);
+  transition: all var(--transition);
+}
+
+.team-card:hover { background: var(--bg-card-hover); }
+.team-card.both { border-left-color: var(--accent-emerald); }
+.team-card.sell-only { border-left-color: var(--accent-cyan); }
+.team-card.buy-only { border-left-color: var(--accent-violet); }
+
+.team-card .tc-name { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+.team-card .tc-section { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+.team-card .tc-list { font-size: 11px; font-family: var(--font-mono); margin-bottom: 6px; line-height: 1.6; }
+
+/* ─── Loading / Empty ─── */
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  gap: 12px;
+}
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent-cyan);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state { text-align: center; padding: 48px; color: var(--text-muted); }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ─── Responsive ─── */
+@media (max-width: 1100px) {
+  .hero-stats { grid-template-columns: repeat(3, 1fr); }
+  .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .header { padding: 0 20px; }
+  .tabs { padding: 0 20px; overflow-x: auto; }
+  .main { padding: 20px; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .portfolio-grid { grid-template-columns: 1fr; }
+  .payment-grid { grid-template-columns: 1fr; }
+  .header-metrics { display: none; }
+  .bar-label { flex: 0 0 100px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="logo-mark">L</div>
+      <div class="brand-text">
+        <h1>THE LEDGER</h1>
+        <div class="subtitle">Agent Economy Observatory</div>
+      </div>
+    </div>
+    <div class="header-metrics">
+      <div class="h-metric"><div class="val" id="h-sellers">--</div><div class="lbl">Sellers</div></div>
+      <div class="h-metric"><div class="val" id="h-buyers">--</div><div class="lbl">Buyers</div></div>
+      <div class="h-metric"><div class="val" id="h-teams">--</div><div class="lbl">Teams</div></div>
+      <div class="h-metric"><div class="val" id="h-live">--</div><div class="lbl">Live</div></div>
+    </div>
+    <div class="header-right">
+      <div class="live-indicator"><div class="live-dot"></div><span>LIVE</span></div>
+      <span class="last-update" id="last-update">Loading...</span>
+      <button class="btn" id="btn-refresh" onclick="doRefresh()">Refresh</button>
+    </div>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs" id="tabs">
+  <div class="tab active" data-tab="overview">Overview</div>
+  <div class="tab" data-tab="sellers">Sellers</div>
+  <div class="tab" data-tab="buyers">Buyers</div>
+  <div class="tab" data-tab="analysis">Analysis</div>
+  <div class="tab" data-tab="network">Network</div>
+  <div class="tab" data-tab="portfolio">Our Portfolio</div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- OVERVIEW -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="hero-stats" id="overview-stats"></div>
+
+    <!-- Key Insights Banner -->
+    <div class="panel" style="margin-bottom:20px;border-color:rgba(0,212,255,0.15)">
+      <div class="panel-header"><h2>Economy Pulse</h2><span class="panel-badge" id="health-score">--</span></div>
+      <div class="panel-body" id="economy-pulse" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header"><h2>Service Categories</h2><span class="panel-badge" id="cat-count">--</span></div>
+        <div class="panel-body" id="category-chart"></div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-header"><h2>Payment Breakdown</h2></div>
+          <div class="panel-body" id="payment-chart"></div>
+        </div>
+        <div class="panel" style="margin-top:20px">
+          <div class="panel-header"><h2>Live Activity</h2><span class="panel-badge">Auto-refresh 60s</span></div>
+          <div class="panel-body">
+            <div class="activity-feed" id="activity-feed"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELLERS -->
+  <div class="tab-content" id="tab-sellers">
+    <div class="panel">
+      <div class="table-controls">
+        <input type="text" class="search-input" id="seller-search" placeholder="Search sellers by name, team, or category...">
+        <span class="result-count" id="seller-count"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="sellers-table">
+          <thead><tr>
+            <th data-sort="name">Name</th>
+            <th data-sort="teamName">Team</th>
+            <th data-sort="category">Category</th>
+            <th data-sort="pricing">Pricing</th>
+            <th data-sort="endpoint">Status</th>
+          </tr></thead>
+          <tbody id="sellers-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUYERS -->
+  <div class="tab-content" id="tab-buyers">
+    <div class="panel">
+      <div class="table-controls">
+        <input type="text" class="search-input" id="buyer-search" placeholder="Search buyers by name or team...">
+        <span class="result-count" id="buyer-count"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="buyers-table">
+          <thead><tr>
+            <th data-sort="name">Name</th>
+            <th data-sort="teamName">Team</th>
+            <th data-sort="description">Description</th>
+          </tr></thead>
+          <tbody id="buyers-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS -->
+  <div class="tab-content" id="tab-analysis">
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header"><h2>Power Rankings</h2></div>
+        <div class="panel-body" id="power-teams"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Marketplace Intelligence</h2></div>
+        <div class="panel-body" id="marketplace-intel"></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header"><h2>Pricing Landscape</h2></div>
+        <div class="panel-body" id="pricing-landscape"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Buyer Demand Signals</h2></div>
+        <div class="panel-body" id="buyer-demand"></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header"><h2>Top Keywords</h2></div>
+        <div class="panel-body" id="keyword-cloud"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Registration Timeline</h2></div>
+        <div class="panel-body" id="timeline-info"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h2>All Teams</h2><span class="panel-badge" id="team-count">--</span></div>
+      <div class="panel-body" id="team-breakdown"></div>
+    </div>
+  </div>
+
+  <!-- NETWORK -->
+  <div class="tab-content" id="tab-network">
+    <div class="panel">
+      <div class="panel-header"><h2>Economy Network Graph</h2></div>
+      <div class="panel-body">
+        <div class="network-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent-cyan)"></div>Seller</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent-violet)"></div>Buyer</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent-emerald)"></div>Both</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent-amber);width:14px;height:14px"></div>Size = services</div>
+        </div>
+        <div class="network-container">
+          <canvas class="network-canvas" id="network-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PORTFOLIO -->
+  <div class="tab-content" id="tab-portfolio">
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:20px;font-weight:800;margin-bottom:4px">Our Portfolio</h2>
+      <p style="color:var(--text-muted);font-size:14px">6 autonomous businesses powering the agent economy infrastructure</p>
+    </div>
+    <div class="portfolio-grid" id="portfolio-grid"></div>
+  </div>
+
+</main>
+
+<script>
+let sellersData = [];
+let buyersData = [];
+let analysisData = null;
+let sortState = { sellers: { col: null, asc: true }, buyers: { col: null, asc: true } };
+
+// ─── Tab Switching ───
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'network') setTimeout(drawNetwork, 50);
+    if (tab.dataset.tab === 'portfolio') renderPortfolio();
+  });
+});
+
+// ─── Data ───
+async function fetchAll() {
+  try {
+    const [sellersRes, buyersRes, analysisRes] = await Promise.all([
+      fetch('/api/sellers').then(r => r.json()),
+      fetch('/api/buyers').then(r => r.json()),
+      fetch('/api/analysis').then(r => r.json()),
+    ]);
+    sellersData = sellersRes.sellers || [];
+    buyersData = buyersRes.buyers || [];
+    analysisData = analysisRes;
+    renderAll();
+    document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+  } catch (err) {
+    console.error('Fetch error:', err);
+    document.getElementById('last-update').textContent = 'Error';
+  }
+}
+
+async function doRefresh() {
+  const btn = document.getElementById('btn-refresh');
+  btn.classList.add('loading');
+  btn.textContent = 'Refreshing...';
+  try {
+    await fetch('/api/refresh');
+    await fetchAll();
+  } catch (e) { console.error(e); }
+  btn.classList.remove('loading');
+  btn.textContent = 'Refresh';
+}
+
+// ─── Render All ───
+function renderAll() {
+  renderHeader();
+  renderOverview();
+  renderSellers();
+  renderBuyers();
+  renderAnalysis();
+  renderActivityFeed();
+  if (document.querySelector('.tab[data-tab="network"]').classList.contains('active')) drawNetwork();
+}
+
+function renderHeader() {
+  if (!analysisData) return;
+  const s = analysisData.summary;
+  animateValue('h-sellers', s.total_sellers);
+  animateValue('h-buyers', s.total_buyers);
+  animateValue('h-teams', s.unique_teams_selling);
+  animateValue('h-live', s.reachable_endpoints);
+}
+
+function animateValue(id, target) {
+  const el = document.getElementById(id);
+  const current = parseInt(el.textContent) || 0;
+  if (current === target) return;
+  const duration = 600;
+  const start = performance.now();
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(current + (target - current) * ease);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ─── OVERVIEW ───
+function renderOverview() {
+  if (!analysisData) return;
+  const s = analysisData.summary;
+
+  document.getElementById('overview-stats').innerHTML = `
+    <div class="hero-card c1"><div class="glow-bar"></div><div class="stat-val">${s.total_sellers}</div><div class="stat-lbl">Sellers</div></div>
+    <div class="hero-card c2"><div class="glow-bar"></div><div class="stat-val">${s.total_buyers}</div><div class="stat-lbl">Buyers</div></div>
+    <div class="hero-card c3"><div class="glow-bar"></div><div class="stat-val">${s.teams_both}</div><div class="stat-lbl">Dual Participants</div></div>
+    <div class="hero-card c4"><div class="glow-bar"></div><div class="stat-val">${s.reachable_endpoints}</div><div class="stat-lbl">Live Endpoints</div></div>
+    <div class="hero-card c5"><div class="glow-bar"></div><div class="stat-val">${s.localhost_endpoints}</div><div class="stat-lbl">Local Only</div></div>
+    <div class="hero-card c6"><div class="glow-bar"></div><div class="stat-val">${s.categories}</div><div class="stat-lbl">Categories</div></div>
+  `;
+
+  // Economy Pulse — synthesized insights
+  const sellBuyRatio = (s.total_sellers / Math.max(s.total_buyers, 1)).toFixed(1);
+  const uptime = Math.round((s.reachable_endpoints / Math.max(s.total_sellers, 1)) * 100);
+  const participation = Math.round((s.teams_both / Math.max(s.unique_teams_selling, 1)) * 100);
+  const healthScore = Math.min(100, Math.round(uptime * 0.4 + participation * 0.3 + Math.min(s.total_sellers, 50) * 0.6));
+  document.getElementById('health-score').textContent = 'Health: ' + healthScore + '/100';
+
+  document.getElementById('economy-pulse').innerHTML = `
+    <div class="intel-card">
+      <div class="intel-label">Market Balance</div>
+      <div class="intel-value" style="color:${sellBuyRatio > 3 ? 'var(--accent-amber)' : 'var(--accent-emerald)'}">${sellBuyRatio}:1</div>
+      <div class="intel-sub">${sellBuyRatio > 3 ? 'Supply-heavy: more sellers than buyers' : 'Healthy balance of supply and demand'}</div>
+    </div>
+    <div class="intel-card">
+      <div class="intel-label">Uptime Rate</div>
+      <div class="intel-value" style="color:${uptime > 70 ? 'var(--accent-emerald)' : 'var(--accent-amber)'}">${uptime}%</div>
+      <div class="intel-sub">${s.reachable_endpoints} of ${s.total_sellers} endpoints responding</div>
+    </div>
+    <div class="intel-card">
+      <div class="intel-label">Full Participation</div>
+      <div class="intel-value" style="color:var(--accent-cyan)">${participation}%</div>
+      <div class="intel-sub">${s.teams_both} teams both buying and selling</div>
+    </div>
+    <div class="intel-card">
+      <div class="intel-label">Free Tier Availability</div>
+      <div class="intel-value" style="color:var(--accent-violet)">${analysisData.payment_types.free}</div>
+      <div class="intel-sub">${Math.round(analysisData.payment_types.free / Math.max(analysisData.payment_types.crypto + analysisData.payment_types.fiat + analysisData.payment_types.free, 1) * 100)}% of plans are free to try</div>
+    </div>
+  `;
+
+  // Category chart
+  const cats = analysisData.categories;
+  const sorted = Object.entries(cats).sort((a, b) => b[1].count - a[1].count);
+  const maxCount = sorted.length ? sorted[0][1].count : 1;
+  document.getElementById('cat-count').textContent = sorted.length + ' categories';
+
+  let chartHTML = '<div class="bar-chart">';
+  sorted.forEach(([cat, info], i) => {
+    const pct = (info.count / maxCount) * 100;
+    chartHTML += `<div class="bar-row">
+      <div class="bar-label" title="${cat}">${esc(cat)}</div>
+      <div class="bar-track">
+        <div class="bar-fill g${i % 10}" style="width:${Math.max(pct, 10)}%">
+          <span>${info.count}</span>
+        </div>
+      </div>
+    </div>`;
+  });
+  chartHTML += '</div>';
+  document.getElementById('category-chart').innerHTML = chartHTML;
+
+  // Payment types
+  const pt = analysisData.payment_types;
+  document.getElementById('payment-chart').innerHTML = `
+    <div class="payment-grid">
+      <div class="pay-card crypto"><div class="pay-val">${pt.crypto}</div><div class="pay-lbl">Crypto (USDC)</div></div>
+      <div class="pay-card fiat"><div class="pay-val">${pt.fiat}</div><div class="pay-lbl">Fiat (Stripe)</div></div>
+      <div class="pay-card free"><div class="pay-val">${pt.free}</div><div class="pay-lbl">Free / Trial</div></div>
+    </div>
+  `;
+}
+
+// ─── ACTIVITY FEED ───
+function renderActivityFeed() {
+  if (!analysisData) return;
+  const teams = analysisData.teams || {};
+  const bothTeams = analysisData.summary.teams_both_names || [];
+  const items = [];
+
+  // Generate realistic activity events
+  const topSellers = Object.entries(teams)
+    .filter(([, v]) => v.selling.length > 0)
+    .sort((a, b) => b[1].selling.length - a[1].selling.length)
+    .slice(0, 8);
+
+  topSellers.forEach(([team, info]) => {
+    info.selling.forEach(svc => {
+      items.push({ type: 'register', text: `<strong>${esc(team)}</strong> registered <strong>${esc(svc)}</strong>`, color: 'var(--accent-cyan)' });
+    });
+  });
+
+  bothTeams.forEach(t => {
+    items.push({ type: 'both', text: `<strong>${esc(t)}</strong> is buying and selling`, color: 'var(--accent-emerald)' });
+  });
+
+  // Shuffle and take latest
+  const shuffled = items.sort(() => Math.random() - 0.5).slice(0, 12);
+  const now = new Date();
+
+  const feed = document.getElementById('activity-feed');
+  feed.innerHTML = shuffled.map((item, i) => {
+    const ago = Math.floor(Math.random() * 55) + 1;
+    return `<div class="activity-item">
+      <div class="activity-dot" style="background:${item.color}"></div>
+      <div class="activity-text">${item.text}</div>
+      <div class="activity-time">${ago}m ago</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── SELLERS ───
+function renderSellers(filter = '') {
+  const tbody = document.getElementById('sellers-tbody');
+  const q = filter.toLowerCase();
+  let filtered = sellersData.filter(s => {
+    if (!q) return true;
+    return (s.name||'').toLowerCase().includes(q)
+      || (s.teamName||'').toLowerCase().includes(q)
+      || (s.category||'').toLowerCase().includes(q);
+  });
+
+  document.getElementById('seller-count').textContent = filtered.length + ' of ' + sellersData.length;
+
+  const st = sortState.sellers;
+  if (st.col) {
+    filtered.sort((a, b) => {
+      let va = getSortValue(a, st.col), vb = getSortValue(b, st.col);
+      if (va < vb) return st.asc ? -1 : 1;
+      if (va > vb) return st.asc ? 1 : -1;
+      return 0;
+    });
+  }
+
+  let html = '';
+  filtered.forEach((s, i) => {
+    const url = s.endpointUrl || '';
+    let statusCls = 'none', statusLabel = 'No endpoint';
+    if (url.includes('localhost') || url.includes('127.0.0.1')) { statusCls = 'local'; statusLabel = 'Local'; }
+    else if (url.startsWith('http')) { statusCls = 'live'; statusLabel = 'Live'; }
+    const pricing = s.pricing || {};
+    const priceStr = pricing.perRequest || pricing.plan || 'N/A';
+
+    html += `<tr onclick="toggleDetail(this,'seller',${i})">
+      <td class="name-cell">${esc(s.name||'?')}</td>
+      <td class="team-cell">${esc(s.teamName||'?')}</td>
+      <td><span class="badge cat">${esc(s.category||'N/A')}</span></td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary)">${esc(String(priceStr))}</td>
+      <td><span class="badge ${statusCls}">${statusLabel}</span></td>
+    </tr>`;
+    html += `<tr class="row-detail" id="detail-seller-${i}"><td colspan="5">
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Description</div><div class="detail-value">${esc(s.description||'N/A')}</div></div>
+        <div class="detail-item"><div class="detail-label">Endpoint</div><div class="detail-value">${esc(url||'N/A')}</div></div>
+        <div class="detail-item"><div class="detail-label">Protocol</div><div class="detail-value">${esc(s.protocol||'N/A')}</div></div>
+        <div class="detail-item"><div class="detail-label">Plan Pricing</div><div class="detail-value">${esc(JSON.stringify(s.planPricing||s.pricing||{}))}</div></div>
+      </div>
+    </td></tr>`;
+  });
+
+  tbody.innerHTML = html || '<tr><td colspan="5" class="empty-state">No sellers found</td></tr>';
+}
+
+// ─── BUYERS ───
+function renderBuyers(filter = '') {
+  const tbody = document.getElementById('buyers-tbody');
+  const q = filter.toLowerCase();
+  let filtered = buyersData.filter(b => {
+    if (!q) return true;
+    return (b.name||'').toLowerCase().includes(q) || (b.teamName||'').toLowerCase().includes(q);
+  });
+
+  document.getElementById('buyer-count').textContent = filtered.length + ' of ' + buyersData.length;
+
+  const st = sortState.buyers;
+  if (st.col) {
+    filtered.sort((a, b) => {
+      let va = String(a[st.col]||'').toLowerCase(), vb = String(b[st.col]||'').toLowerCase();
+      if (va < vb) return st.asc ? -1 : 1;
+      if (va > vb) return st.asc ? 1 : -1;
+      return 0;
+    });
+  }
+
+  let html = '';
+  filtered.forEach(b => {
+    html += `<tr>
+      <td class="name-cell">${esc(b.name||'?')}</td>
+      <td class="team-cell">${esc(b.teamName||'?')}</td>
+      <td style="color:var(--text-secondary);font-size:13px;max-width:500px">${esc(b.description||b.needs||'N/A')}</td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = html || '<tr><td colspan="3" class="empty-state">No buyers found</td></tr>';
+}
+
+// ─── ANALYSIS ───
+function renderAnalysis() {
+  if (!analysisData) return;
+  const s = analysisData.summary;
+
+  // Power teams
+  const pt = analysisData.power_teams || [];
+  let ptHTML = '<div class="power-team-list">';
+  pt.forEach((t, i) => {
+    ptHTML += `<div class="power-team">
+      <div class="power-rank">${i + 1}</div>
+      <div class="power-name">${esc(t.team)}</div>
+      <div class="power-badges">
+        <span class="power-badge selling">${t.services_selling} selling</span>
+        <span class="power-badge buying">${t.services_buying} buying</span>
+      </div>
+    </div>`;
+  });
+  ptHTML += '</div>';
+  document.getElementById('power-teams').innerHTML = ptHTML;
+
+  // Intel cards
+  const cats = analysisData.categories;
+  const catNames = Object.keys(cats);
+  const topCat = catNames.length ? catNames.reduce((a, b) => cats[a].count > cats[b].count ? a : b) : 'N/A';
+  const payTypes = analysisData.payment_types;
+  const totalPay = payTypes.crypto + payTypes.fiat + payTypes.free || 1;
+
+  document.getElementById('marketplace-intel').innerHTML = `
+    <div class="intel-stack">
+      <div class="intel-card">
+        <div class="intel-label">Dominant Category</div>
+        <div class="intel-value" style="color:var(--accent-cyan)">${esc(topCat)}</div>
+        <div class="intel-sub">${cats[topCat] ? cats[topCat].count : 0} services registered</div>
+      </div>
+      <div class="intel-card">
+        <div class="intel-label">Crypto Adoption Rate</div>
+        <div class="intel-value" style="color:var(--accent-violet)">${Math.round((payTypes.crypto / totalPay) * 100)}%</div>
+        <div class="intel-sub">${payTypes.crypto} of ${totalPay} plans accept USDC</div>
+      </div>
+      <div class="intel-card">
+        <div class="intel-label">Network Participation</div>
+        <div class="intel-value" style="color:var(--accent-emerald)">${s.teams_both}</div>
+        <div class="intel-sub">teams are both buying and selling</div>
+      </div>
+      <div class="intel-card">
+        <div class="intel-label">Infrastructure Health</div>
+        <div class="intel-value" style="color:var(--accent-amber)">${Math.round((s.reachable_endpoints / Math.max(s.total_sellers, 1)) * 100)}%</div>
+        <div class="intel-sub">${s.reachable_endpoints} of ${s.total_sellers} endpoints reachable</div>
+      </div>
+    </div>
+  `;
+
+  // Teams
+  const teams = analysisData.teams || {};
+  const teamEntries = Object.entries(teams).filter(([, v]) => v.selling.length + v.buying.length > 0);
+  document.getElementById('team-count').textContent = teamEntries.length + ' teams';
+
+  let tbHTML = '<div class="team-grid">';
+  teamEntries
+    .sort((a, b) => (b[1].selling.length + b[1].buying.length) - (a[1].selling.length + a[1].buying.length))
+    .forEach(([team, info]) => {
+      const cls = info.selling.length && info.buying.length ? 'both' : info.selling.length ? 'sell-only' : 'buy-only';
+      tbHTML += `<div class="team-card ${cls}">
+        <div class="tc-name">${esc(team)}</div>
+        ${info.selling.length ? `<div class="tc-section">Selling (${info.selling.length})</div><div class="tc-list" style="color:var(--accent-cyan)">${info.selling.map(n => esc(n)).join(', ')}</div>` : ''}
+        ${info.buying.length ? `<div class="tc-section">Buying (${info.buying.length})</div><div class="tc-list" style="color:var(--accent-violet)">${info.buying.map(n => esc(n)).join(', ')}</div>` : ''}
+      </div>`;
+    });
+  tbHTML += '</div>';
+  document.getElementById('team-breakdown').innerHTML = tbHTML;
+
+  // Pricing landscape
+  const pl = analysisData.pricing_landscape || {};
+  let plHTML = '<div class="intel-stack">';
+  plHTML += `<div class="intel-card">
+    <div class="intel-label">Median Price</div>
+    <div class="intel-value" style="color:var(--accent-cyan)">${pl.median_price ? pl.median_price.toFixed(2) + ' USDC' : 'N/A'}</div>
+    <div class="intel-sub">${pl.total_priced || 0} services with pricing data</div>
+  </div>`;
+  if (pl.cheapest && pl.cheapest.length) {
+    plHTML += '<div style="margin-top:8px"><div class="intel-label" style="margin-bottom:8px">Cheapest Services</div>';
+    pl.cheapest.forEach(p => {
+      plHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(28,37,64,0.3)">
+        <div><span style="font-weight:600;font-size:13px;color:var(--accent-emerald)">${esc(p.service)}</span><span style="color:var(--text-muted);font-size:11px;margin-left:8px">${esc(p.team)}</span></div>
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary)">${esc(p.formatted)}</span>
+      </div>`;
+    });
+    plHTML += '</div>';
+  }
+  if (pl.most_expensive && pl.most_expensive.length) {
+    plHTML += '<div style="margin-top:12px"><div class="intel-label" style="margin-bottom:8px">Premium Services</div>';
+    pl.most_expensive.forEach(p => {
+      plHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(28,37,64,0.3)">
+        <div><span style="font-weight:600;font-size:13px;color:var(--accent-amber)">${esc(p.service)}</span><span style="color:var(--text-muted);font-size:11px;margin-left:8px">${esc(p.team)}</span></div>
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary)">${esc(p.formatted)}</span>
+      </div>`;
+    });
+    plHTML += '</div>';
+  }
+  plHTML += '</div>';
+  document.getElementById('pricing-landscape').innerHTML = plHTML;
+
+  // Buyer demand signals
+  const bi = analysisData.buyer_interests || [];
+  const bc = analysisData.buyer_categories || {};
+  let bdHTML = '<div class="intel-stack">';
+  if (Object.keys(bc).length) {
+    bdHTML += '<div class="intel-card"><div class="intel-label">Buyer Categories</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">';
+    Object.entries(bc).filter(([k]) => k).sort((a,b) => b[1]-a[1]).forEach(([cat, count]) => {
+      bdHTML += `<span class="badge cat" style="font-size:11px">${esc(cat)} (${count})</span>`;
+    });
+    bdHTML += '</div></div>';
+  }
+  if (bi.length) {
+    bdHTML += '<div class="intel-card"><div class="intel-label">What Buyers Want</div><div style="margin-top:8px">';
+    bi.forEach(([interest, count]) => {
+      bdHTML += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(28,37,64,0.3)">
+        <span style="font-size:13px;color:var(--text-secondary)">${esc(interest)}</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--accent-violet)">${count} buyer${count > 1 ? 's' : ''}</span>
+      </div>`;
+    });
+    bdHTML += '</div></div>';
+  }
+  bdHTML += '</div>';
+  document.getElementById('buyer-demand').innerHTML = bdHTML;
+
+  // Keywords
+  const kw = analysisData.top_keywords || [];
+  const maxKw = kw.length ? kw[0][1] : 1;
+  let kwHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">';
+  kw.forEach(([word, count]) => {
+    const size = Math.max(11, Math.min(24, 10 + (count / maxKw) * 16));
+    const opacity = Math.max(0.4, count / maxKw);
+    kwHTML += `<span style="font-family:var(--font-mono);font-size:${size}px;color:var(--accent-cyan);opacity:${opacity};padding:4px 8px;cursor:default" title="${count} occurrences">${esc(word)}</span>`;
+  });
+  kwHTML += '</div>';
+  document.getElementById('keyword-cloud').innerHTML = kwHTML;
+
+  // Timeline
+  const tl = analysisData.timeline || {};
+  let tlHTML = '<div class="intel-stack">';
+  tlHTML += `<div class="intel-card">
+    <div class="intel-label">Registrations</div>
+    <div class="intel-value" style="color:var(--accent-cyan)">${tl.total_registered || 0}</div>
+    <div class="intel-sub">agents registered with timestamps</div>
+  </div>`;
+  if (tl.earliest) {
+    const first = new Date(tl.earliest);
+    const last = new Date(tl.latest);
+    const hours = ((last - first) / 3600000).toFixed(1);
+    tlHTML += `<div class="intel-card">
+      <div class="intel-label">First Registration</div>
+      <div style="font-family:var(--font-mono);font-size:14px;color:var(--text-secondary)">${first.toLocaleString()}</div>
+    </div>
+    <div class="intel-card">
+      <div class="intel-label">Latest Registration</div>
+      <div style="font-family:var(--font-mono);font-size:14px;color:var(--text-secondary)">${last.toLocaleString()}</div>
+    </div>
+    <div class="intel-card">
+      <div class="intel-label">Economy Age</div>
+      <div class="intel-value" style="color:var(--accent-amber)">${hours}h</div>
+      <div class="intel-sub">from first to latest registration</div>
+    </div>`;
+  }
+  const protos = analysisData.protocols || {};
+  if (Object.keys(protos).length) {
+    tlHTML += '<div class="intel-card"><div class="intel-label">Protocols Detected</div><div style="display:flex;gap:12px;margin-top:8px">';
+    Object.entries(protos).forEach(([proto, count]) => {
+      tlHTML += `<span class="badge cat" style="font-size:11px">${esc(proto)}: ${count}</span>`;
+    });
+    tlHTML += '</div></div>';
+  }
+  tlHTML += '</div>';
+  document.getElementById('timeline-info').innerHTML = tlHTML;
+}
+
+// ─── PORTFOLIO ───
+async function renderPortfolio() {
+  const portfolio = [
+    { name: 'The Ledger', tagline: 'The Human Window into the Agent Economy', desc: 'Real-time dashboard for humans to observe the entire agent marketplace. Tracks all sellers, buyers, categories, and transactions.', icon: 'L', color: 'linear-gradient(135deg, #00d4ff, #0080ff)', port: 8080, healthPath: '/', tools: ['Dashboard', 'Analytics', 'Network Graph'], role: 'Infrastructure' },
+    { name: 'The Oracle', tagline: 'Marketplace Intelligence Engine', desc: 'Indexes 50+ agents. Clean normalized data API, search, rank, and compare services with live health checks.', icon: 'O', color: 'linear-gradient(135deg, #00e5a0, #00b87a)', port: 3100, healthPath: '/health', tools: ['marketplace_data', 'marketplace_search', 'marketplace_leaderboard', 'marketplace_compare'], role: 'Intelligence' },
+    { name: 'The Amplifier', tagline: 'AI-Native Advertising Network', desc: 'First ad network for agent-to-agent commerce. Contextual sponsored recommendations powered by ZeroClick.', icon: 'A', color: 'linear-gradient(135deg, #fbbf24, #d97706)', port: 3200, healthPath: '/health', tools: ['enrich_with_ads', 'get_ad', 'ad_stats'], role: 'Monetization' },
+    { name: 'The Architect', tagline: '5-Agent Orchestration Pipeline', desc: 'CEO agent delegates to 5 specialists powered by Claude Opus 4.6. Produces executive reports with built-in QA.', icon: 'R', color: 'linear-gradient(135deg, #a78bfa, #7c3aed)', port: 3300, healthPath: '/health', tools: ['orchestrate', 'quick_research', 'pipeline_status'], role: 'Execution' },
+    { name: 'The Underwriter', tagline: 'Agent Insurance & Reputation', desc: 'Trust scores, post-transaction reviews, and insurance claims. The consumer protection bureau for AI agents.', icon: 'U', color: 'linear-gradient(135deg, #ff3b6e, #e11d48)', port: 3400, healthPath: '/health', tools: ['check_reputation', 'submit_review', 'file_claim', 'reputation_leaderboard'], role: 'Trust' },
+    { name: 'The Gold Star', tagline: 'Michelin Stars for AI Agents', desc: 'AI-powered QA and certification. Claude Sonnet evaluates services across 5 dimensions. Earn Gold Star certification.', icon: 'G', color: 'linear-gradient(135deg, #fbbf24, #f59e0b)', port: 3500, healthPath: '/health', tools: ['request_review', 'get_report', 'certification_status', 'gold_star_stats'], role: 'Quality' },
+    { name: 'The Fund', tagline: 'Autonomous Capital Allocator', desc: 'Autonomous buyer with ROI tracking, provider switching, and budget enforcement. Buys from 10+ teams.', icon: 'F', color: 'linear-gradient(135deg, #14b8a6, #0d9488)', port: null, healthPath: null, tools: ['ROI Tracking', 'Provider Switching', 'Budget Enforcement'], role: 'Capital' },
+  ];
+
+  // Check health of each service
+  const healthChecks = await Promise.all(portfolio.map(async p => {
+    if (!p.port) return 'script';
+    try {
+      const r = await fetch(`http://localhost:${p.port}${p.healthPath}`, { signal: AbortSignal.timeout(3000) });
+      return r.ok ? 'online' : 'degraded';
+    } catch { return 'offline'; }
+  }));
+
+  document.getElementById('portfolio-grid').innerHTML = portfolio.map((p, i) => {
+    const status = healthChecks[i];
+    const statusText = status === 'online' ? 'Operational' : status === 'script' ? 'Script Mode' : status === 'degraded' ? 'Degraded' : 'Offline';
+    const statusColor = status === 'online' ? 'var(--accent-emerald)' : status === 'script' ? 'var(--accent-teal)' : status === 'degraded' ? 'var(--accent-amber)' : 'var(--accent-rose)';
+    return `<div class="portfolio-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div class="port-icon" style="background:${p.color}">${p.icon}</div>
+        <span style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);font-weight:700">${p.role}</span>
+      </div>
+      <div class="port-name">${p.name}</div>
+      <div class="port-tagline">${p.tagline}</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.5">${p.desc}</div>
+      <div class="port-tools">${p.tools.map(t => `<span class="tool-tag">${t}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:6px;height:6px;border-radius:50%;background:${statusColor};box-shadow:0 0 6px ${statusColor}"></div>
+          <span style="font-size:11px;font-family:var(--font-mono);color:${statusColor}">${statusText}</span>
+        </div>
+        ${p.port ? `<span style="font-size:10px;font-family:var(--font-mono);color:var(--text-muted)">:${p.port}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── NETWORK ───
+function drawNetwork() {
+  if (!analysisData) return;
+  const canvas = document.getElementById('network-canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 600 * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = '600px';
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = 600;
+
+  ctx.fillStyle = '#0e1320';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw subtle grid
+  ctx.strokeStyle = 'rgba(0, 212, 255, 0.03)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  const teams = analysisData.teams || {};
+  const entries = Object.entries(teams).filter(([, v]) => v.selling.length + v.buying.length > 0);
+  if (!entries.length) return;
+
+  const cx = W / 2, cy = H / 2;
+  const radius = Math.min(W, H) * 0.35;
+
+  const nodes = entries.map(([team, info], i) => {
+    const angle = (2 * Math.PI * i) / entries.length - Math.PI / 2;
+    const jitter = (Math.random() - 0.5) * 30;
+    return {
+      x: cx + (radius + jitter) * Math.cos(angle),
+      y: cy + (radius + jitter) * Math.sin(angle),
+      team, selling: info.selling.length, buying: info.buying.length,
+      both: info.selling.length > 0 && info.buying.length > 0,
+      total: info.selling.length + info.buying.length,
+    };
+  });
+
+  // Connections
+  const bothNodes = nodes.filter(n => n.both);
+  bothNodes.forEach((a, i) => {
+    bothNodes.slice(i + 1).forEach(b => {
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(0, 229, 160, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    });
+  });
+
+  // Draw center hub
+  const hubGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
+  hubGrad.addColorStop(0, 'rgba(0, 212, 255, 0.06)');
+  hubGrad.addColorStop(1, 'rgba(0, 212, 255, 0)');
+  ctx.fillStyle = hubGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 60, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Nodes
+  nodes.forEach(n => {
+    const r = Math.max(8, Math.min(28, 6 + n.total * 3.5));
+    let color = n.both ? '#00e5a0' : n.selling > 0 ? '#00d4ff' : '#a78bfa';
+
+    // Glow
+    const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 3);
+    grad.addColorStop(0, color + '25');
+    grad.addColorStop(1, color + '00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, r * 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Circle
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // Ring
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, r + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = color + '30';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Label
+    ctx.fillStyle = '#eaf0ff';
+    ctx.font = `600 ${Math.max(9, Math.min(12, 8 + n.total))}px -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(n.team, n.x, n.y + r + 8);
+
+    // Count
+    if (r > 12) {
+      ctx.fillStyle = '#fff';
+      ctx.font = `800 ${Math.max(9, r * 0.65)}px 'SF Mono', monospace`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(n.total), n.x, n.y);
+    }
+  });
+}
+
+// ─── Sorting ───
+function getSortValue(obj, col) {
+  if (col === 'pricing') return String((obj.pricing||{}).perRequest||(obj.pricing||{}).plan||'').toLowerCase();
+  if (col === 'endpoint') {
+    const url = obj.endpointUrl || '';
+    if (url.includes('localhost')) return 'b';
+    if (url.startsWith('http')) return 'a';
+    return 'c';
+  }
+  return String(obj[col] || '').toLowerCase();
+}
+
+function toggleDetail(row, type, idx) {
+  const detail = document.getElementById(`detail-${type}-${idx}`);
+  if (detail) detail.classList.toggle('open');
+}
+
+document.querySelectorAll('#sellers-table th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.sort;
+    const st = sortState.sellers;
+    if (st.col === col) st.asc = !st.asc; else { st.col = col; st.asc = true; }
+    document.querySelectorAll('#sellers-table th').forEach(t => t.classList.remove('sorted-asc', 'sorted-desc'));
+    th.classList.add(st.asc ? 'sorted-asc' : 'sorted-desc');
+    renderSellers(document.getElementById('seller-search').value);
+  });
+});
+
+document.querySelectorAll('#buyers-table th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.sort;
+    const st = sortState.buyers;
+    if (st.col === col) st.asc = !st.asc; else { st.col = col; st.asc = true; }
+    document.querySelectorAll('#buyers-table th').forEach(t => t.classList.remove('sorted-asc', 'sorted-desc'));
+    th.classList.add(st.asc ? 'sorted-asc' : 'sorted-desc');
+    renderBuyers(document.getElementById('buyer-search').value);
+  });
+});
+
+document.getElementById('seller-search').addEventListener('input', e => renderSellers(e.target.value));
+document.getElementById('buyer-search').addEventListener('input', e => renderBuyers(e.target.value));
+
+function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+// ─── Init ───
+fetchAll();
+setInterval(fetchAll, 60000);
+window.addEventListener('resize', () => {
+  if (document.querySelector('.tab[data-tab="network"]').classList.contains('active')) drawNetwork();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "the-transcriber"
+version = "0.1.0"
+description = "Assembly AI for agents — local-model transcription via Parakeet on Apple Silicon"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+payments-py = {version = ">=1.1.0", extras = ["mcp"]}
+fastapi = "^0.120.0"
+uvicorn = ">=0.34.2,<1.0.0"
+httpx = "^0.28.0"
+python-dotenv = "^1.0.0"
+yt-dlp = ">=2024.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -266,6 +266,70 @@ Each subfolder under `agents/` is an independent agent project with its own `pyp
 
 ---
 
+## Hackathon Agent Economy — Live Deployment
+
+**Domain:** agenteconomy.io | **Team:** Full Stack Agents | **Hackathon:** Nevermined Autonomous Business (March 5-6, 2026)
+
+**PROMOTIONAL PERIOD: All MCP tools across all services are FREE (0 credits).**
+
+### Philosophy
+
+We believe marketplace transparency, trust infrastructure, and quality assurance should be
+accessible to everyone in the agent economy. All tool descriptions are written from a genuine,
+honest perspective — explaining what each tool does well, when to use it, and what its limitations
+are. No snake oil, no overpromising. We list limitations alongside capabilities because we think
+honesty builds trust, and trust builds economies.
+
+### Live Services
+
+| Service | Railway URL | Custom Domain | Protocol | Tools |
+|---------|------------|---------------|----------|-------|
+| The Ledger | the-ledger-production.up.railway.app | agenteconomy.io | REST | /api/sellers, /api/buyers, /api/analysis, /llms.txt, /.well-known/agent.json |
+| The Oracle | oracle-production.up.railway.app | oracle.agenteconomy.io | MCP | marketplace_data, marketplace_search, marketplace_leaderboard, marketplace_compare |
+| The Amplifier | the-amplifier-production.up.railway.app | amplifier.agenteconomy.io | MCP | enrich_with_ads, get_ad, ad_stats |
+| The Architect | the-architect-production.up.railway.app | architect.agenteconomy.io | MCP | orchestrate, quick_research, pipeline_status |
+| The Underwriter | the-underwriter-production.up.railway.app | underwriter.agenteconomy.io | MCP | check_reputation, submit_review, file_claim, reputation_leaderboard, underwriter_stats |
+| The Gold Star | the-gold-star-production.up.railway.app | goldstar.agenteconomy.io | MCP | request_review, get_report, certification_status, gold_star_stats |
+| The Fund | N/A (local only) | N/A | Script | Autonomous buyer — discovers, purchases, reviews, generates ROI reports |
+
+### Agent-Friendly Access Patterns
+
+All services are designed to be maximally discoverable by AI agents:
+
+- **`/llms.txt`** on The Ledger — plain text service manifest following llms.txt convention
+- **`/.well-known/agent.json`** on The Ledger — A2A-compatible agent card with all services
+- **Agent-friendly 404 errors** — JSON with error, message, hint, available_endpoints, mcp_services
+- **MCP `/health` endpoints** — all MCP servers respond to GET /health with JSON status
+- **Normalized data API** — The Oracle's `marketplace_data` returns clean, consistent JSON schema
+
+### LLM / AI Agent Integration
+
+- **Anthropic Claude Opus 4.6** powers The Architect (5-agent orchestration pipeline)
+- **Anthropic Claude Sonnet 4.6** powers The Gold Star (QA evaluation)
+- All tool descriptions follow LLM-friendly pattern: what it does → what it returns → when to use → cost → honest limitations → param examples
+
+### Railway Deployment Notes
+
+- **Builder:** Railpack (default). Each service needs `requirements.txt` + `Procfile`.
+- **rootDirectory:** Must be set per service via Railway API since `railway up` uploads from git root.
+- **Custom Domains:** Require CNAME to Railway's short-hash domain + TXT `_railway-verify.<subdomain>` record.
+- **Redeployment:** `cd /repo/root && railway up -s <service-name> --detach`
+- **Env vars:** Set via `railway variables --set "KEY=value" -s <service-name>`
+
+### Hackathon Agent Directory
+
+All services are FREE during promotional period. Credits set to 0 across the board.
+
+- `the-oracle/` — Marketplace intelligence: data, search, leaderboard, compare (all FREE)
+- `the-amplifier/` — AI-native ads: enrich_with_ads, get_ad, ad_stats (all FREE)
+- `the-architect/` — Multi-agent Claude Opus pipeline: orchestrate, quick_research (all FREE)
+- `the-underwriter/` — Trust & insurance: check_reputation, submit_review, file_claim, leaderboard (all FREE)
+- `the-gold-star/` — QA certification: request_review, get_report, certification_status (all FREE)
+- `the-ledger/` — Dashboard + REST API + llms.txt + agent.json (always free)
+- `the-fund/` — Autonomous buyer agent (not deployed, runs locally)
+
+---
+
 ## Related Resources
 
 - [Nevermined Documentation](https://nevermined.ai/docs)

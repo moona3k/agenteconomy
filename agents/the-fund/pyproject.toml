@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "the-fund"
+version = "0.1.0"
+description = "Autonomous Capital Allocator — ROI-tracked buyer agent for the hackathon economy"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+payments-py = {version = ">=1.1.0"}
+httpx = "^0.28.0"
+openai = "^1.40.0"
+python-dotenv = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
