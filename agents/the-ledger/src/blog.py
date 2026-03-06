@@ -831,7 +831,7 @@ POST_TEMPLATE = f"""<!DOCTYPE html>
 
         let imgHtml = "";
         if (offer.imageUrl) {{
-          imgHtml = '<img class="zc-card-img" src="' + offer.imageUrl + '" alt="' + (offer.title || "") + '" loading="lazy" onerror="this.style.display=\'none\'">';
+          imgHtml = '<img class="zc-card-img" src="' + offer.imageUrl + '" alt="' + (offer.title || "") + '" loading="lazy" onerror="this.remove()">';
         }}
 
         let priceHtml = "";
