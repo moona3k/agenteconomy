@@ -59,7 +59,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def transcribe_youtube(youtube_url: str) -> str:
     """Transcribe a YouTube video to text. FREE during promotional period.
 
@@ -90,7 +90,7 @@ def transcribe_youtube(youtube_url: str) -> str:
     return json.dumps(result, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def transcribe_file(file_path: str) -> str:
     """Transcribe a local audio or video file to text. FREE during promotional period.
 
@@ -113,7 +113,7 @@ def transcribe_file(file_path: str) -> str:
     return json.dumps(result, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def transcriber_info() -> str:
     """Get transcription service capabilities and status. Always free.
 
