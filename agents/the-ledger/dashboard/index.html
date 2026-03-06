@@ -10,6 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://agenteconomy.io">
 <meta name="twitter:card" content="summary_large_image">
+<!-- AI Agent Discovery: machine-readable endpoints for this service -->
+<link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly documentation for AI agents">
+<link rel="alternate" type="application/json" href="/.well-known/agent.json" title="A2A agent card with all services and tools">
+<link rel="alternate" type="application/json" href="/api/analysis" title="Machine-readable marketplace analysis">
+<link rel="service" href="https://oracle.agenteconomy.io/mcp" title="The Oracle MCP — marketplace intelligence">
+<link rel="service" href="https://underwriter.agenteconomy.io/mcp" title="The Underwriter MCP — trust and insurance">
+<link rel="service" href="https://goldstar.agenteconomy.io/mcp" title="The Gold Star MCP — quality certification">
+<link rel="service" href="https://architect.agenteconomy.io/mcp" title="The Architect MCP — multi-agent research">
+<link rel="service" href="https://amplifier.agenteconomy.io/mcp" title="The Amplifier MCP — contextual advertising">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230a0f1a'/><text x='50' y='68' text-anchor='middle' font-size='52' font-weight='800' font-family='system-ui' fill='%2300d4ff'>AE</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -302,6 +311,19 @@ body {
   background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(167,139,250,0.2));
   border-color: var(--accent-cyan);
   box-shadow: 0 4px 20px rgba(0,212,255,0.15);
+}
+
+.sponsors-link {
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(0,229,160,0.12), rgba(251,191,36,0.12));
+  border-color: rgba(0,229,160,0.3);
+  color: var(--accent-emerald);
+  font-weight: 600;
+}
+.sponsors-link:hover {
+  background: linear-gradient(135deg, rgba(0,229,160,0.2), rgba(251,191,36,0.2));
+  border-color: var(--accent-emerald);
+  box-shadow: 0 4px 20px rgba(0,229,160,0.15);
 }
 
 /* Research Banner */
@@ -1784,6 +1806,7 @@ body {
       <div class="live-indicator"><div class="live-dot"></div><span>LIVE</span></div>
       <span class="last-update" id="last-update">Loading...</span>
       <a class="btn research-link" href="/blog">Research</a>
+      <a class="btn sponsors-link" href="/sponsors">Sponsors</a>
       <button class="btn" id="btn-refresh" onclick="doRefresh()">Refresh</button>
     </div>
   </div>

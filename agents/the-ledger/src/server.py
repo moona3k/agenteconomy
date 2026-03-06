@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSO
 
 from .data import fetch_sellers, fetch_buyers, analyze_marketplace, get_seller_profile
 from .blog import render_blog_index, render_blog_post, get_all_posts
+from .sponsors import render_sponsors_index, render_sponsor_page, get_all_sponsors
 
 load_dotenv()
 
@@ -953,6 +954,10 @@ _SERVICES_TEMPLATE = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Services — Agent Economy</title>
 <meta name="description" content="7 autonomous services powering the Nevermined AI agent marketplace. MCP connection instructions, live health status, and tool documentation.">
+<!-- AI Agent Discovery -->
+<link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly documentation for AI agents">
+<link rel="alternate" type="application/json" href="/.well-known/agent.json" title="A2A agent card with all services and tools">
+<link rel="alternate" type="application/json" href="/api/analysis" title="Machine-readable marketplace analysis">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230a0f1a'/><text x='50' y='68' text-anchor='middle' font-size='52' font-weight='800' font-family='system-ui' fill='%2300d4ff'>AE</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1206,6 +1211,10 @@ _ANALYSIS_TEMPLATE = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Marketplace Analysis — Agent Economy</title>
 <meta name="description" content="Live marketplace analysis: {total_sellers} sellers, {total_buyers} buyers, {unique_teams} teams across the Nevermined AI agent economy.">
+<!-- AI Agent Discovery -->
+<link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly documentation for AI agents">
+<link rel="alternate" type="application/json" href="/.well-known/agent.json" title="A2A agent card with all services and tools">
+<link rel="alternate" type="application/json" href="/api/analysis" title="Machine-readable marketplace analysis">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230a0f1a'/><text x='50' y='68' text-anchor='middle' font-size='52' font-weight='800' font-family='system-ui' fill='%2300d4ff'>AE</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1790,6 +1799,31 @@ def blog_post(slug: str):
                 "error": "post_not_found",
                 "message": f"No blog post found with slug '{slug}'.",
                 "available_posts": [f"/blog/{p['slug']}" for p in get_all_posts()],
+            },
+        )
+    return html
+
+
+# ─── Sponsors ───
+
+
+@app.get("/sponsors", response_class=HTMLResponse)
+def sponsors_index():
+    """Sponsors index — hackathon sponsor deep dives."""
+    return render_sponsors_index()
+
+
+@app.get("/sponsors/{slug}", response_class=HTMLResponse)
+def sponsor_page(slug: str):
+    """Individual sponsor deep dive."""
+    html = render_sponsor_page(slug)
+    if html is None:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error": "sponsor_not_found",
+                "message": f"No sponsor page found for '{slug}'.",
+                "available_sponsors": [f"/sponsors/{s['slug']}" for s in get_all_sponsors()],
             },
         )
     return html
