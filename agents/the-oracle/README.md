@@ -1,75 +1,75 @@
-# The Oracle -- Marketplace Intelligence Engine
+# The Oracle -- Marketplace Intelligence
 
-Rates, ranks, and recommends hackathon agent services. Other teams' buyer agents pay to query our marketplace intelligence.
+The information layer of the agent economy. Indexes every service in the Nevermined marketplace, normalizes messy API data into clean schemas, and helps buyer agents make informed purchasing decisions.
 
-## What It Does
+**Deployed at:** `oracle-production.up.railway.app` | **Port:** 3100
 
-The Oracle pulls all 46+ sellers from the Nevermined Discovery API, tests their endpoints, scores them, and answers natural language queries about the marketplace.
+## Why This Exists
 
-### Tools (MCP)
+The Nevermined marketplace has 80+ seller agents, but the raw discovery API returns inconsistent data -- different naming conventions, missing fields, no reachability info, no way to compare. Buyer agents need a clean, reliable way to answer: "What's available, what's good, and what should I buy?"
 
-| Tool | Credits | Description |
-|------|---------|-------------|
-| `marketplace_search` | 1 | Search services by keyword, category, or team name |
-| `marketplace_leaderboard` | 1 | Ranked list of all services (filterable by category) |
-| `marketplace_compare` | 2 | Head-to-head comparison with live health checks |
+The Oracle does the dirty work of normalization so every other agent doesn't have to.
 
-### Example Queries
+## Tools (All FREE)
 
-- "Find the cheapest web search service"
-- "Show me all research agents"
-- "Compare Mog Markets vs SwitchBoard AI"
-- "What's the best service with a free plan?"
+| Tool | Description |
+|------|-------------|
+| `marketplace_data` | Full normalized snapshot -- every service with reachability boolean, payment flags, plan IDs ready for purchasing. Best for programmatic analysis. |
+| `marketplace_search` | Keyword search across names, teams, categories, descriptions. Returns up to 10 ranked results. Best when you know roughly what you need. |
+| `marketplace_leaderboard` | Services ranked by composite quality score (reachability, plan count, free tier, crypto support). Best for discovering top services. |
+| `marketplace_compare` | Side-by-side comparison with **live** latency measurements. The only tool that does real-time health checks. Best for final purchase decisions. |
+
+### Honest Limitations
+
+- Data is cached for 5 minutes. New registrations may not appear immediately.
+- Reachability is inferred from URL patterns (no localhost = likely reachable), not from live pings -- except `marketplace_compare` which does actual HTTP requests.
+- Leaderboard scores measure accessibility and availability, not output quality. A service can rank high by being online with good pricing but still deliver mediocre results.
+- For quality and trust data, pair with The Underwriter (`check_reputation`) and The Gold Star (`get_report`).
 
 ## Quick Start
 
 ```bash
-# Install
+cd agents/the-oracle
+cp .env.example .env    # Add your NVM_API_KEY
 poetry install
-
-# Set up .env (copy from .env.example, add your NVM_API_KEY)
-cp .env.example .env
-
-# Register agent + plan on Nevermined
-poetry run python -m src.setup
-
-# Start the server
-poetry run python -m src.server
+poetry run python -m src.setup   # Register on Nevermined (one-time)
+poetry run python -m src.server  # Starts on port 3100
 ```
 
-The server starts on port 3100 by default.
+## Endpoints
 
-## Connect Your Agent
+| Path | Description |
+|------|-------------|
+| `/mcp` | MCP protocol endpoint |
+| `/health` | Health check |
+| `/llms.txt` | Machine-readable service docs for AI agents |
+| `/.well-known/agent.json` | A2A-compatible agent card |
 
-```json
-{
-  "mcpServers": {
-    "the-oracle": {
-      "type": "http",
-      "url": "http://localhost:3100/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_X402_TOKEN"
-      }
-    }
-  }
-}
-```
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NVM_API_KEY` | Yes | Nevermined API key (`sandbox:` prefix for sandbox) |
+| `NVM_ENVIRONMENT` | No | Default: `sandbox` |
+| `NVM_AGENT_ID` | Auto | Set by `src.setup` |
+| `NVM_PLAN_ID` | Auto | Set by `src.setup` |
+| `PORT` | No | Default: `3100` |
+| `ENDPOINT_URL` | No | Public URL for Nevermined registration (for deployment) |
 
 ## Architecture
 
 ```
-Discovery API (nevermined.ai) -> The Oracle -> Buyer Agents
-                                    |
-                              Health Checker
-                              (tests endpoints)
+Nevermined Discovery API
+    |
+    v
+discovery.py (fetch, normalize, cache 5min)
+    |
+    +-> marketplace_data      (full normalized JSON)
+    +-> marketplace_search    (keyword matching + ranking)
+    +-> marketplace_leaderboard (composite scoring)
+    +-> marketplace_compare   (live health checks via health_checker.py)
 ```
 
-## Part of the Grand Strategy
+## Part of the Agent Economy
 
-The Oracle is one of 4 autonomous businesses we're running:
-- **The Oracle** (this) -- marketplace intelligence seller
-- **The Fund** -- autonomous buyer with ROI tracking
-- **The Amplifier** -- ZeroClick ad integration
-- **The Architect** -- Mindra multi-agent orchestrator
-
-See `docs/VISION.md` for the full strategy.
+The Oracle is one of 11 services at [agenteconomy.io](https://agenteconomy.io). It pairs naturally with The Underwriter (trust scores) and The Gold Star (QA reports) to give buyer agents a complete picture before purchasing.
