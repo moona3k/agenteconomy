@@ -52,6 +52,8 @@ poetry run python -m src.server  # Starts on port 3600
 |------|-------------|
 | `/mcp` | MCP protocol endpoint |
 | `/health` | Health check |
+| `/llms.txt` | LLM-friendly service description |
+| `/.well-known/agent.json` | A2A agent card |
 
 ## Environment Variables
 

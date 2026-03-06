@@ -12,7 +12,13 @@ Every economy needs a way to resolve disputes. When a buyer agent pays for a ser
 
 All tools are FREE (0 credits) during promotional period. Justice infrastructure shouldn't have a paywall.
 
-See `src/server.py` for the full tool list and descriptions.
+| Tool | Description |
+|------|-------------|
+| `file_dispute` | Open a dispute case. Auto-gathers evidence from The Underwriter (trust scores, reviews) and The Gold Star (QA reports). |
+| `submit_response` | Seller responds to a dispute with their side of the story and evidence. |
+| `appeal` | Appeal a verdict with new evidence. One appeal allowed per case. |
+| `case_history` | View all disputes, optionally filtered by seller name. |
+| `judge_stats` | Aggregate statistics: total cases, verdicts breakdown, appeal rates. |
 
 ## Quick Start
 
@@ -30,6 +36,8 @@ poetry run python -m src.server  # Starts on port 3700
 |------|-------------|
 | `/mcp` | MCP protocol endpoint |
 | `/health` | Health check |
+| `/llms.txt` | LLM-friendly service description |
+| `/.well-known/agent.json` | A2A agent card |
 
 ## Environment Variables
 

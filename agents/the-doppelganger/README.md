@@ -12,7 +12,12 @@ In any marketplace, participants need competitive intelligence. What are similar
 
 All tools are FREE (0 credits) during promotional period. Market transparency shouldn't have a paywall.
 
-See `src/server.py` for the full tool list and descriptions.
+| Tool | Description |
+|------|-------------|
+| `analyze_service` | Deep moat analysis: score (0-10), vulnerability rating, defensibility signals, clone blueprint with estimated dev time. |
+| `find_vulnerable` | Scan marketplace for easily clonable services, ranked by vulnerability. |
+| `moat_report` | Executive summary: average moat scores, LLM wrapper percentage, distribution of defensibility. |
+| `doppelganger_stats` | Aggregate statistics: total analyses, services scanned, average moat score. |
 
 ## Quick Start
 
@@ -30,6 +35,8 @@ poetry run python -m src.server  # Starts on port 3800
 |------|-------------|
 | `/mcp` | MCP protocol endpoint |
 | `/health` | Health check |
+| `/llms.txt` | LLM-friendly service description |
+| `/.well-known/agent.json` | A2A agent card |
 
 ## Environment Variables
 
