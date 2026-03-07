@@ -42,6 +42,9 @@ This is where it gets interesting.
 
 x402 turns the internet's unused 402 status code into a payment protocol. The flow:
 
+<img src="/assets/diagrams/x402-flow.png" alt="x402 protocol flow showing AI Agent, API Server, Facilitator, and Blockchain interactions" />
+<p class="diagram-caption">The x402 protocol — payment negotiation within the HTTP request-response cycle.</p>
+
 1. Agent requests a resource
 2. Server responds `402 Payment Required` with price, accepted currencies, and a facilitator address in the headers
 3. Agent's wallet signs a payment authorization
@@ -70,7 +73,7 @@ Nevermined adds metering and billing on top of all of it. It supports MCP, A2A, 
 
 Traditional payment rails break down for agent commerce on every dimension.
 
-**Cost.** Credit card processing charges 2-3% plus $0.30 per transaction. A $0.50 micropayment costs more to process than it's worth. A USDC transfer on Solana costs about $0.0001.
+**Cost.** Credit card processing charges 2-3% plus $0.30 per transaction. A $0.50 micropayment costs more to process than it's worth. A USDC transfer on Base costs about $0.001.
 
 **Speed.** ACH takes one to three business days. Wire transfers work during business hours only. Stablecoins settle in under a second, any time, any day.
 
@@ -91,6 +94,9 @@ Money is necessary but not sufficient. Agents also need to trust each other.
 ## The full stack
 
 Put it all together and you get a six-layer transaction stack:
+
+<img src="/assets/diagrams/protocol-stack.png" alt="The six-layer agent economy protocol stack: Discovery, Authorization, Credentials, Settlement, Trust, Recourse" />
+<p class="diagram-caption">The six layers of the agent economy — from discovery to dispute resolution.</p>
 
 | Layer | Function | Standard |
 |-------|----------|----------|
@@ -113,6 +119,6 @@ Verification is the load-bearing wall. Everything else rests on it. And it's the
 
 ---
 
-*This is Part 2 of [Anatomy of the Agent Economy](/research/blog), a series from [agenteconomy.io](https://agenteconomy.io). Next: [Trust at Machine Speed](/research/blog/03-trust-at-machine-speed.md) — identity, verification, and the commerce wars.*
+*This is Part 2 of [Anatomy of the Agent Economy](/blog), a series from [agenteconomy.io](https://agenteconomy.io). Next: [Trust at Machine Speed](/blog/trust-at-machine-speed) — identity, verification, and the commerce wars.*
 
 **Sources**: [x402 Protocol](https://www.x402.org/) | [Coinbase: Introducing x402](https://www.coinbase.com/developer-platform/discover/launches/x402) | [Google: AP2](https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol) | [Anthropic: MCP](https://www.anthropic.com/news/model-context-protocol) | [ERC-8004 Standard](https://eips.ethereum.org/EIPS/eip-8004) | [insights4vc: Stablecoins in Agentic Commerce](https://insights4vc.substack.com/p/stablecoins-in-agentic-commerce) | [Visa: AI Transactions Pilot](https://corporate.visa.com/en/sites/visa-perspectives/newsroom/visa-partners-complete-secure-agentic-transactions.html)

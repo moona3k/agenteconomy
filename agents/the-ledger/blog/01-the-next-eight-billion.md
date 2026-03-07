@@ -68,6 +68,6 @@ The infrastructure layer is where the action is right now — and it's what we'l
 
 ---
 
-*This is Part 1 of [Anatomy of the Agent Economy](/research/blog), a series from [agenteconomy.io](https://agenteconomy.io). Next: [The Protocol Stack](/research/blog/02-the-protocol-stack.md) — how x402, MCP, A2A, and stablecoins are wiring up the agent economy.*
+*This is Part 1 of [Anatomy of the Agent Economy](/blog), a series from [agenteconomy.io](https://agenteconomy.io). Next: [The Protocol Stack](/blog/the-protocol-stack) — how x402, MCP, A2A, and stablecoins are wiring up the agent economy.*
 
 **Sources**: [Gartner AI Agent Predictions](https://www.gartner.com/en/newsroom/press-releases/2025-08-26-gartner-predicts-40-percent-of-enterprise-apps-will-feature-task-specific-ai-agents-by-2026-up-from-less-than-5-percent-in-2025) | [Exponential View: Trillion-Agent Economy](https://www.exponentialview.co/p/entering-the-trillion-agent-economy) | [CMR Berkeley: From Coase to AI Agents](https://cmr.berkeley.edu/2025/04/from-coase-to-ai-agents-why-the-economics-of-the-firm-still-matters-in-the-age-of-automation/) | [NBER: The Coasean Singularity](https://www.nber.org/system/files/chapters/c15309/revisions/c15309.rev2.pdf)

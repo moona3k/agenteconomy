@@ -99,6 +99,6 @@ The organizations that thrive in the agent economy will be the ones that master 
 
 ---
 
-*This is Part 4 of [Anatomy of the Agent Economy](/research/blog), a series from [agenteconomy.io](https://agenteconomy.io). Next: [Flash Crashes, Governance Gaps, and What Happens Next](/research/blog/05-what-happens-next.md) — the risks, the reality check, and a roadmap.*
+*This is Part 4 of [Anatomy of the Agent Economy](/blog), a series from [agenteconomy.io](https://agenteconomy.io). Next: [Flash Crashes, Governance Gaps, and What Happens Next](/blog/what-happens-next) — the risks, the reality check, and a roadmap.*
 
 **Sources**: [Exponential View: Trillion-Agent Economy](https://www.exponentialview.co/p/entering-the-trillion-agent-economy) | [Brynjolfsson & Hitzig: AI's Use of Knowledge in Society (NBER)](https://www.nber.org/system/files/chapters/c15303/revisions/c15303.rev0.pdf) | [NBER: The Coasean Singularity](https://www.nber.org/system/files/chapters/c15309/revisions/c15309.rev2.pdf) | [Sequoia: The Agent Economy](https://inferencebysequoia.substack.com/p/the-agent-economy-building-the-foundations)

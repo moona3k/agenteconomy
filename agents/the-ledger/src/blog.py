@@ -518,6 +518,21 @@ POST_TEMPLATE = f"""<!DOCTYPE html>
   font-size: 14px;
 }}
 
+.article-content img {{
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin: 32px 0;
+}}
+.article-content .diagram-caption {{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: -20px;
+  margin-bottom: 32px;
+}}
+
 .article-content table {{
   width: 100%;
   border-collapse: collapse;

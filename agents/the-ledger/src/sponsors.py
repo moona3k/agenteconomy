@@ -596,6 +596,21 @@ SPONSOR_PAGE_TEMPLATE = f"""<!DOCTYPE html>
   font-size: 14px;
   line-height: 1.6;
 }}
+.article-content img {{
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin: 32px 0;
+}}
+.article-content .diagram-caption {{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: -20px;
+  margin-bottom: 32px;
+}}
+
 .article-content pre code {{
   background: none; padding: 0;
   color: var(--text-secondary); font-size: 14px;

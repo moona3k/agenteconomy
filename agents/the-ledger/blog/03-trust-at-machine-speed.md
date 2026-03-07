@@ -124,6 +124,6 @@ Whether this composability holds as stakes increase is the open question.
 
 ---
 
-*This is Part 3 of [Anatomy of the Agent Economy](/research/blog), a series from [agenteconomy.io](https://agenteconomy.io). Next: [Hayek, Coase, and Homo Agenticus](/research/blog/04-hayek-coase-and-homo-agenticus.md) — the economic theory underneath, and the behavioral biases nobody's talking about.*
+*This is Part 3 of [Anatomy of the Agent Economy](/blog), a series from [agenteconomy.io](https://agenteconomy.io). Next: [Hayek, Coase, and Homo Agenticus](/blog/hayek-coase-and-homo-agenticus) — the economic theory underneath, and the behavioral biases nobody's talking about.*
 
 **Sources**: [ERC-8004: Trustless Agents](https://eips.ethereum.org/EIPS/eip-8004) | [Ravi Naarla: Building a Trust Economy for Agents](https://rnaarla.substack.com/p/building-a-trust-economy-for-agents) | [OpenAI: Buy It in ChatGPT](https://openai.com/index/buy-it-in-chatgpt/) | [Google: UCP](https://developers.googleblog.com/under-the-hood-universal-commerce-protocol-ucp/) | [Dock.io: AI Agent Identity](https://www.dock.io/post/ai-agent-identity)

@@ -1,0 +1,341 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "claude-code",
+  "elements": [
+    {
+      "type": "text",
+      "id": "title",
+      "x": 60, "y": 30, "width": 500, "height": 40,
+      "text": "The Agent Economy Protocol Stack",
+      "fontSize": 32, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#eef2ff", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 100, "version": 1, "versionNonce": 100,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "The Agent Economy Protocol Stack", "link": null, "locked": false
+    },
+
+    {
+      "type": "rectangle",
+      "id": "layer6_box",
+      "x": 60, "y": 100, "width": 260, "height": 60,
+      "strokeColor": "#e03131", "backgroundColor": "#4c1d1d",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": { "type": 3 }, "seed": 601, "version": 1, "versionNonce": 601,
+      "isDeleted": false,
+      "boundElements": [
+        { "id": "layer6_text", "type": "text" }
+      ],
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer6_text",
+      "x": 80, "y": 118, "width": 220, "height": 24,
+      "text": "Recourse",
+      "fontSize": 20, "fontFamily": 3,
+      "textAlign": "center", "verticalAlign": "middle",
+      "strokeColor": "#ffc9c9", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 602, "version": 1, "versionNonce": 602,
+      "isDeleted": false, "boundElements": null,
+      "containerId": "layer6_box", "originalText": "Recourse",
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer6_desc",
+      "x": 340, "y": 108, "width": 340, "height": 44,
+      "text": "Dispute resolution\nSmart contract escrow, reputation penalties",
+      "fontSize": 14, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#868e96", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 603, "version": 1, "versionNonce": 603,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "Dispute resolution\nSmart contract escrow, reputation penalties",
+      "link": null, "locked": false
+    },
+
+    {
+      "type": "rectangle",
+      "id": "layer5_box",
+      "x": 60, "y": 180, "width": 260, "height": 60,
+      "strokeColor": "#f08c00", "backgroundColor": "#4a3000",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": { "type": 3 }, "seed": 501, "version": 1, "versionNonce": 501,
+      "isDeleted": false,
+      "boundElements": [
+        { "id": "layer5_text", "type": "text" }
+      ],
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer5_text",
+      "x": 80, "y": 198, "width": 220, "height": 24,
+      "text": "Trust",
+      "fontSize": 20, "fontFamily": 3,
+      "textAlign": "center", "verticalAlign": "middle",
+      "strokeColor": "#fff3bf", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 502, "version": 1, "versionNonce": 502,
+      "isDeleted": false, "boundElements": null,
+      "containerId": "layer5_box", "originalText": "Trust",
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer5_desc",
+      "x": 340, "y": 188, "width": 340, "height": 44,
+      "text": "Reputation and identity\nERC-8004, Know Your Agent (KYA)",
+      "fontSize": 14, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#868e96", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 503, "version": 1, "versionNonce": 503,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "Reputation and identity\nERC-8004, Know Your Agent (KYA)",
+      "link": null, "locked": false
+    },
+
+    {
+      "type": "rectangle",
+      "id": "layer4_box",
+      "x": 60, "y": 260, "width": 260, "height": 60,
+      "strokeColor": "#00e5a0", "backgroundColor": "#0a3324",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": { "type": 3 }, "seed": 401, "version": 1, "versionNonce": 401,
+      "isDeleted": false,
+      "boundElements": [
+        { "id": "layer4_text", "type": "text" }
+      ],
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer4_text",
+      "x": 80, "y": 278, "width": 220, "height": 24,
+      "text": "Settlement",
+      "fontSize": 20, "fontFamily": 3,
+      "textAlign": "center", "verticalAlign": "middle",
+      "strokeColor": "#b2f2bb", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 402, "version": 1, "versionNonce": 402,
+      "isDeleted": false, "boundElements": null,
+      "containerId": "layer4_box", "originalText": "Settlement",
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer4_desc",
+      "x": 340, "y": 268, "width": 340, "height": 44,
+      "text": "Value transfer\nx402, USDC, card networks",
+      "fontSize": 14, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#868e96", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 403, "version": 1, "versionNonce": 403,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "Value transfer\nx402, USDC, card networks",
+      "link": null, "locked": false
+    },
+
+    {
+      "type": "rectangle",
+      "id": "layer3_box",
+      "x": 60, "y": 340, "width": 260, "height": 60,
+      "strokeColor": "#a78bfa", "backgroundColor": "#2a1f4e",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": { "type": 3 }, "seed": 301, "version": 1, "versionNonce": 301,
+      "isDeleted": false,
+      "boundElements": [
+        { "id": "layer3_text", "type": "text" }
+      ],
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer3_text",
+      "x": 80, "y": 358, "width": 220, "height": 24,
+      "text": "Credentials",
+      "fontSize": 20, "fontFamily": 3,
+      "textAlign": "center", "verticalAlign": "middle",
+      "strokeColor": "#d0bfff", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 302, "version": 1, "versionNonce": 302,
+      "isDeleted": false, "boundElements": null,
+      "containerId": "layer3_box", "originalText": "Credentials",
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer3_desc",
+      "x": 340, "y": 348, "width": 340, "height": 44,
+      "text": "Scoped tokens for specific agents\nNetwork tokens, shared payment tokens",
+      "fontSize": 14, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#868e96", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 303, "version": 1, "versionNonce": 303,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "Scoped tokens for specific agents\nNetwork tokens, shared payment tokens",
+      "link": null, "locked": false
+    },
+
+    {
+      "type": "rectangle",
+      "id": "layer2_box",
+      "x": 60, "y": 420, "width": 260, "height": 60,
+      "strokeColor": "#3b82f6", "backgroundColor": "#0f2554",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": { "type": 3 }, "seed": 201, "version": 1, "versionNonce": 201,
+      "isDeleted": false,
+      "boundElements": [
+        { "id": "layer2_text", "type": "text" }
+      ],
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer2_text",
+      "x": 80, "y": 438, "width": 220, "height": 24,
+      "text": "Authorization",
+      "fontSize": 20, "fontFamily": 3,
+      "textAlign": "center", "verticalAlign": "middle",
+      "strokeColor": "#a5d8ff", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 202, "version": 1, "versionNonce": 202,
+      "isDeleted": false, "boundElements": null,
+      "containerId": "layer2_box", "originalText": "Authorization",
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer2_desc",
+      "x": 340, "y": 428, "width": 340, "height": 44,
+      "text": "User approves agent spending\nAP2 (Verifiable Digital Credentials)",
+      "fontSize": 14, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#868e96", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 203, "version": 1, "versionNonce": 203,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "User approves agent spending\nAP2 (Verifiable Digital Credentials)",
+      "link": null, "locked": false
+    },
+
+    {
+      "type": "rectangle",
+      "id": "layer1_box",
+      "x": 60, "y": 500, "width": 260, "height": 60,
+      "strokeColor": "#00d4ff", "backgroundColor": "#0a2838",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": { "type": 3 }, "seed": 101, "version": 1, "versionNonce": 101,
+      "isDeleted": false,
+      "boundElements": [
+        { "id": "layer1_text", "type": "text" }
+      ],
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer1_text",
+      "x": 80, "y": 518, "width": 220, "height": 24,
+      "text": "Discovery",
+      "fontSize": 20, "fontFamily": 3,
+      "textAlign": "center", "verticalAlign": "middle",
+      "strokeColor": "#00d4ff", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 102, "version": 1, "versionNonce": 102,
+      "isDeleted": false, "boundElements": null,
+      "containerId": "layer1_box", "originalText": "Discovery",
+      "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "layer1_desc",
+      "x": 340, "y": 508, "width": 340, "height": 44,
+      "text": "Machine-readable capabilities\nUCP, Agent Cards, llms.txt",
+      "fontSize": 14, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#868e96", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 103, "version": 1, "versionNonce": 103,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "Machine-readable capabilities\nUCP, Agent Cards, llms.txt",
+      "link": null, "locked": false
+    },
+
+    {
+      "type": "text",
+      "id": "bracket_label_top",
+      "x": 720, "y": 100, "width": 100, "height": 20,
+      "text": "Application",
+      "fontSize": 13, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#505d78", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 700, "version": 1, "versionNonce": 700,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "Application", "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "bracket_label_mid",
+      "x": 720, "y": 290, "width": 100, "height": 20,
+      "text": "Protocol",
+      "fontSize": 13, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#505d78", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 701, "version": 1, "versionNonce": 701,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "Protocol", "link": null, "locked": false
+    },
+    {
+      "type": "text",
+      "id": "bracket_label_bot",
+      "x": 720, "y": 490, "width": 100, "height": 20,
+      "text": "Infrastructure",
+      "fontSize": 13, "fontFamily": 3,
+      "textAlign": "left", "verticalAlign": "top",
+      "strokeColor": "#505d78", "backgroundColor": "transparent",
+      "fillStyle": "solid", "strokeWidth": 1, "strokeStyle": "solid",
+      "roughness": 0, "opacity": 100, "angle": 0, "groupIds": [],
+      "roundness": null, "seed": 702, "version": 1, "versionNonce": 702,
+      "isDeleted": false, "boundElements": null, "containerId": null,
+      "originalText": "Infrastructure", "link": null, "locked": false
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#0a0f1a",
+    "gridSize": null,
+    "scrollX": 0, "scrollY": 0,
+    "zoom": { "value": 1 }
+  },
+  "files": {}
+}

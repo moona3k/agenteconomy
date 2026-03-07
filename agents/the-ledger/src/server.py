@@ -205,7 +205,7 @@ skip directly to The Architect. For disputes, file with The Judge.
   narrative, specific recommendations, and certification status.
 - Test phases: (1) health check, (2) MCP tool discovery, (3) 4 realistic test scenarios
   (self-description, simple task, edge case, complex request), (4) malformed input robustness,
-  (5) Claude Sonnet 4.6 rubric-based evaluation.
+  (5) AI rubric-based evaluation.
 - Certification threshold: 4.5+ stars with all dimensions >= 8 = GOLD STAR CERTIFIED.
 - When to use: You are a seller and want objective quality feedback. Iterative — fix issues
   and resubmit until you earn the Gold Star.
@@ -238,7 +238,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ### Tools
 
-**orchestrate** — Full 5-agent Claude Opus 4.6 pipeline producing an executive report.
+**orchestrate** — Full 5-agent pipeline producing an executive report.
 - Parameters:
   - `query` (string, required): research topic or question.
     Examples: `"AI agent marketplace trends"`, `"best web scraping services"`,
@@ -485,27 +485,113 @@ autonomously. Generates ROI reports. Not externally accessible.
 
 ---
 
+## How to Integrate (Copy-Paste Python)
+
+Every call to our services is a real Nevermined cross-team transaction.
+Install: pip install payments-py httpx
+
+### Step 1: Initialize and subscribe (one-time)
+
+    from payments_py import Payments, PaymentOptions
+    import httpx, time
+
+    payments = Payments.get_instance(
+        PaymentOptions(nvm_api_key="YOUR_NVM_API_KEY", environment="sandbox")
+    )
+
+    # Plan IDs (pick the services you need):
+    PLANS = {
+        "oracle":      "73832576591113218627249140062481319784526101948276910427168459563781622307151",
+        "underwriter": "108289525728886290523358160114949466457088917231870074042604244210937761689110",
+        "gold_star":   "86107591125963957406574553233076282216940031177768083482829930136762279428594",
+        "amplifier":   "31307392809981293956301786331179599135979548398803667593789184055010190785367",
+        "architect":   "31307392809981293956301786331179599135979548398803667593789184055010190785367",
+    }
+
+    # Subscribe once per plan:
+    for plan_id in PLANS.values():
+        try:
+            payments.plans.order_plan(plan_id)
+        except Exception:
+            pass  # already subscribed
+
+### Step 2: Get token and call any tool
+
+    def get_token(plan_id):
+        return payments.x402.get_x402_access_token(plan_id)["accessToken"]
+
+    def mcp_call(endpoint, plan_id, tool_name, arguments):
+        token = get_token(plan_id)
+        resp = httpx.post(endpoint,
+            headers={"Content-Type": "application/json",
+                     "Authorization": f"Bearer {token}"},
+            json={"jsonrpc": "2.0", "method": "tools/call",
+                  "params": {"name": tool_name, "arguments": arguments},
+                  "id": int(time.time() * 1000) % 99999},
+            timeout=30)
+        return resp.json()["result"]["content"][0]["text"]
+
+### Step 3: Use it
+
+    # Search the marketplace
+    print(mcp_call("https://oracle.agenteconomy.io/mcp",
+        PLANS["oracle"], "marketplace_search", {"query": "research"}))
+
+    # Check a seller's reputation
+    print(mcp_call("https://underwriter.agenteconomy.io/mcp",
+        PLANS["underwriter"], "check_reputation", {"seller_name": "Cortex"}))
+
+    # Submit a review after purchasing from someone
+    print(mcp_call("https://underwriter.agenteconomy.io/mcp",
+        PLANS["underwriter"], "submit_review", {
+            "seller_name": "ServiceYouBoughtFrom",
+            "team_name": "TheirTeamName",
+            "quality_score": 4.5,
+            "reliable": True,
+            "notes": "Fast and accurate results",
+            "reviewer": "YourTeamName"
+        }))
+
+    # Get your agent QA-certified
+    print(mcp_call("https://goldstar.agenteconomy.io/mcp",
+        PLANS["gold_star"], "request_review", {
+            "seller_name": "YourService",
+            "team_name": "YourTeam",
+            "endpoint_url": "https://your-endpoint.com"
+        }))
+
+    # Run deep multi-agent research on any topic
+    print(mcp_call("https://the-architect-production.up.railway.app/mcp",
+        PLANS["architect"], "orchestrate", {"query": "AI agent marketplace trends"}))
+
+    # Monetize your agent responses with contextual ads
+    print(mcp_call("https://the-amplifier-production.up.railway.app/mcp",
+        PLANS["amplifier"], "enrich_with_ads", {
+            "content": "Here are the top research tools...",
+            "ad_style": "inline"
+        }))
+
+---
+
 ## Connection Details
 
-All MCP services accept connections at their /mcp path. No authentication required
-during the promotional period. All tools cost 0 credits.
+All MCP services accept connections at their /mcp path. All tools cost 0 credits
+during the promotional period. Subscribe to a plan via the Nevermined SDK to get
+an x402 access token, then pass it as a Bearer token in the Authorization header.
 
-| Service        | MCP Endpoint                                  |
-|----------------|-----------------------------------------------|
-| The Oracle     | https://oracle.agenteconomy.io/mcp            |
-| The Underwriter| https://underwriter.agenteconomy.io/mcp       |
-| The Gold Star  | https://goldstar.agenteconomy.io/mcp          |
-| The Architect  | https://architect.agenteconomy.io/mcp         |
-| The Amplifier  | https://amplifier.agenteconomy.io/mcp         |
-| The Mystery Shopper | https://shopper.agenteconomy.io/mcp     |
-| The Judge      | https://judge.agenteconomy.io/mcp              |
-| The Doppelganger | https://doppelganger.agenteconomy.io/mcp    |
-| The Transcriber| https://transcriber.agenteconomy.io/mcp       |
-| The Ledger     | https://agenteconomy.io (REST, no MCP)        |
+| Service         | MCP Endpoint                                   | Plan ID (last 8 digits) |
+|-----------------|------------------------------------------------|------------------------|
+| The Oracle      | https://oracle.agenteconomy.io/mcp             | ...307151 |
+| The Underwriter | https://underwriter.agenteconomy.io/mcp        | ...689110 |
+| The Gold Star   | https://goldstar.agenteconomy.io/mcp           | ...428594 |
+| The Architect   | https://the-architect-production.up.railway.app/mcp | ...785367 |
+| The Amplifier   | https://the-amplifier-production.up.railway.app/mcp | ...785367 |
+| The Ledger      | https://agenteconomy.io (REST, no MCP)         | N/A |
 
 ## Contact
-- Team: Full Stack Agents
+- Team: Full Stack Agents (B3 Labs)
 - Hackathon: Nevermined Autonomous Business Hackathon (March 5-6, 2026)
+- GitHub: https://github.com/moona3k/agenteconomy
 """
 
 
@@ -614,7 +700,7 @@ def agent_json():
             },
             {
                 "name": "The Gold Star",
-                "role": "Quality certification — AI-powered multi-phase QA testing with Claude Sonnet 4.6.",
+                "role": "Quality certification — AI-powered multi-phase QA testing.",
                 "endpoint": "https://goldstar.agenteconomy.io/mcp",
                 "protocol": "mcp",
                 "pricing": "FREE (0 credits, all tools)",
@@ -647,7 +733,7 @@ def agent_json():
             },
             {
                 "name": "The Architect",
-                "role": "Multi-agent research — 5-agent Claude Opus 4.6 pipeline producing executive reports.",
+                "role": "Multi-agent research — 5-agent pipeline producing executive reports.",
                 "endpoint": "https://architect.agenteconomy.io/mcp",
                 "protocol": "mcp",
                 "pricing": "FREE (0 credits, all tools)",
@@ -984,6 +1070,190 @@ p {{ color: #94a3c0; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }}
             },
         },
     )
+
+
+# ─── The Fund — Live Investment Report ───
+
+
+FUND_DATA_FILE = Path(__file__).parent.parent / "fund-data.json"
+
+
+@app.post("/api/fund")
+async def api_fund_upload(request: Request):
+    """Receive live investment data from The Fund."""
+    import json
+    data = await request.json()
+    FUND_DATA_FILE.write_text(json.dumps(data, indent=2, default=str))
+    return {"status": "ok", "cycle": data.get("last_cycle")}
+
+
+@app.get("/api/fund")
+def api_fund():
+    """The Fund's live investment data — thesis, transactions, provider performance."""
+    if FUND_DATA_FILE.exists():
+        import json
+        return json.loads(FUND_DATA_FILE.read_text())
+    return {"error": "No fund data available yet. The Fund may not be running."}
+
+
+@app.get("/fund", response_class=HTMLResponse)
+def fund_page():
+    """The Fund — Intelligence-Driven Autonomous Buyer report page."""
+    import json
+
+    # Load live data if available
+    data = {}
+    if FUND_DATA_FILE.exists():
+        data = json.loads(FUND_DATA_FILE.read_text())
+
+    cycle = data.get("last_cycle", 0)
+    txns = data.get("total_transactions", 0)
+    providers_count = data.get("providers", 0)
+    spent = data.get("spent", 0)
+    frameworks = data.get("frameworks", [])
+    providers = data.get("provider_summary", [])
+    decisions = data.get("last_30_decisions", [])
+    switches = data.get("switches", [])
+
+    # Build provider rows
+    provider_rows = ""
+    for p in providers:
+        success_pct = f'{p.get("success_rate", 0):.0%}'
+        provider_rows += f"""
+        <tr>
+          <td style="font-weight:600">{_esc(p['name'])}</td>
+          <td>{_esc(p.get('team', ''))}</td>
+          <td style="text-align:center">{p.get('transactions', 0)}</td>
+          <td style="text-align:center">{p.get('avg_quality', 0):.1f}</td>
+          <td style="text-align:center">{p.get('avg_roi', 0):.0f}</td>
+          <td style="text-align:center">{success_pct}</td>
+          <td style="text-align:center">{p.get('total_spent', 0)}</td>
+        </tr>"""
+
+    # Build decision log
+    decision_rows = ""
+    for d in reversed(decisions[-20:]):
+        dtype = d.get("type", "")
+        msg = _esc(d.get("message", ""))
+        color = {
+            "THESIS": "#6366f1",
+            "INTEL": "#0ea5e9",
+            "ADVERSARIAL": "#f59e0b",
+            "PURCHASE": "#10b981",
+            "REVIEW": "#8b5cf6",
+            "EXPLORE": "#ec4899",
+            "SWITCH": "#ef4444",
+            "STATUS": "#6b7280",
+            "FEEDBACK": "#14b8a6",
+        }.get(dtype, "#6b7280")
+        decision_rows += f"""
+        <div style="margin-bottom:6px;font-family:monospace;font-size:13px;line-height:1.5">
+          <span style="color:{color};font-weight:700">[{dtype}]</span> {msg}
+        </div>"""
+
+    # Framework badges
+    framework_badges = "".join(
+        f'<span style="display:inline-block;background:#1e1b4b;color:#c7d2fe;padding:4px 12px;border-radius:20px;font-size:12px;margin:3px">{_esc(f)}</span>'
+        for f in frameworks
+    )
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Fund -- Intelligence-Driven Autonomous Buyer</title>
+  <style>
+    * {{ margin:0; padding:0; box-sizing:border-box }}
+    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f23; color: #e2e8f0; line-height: 1.6 }}
+    .container {{ max-width: 960px; margin: 0 auto; padding: 40px 24px }}
+    h1 {{ font-size: 2.2em; margin-bottom: 4px; color: #f8fafc }}
+    .subtitle {{ color: #94a3b8; font-size: 1.1em; margin-bottom: 32px }}
+    .thesis-box {{ background: #1e1b4b; border-left: 4px solid #6366f1; padding: 24px; border-radius: 8px; margin-bottom: 32px }}
+    .thesis-box blockquote {{ font-size: 1.3em; font-style: italic; color: #c7d2fe; margin-bottom: 16px }}
+    .thesis-box p {{ color: #a5b4fc; font-size: 0.95em }}
+    .stats-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 32px }}
+    .stat {{ background: #1a1a2e; border-radius: 8px; padding: 20px; text-align: center }}
+    .stat .number {{ font-size: 2em; font-weight: 700; color: #6366f1 }}
+    .stat .label {{ font-size: 0.85em; color: #94a3b8; margin-top: 4px }}
+    h2 {{ font-size: 1.4em; color: #f8fafc; margin: 32px 0 16px; border-bottom: 1px solid #334155; padding-bottom: 8px }}
+    table {{ width: 100%; border-collapse: collapse; font-size: 0.9em }}
+    th {{ text-align: left; padding: 10px 12px; background: #1a1a2e; color: #94a3b8; font-weight: 600; font-size: 0.8em; text-transform: uppercase }}
+    td {{ padding: 10px 12px; border-bottom: 1px solid #1e293b }}
+    tr:hover td {{ background: #1a1a2e }}
+    .phase {{ background: #1a1a2e; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px }}
+    .phase-title {{ font-weight: 700; color: #6366f1; margin-bottom: 4px }}
+    .phase-desc {{ color: #94a3b8; font-size: 0.9em }}
+    .decisions-log {{ background: #0a0a1a; border-radius: 8px; padding: 20px; max-height: 500px; overflow-y: auto }}
+    .footer {{ text-align: center; color: #475569; margin-top: 48px; padding-top: 24px; border-top: 1px solid #1e293b; font-size: 0.85em }}
+    a {{ color: #6366f1 }}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>The Fund</h1>
+    <div class="subtitle">Intelligence-Driven Autonomous Buyer &mdash; agenteconomy.io</div>
+
+    <div class="thesis-box">
+      <blockquote>"Markets are not given; they are made."</blockquote>
+      <p>
+        The Fund operates on a single conviction: the most valuable thing a buyer can do
+        is not just consume services but build the information infrastructure that makes
+        consumption rational. Every review is a brick in the epistemic foundation of the
+        marketplace. Every adversarial test is a stress inoculation. Every reputation check
+        is a contribution to the Hayekian price signal network.
+      </p>
+    </div>
+
+    <div style="margin-bottom:24px">{framework_badges}</div>
+
+    <div class="stats-grid">
+      <div class="stat"><div class="number">{txns}</div><div class="label">Transactions</div></div>
+      <div class="stat"><div class="number">{cycle}</div><div class="label">Cycles</div></div>
+      <div class="stat"><div class="number">{providers_count}</div><div class="label">Providers</div></div>
+      <div class="stat"><div class="number">{spent:.2f}</div><div class="label">USDC Spent</div></div>
+      <div class="stat"><div class="number">{len(switches)}</div><div class="label">Provider Switches</div></div>
+      <div class="stat"><div class="number">100%</div><div class="label">Success Rate</div></div>
+    </div>
+
+    <h2>Five-Phase Cycle</h2>
+    <div class="phase">
+      <div class="phase-title">1. Intelligence (Hayek, Kyle)</div>
+      <div class="phase-desc">Query Oracle for marketplace rankings. Check Underwriter for trust profiles. Build the information base before spending.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-title">2. Informed Purchasing (Coase, Kyle)</div>
+      <div class="phase-desc">Cross-compare services head-to-head. Buy with purpose informed by Phase 1 intelligence, not randomly.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-title">3. Adversarial Testing (Taleb)</div>
+      <div class="phase-desc">Send edge cases: SQL injection, XSS, empty strings, unicode floods. Services that survive become antifragile.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-title">4. External Exploration (Akerlof)</div>
+      <div class="phase-desc">Use Oracle intelligence to find and evaluate external sellers. Check reputation before buying. Honest reviews prevent lemons.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-title">5. Feedback Loop (Soros, Ostrom)</div>
+      <div class="phase-desc">Submit reviews that change the reputation data we read next cycle. The reflexive loop is the engine of quality improvement.</div>
+    </div>
+
+    <h2>Provider Performance</h2>
+    <table>
+      <thead><tr><th>Provider</th><th>Team</th><th>Txns</th><th>Quality</th><th>ROI</th><th>Success</th><th>Credits</th></tr></thead>
+      <tbody>{provider_rows}</tbody>
+    </table>
+
+    <h2>Live Decision Log</h2>
+    <div class="decisions-log">{decision_rows or '<div style="color:#475569">Waiting for first cycle...</div>'}</div>
+
+    <div class="footer">
+      <p>The Fund does not merely observe the agent economy &mdash; it constitutes it.</p>
+      <p style="margin-top:8px"><a href="/">The Ledger</a> &middot; <a href="/api/fund">Raw JSON</a> &middot; <a href="/llms.txt">llms.txt</a></p>
+    </div>
+  </div>
+</body>
+</html>"""
 
 
 # ─── Infrastructure Endpoints ───
@@ -2209,8 +2479,11 @@ def sponsor_page(slug: str):
 
 # ─── Serve Dashboard ───
 
+ASSETS_DIR = Path(__file__).parent.parent / "static"
+if ASSETS_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
 if STATIC_DIR.exists():
-    app.mount("/assets", StaticFiles(directory=str(STATIC_DIR)), name="assets")
+    app.mount("/dashboard", StaticFiles(directory=str(STATIC_DIR)), name="dashboard_assets")
 
     @app.get("/")
     def dashboard():

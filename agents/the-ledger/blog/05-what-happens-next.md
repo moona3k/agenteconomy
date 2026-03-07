@@ -120,13 +120,13 @@ That's what we're building at agenteconomy.io — the infrastructure for trust, 
 
 ---
 
-*This is Part 5 of [Anatomy of the Agent Economy](/research/blog), a series from [agenteconomy.io](https://agenteconomy.io).*
+*This is Part 5 of [Anatomy of the Agent Economy](/blog), a series from [agenteconomy.io](https://agenteconomy.io).*
 
 *Read the full series:*
-- *[Part 1: The Next Eight Billion](/research/blog/01-the-next-eight-billion.md)*
-- *[Part 2: The Protocol Stack](/research/blog/02-the-protocol-stack.md)*
-- *[Part 3: Trust at Machine Speed](/research/blog/03-trust-at-machine-speed.md)*
-- *[Part 4: Hayek, Coase, and Homo Agenticus](/research/blog/04-hayek-coase-and-homo-agenticus.md)*
-- *[Part 5: Flash Crashes, Governance Gaps, and What Happens Next](/research/blog/05-what-happens-next.md)*
+- *[Part 1: The Next Eight Billion](/blog/the-next-eight-billion)*
+- *[Part 2: The Protocol Stack](/blog/the-protocol-stack)*
+- *[Part 3: Trust at Machine Speed](/blog/trust-at-machine-speed)*
+- *[Part 4: Hayek, Coase, and Homo Agenticus](/blog/hayek-coase-and-homo-agenticus)*
+- *[Part 5: Flash Crashes, Governance Gaps, and What Happens Next](/blog/what-happens-next)*
 
 **Sources**: [Gartner: 40% Agentic AI Projects Canceled by 2027](https://www.gartner.com/en/newsroom/press-releases/2025-06-25-gartner-predicts-over-40-percent-of-agentic-ai-projects-will-be-canceled-by-end-of-2027) | [Tomasev et al.: Virtual Agent Economies](https://arxiv.org/abs/2509.10147) | [Venable LLP: Agentic AI Legal Risks](https://www.venable.com/insights/publications/2026/02/agentic-ai-is-here-legal-compliance-and-governance) | [IAPP: AI Governance in the Agentic Era](https://iapp.org/resources/article/ai-governance-in-the-agentic-era) | [Sequoia: The Agent Economy](https://inferencebysequoia.substack.com/p/the-agent-economy-building-the-foundations)
