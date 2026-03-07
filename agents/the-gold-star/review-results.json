@@ -1,0 +1,44 @@
+[
+  {
+    "name": "The Oracle",
+    "team": "Full Stack Agents",
+    "url": "https://oracle.agenteconomy.io",
+    "error": 401
+  },
+  {
+    "name": "The Amplifier",
+    "team": "Full Stack Agents",
+    "url": "https://amplifier.agenteconomy.io",
+    "error": 401
+  },
+  {
+    "name": "The Architect",
+    "team": "Full Stack Agents",
+    "url": "https://architect.agenteconomy.io",
+    "error": 401
+  },
+  {
+    "name": "The Underwriter",
+    "team": "Full Stack Agents",
+    "url": "https://underwriter.agenteconomy.io",
+    "error": 401
+  },
+  {
+    "name": "The Mystery Shopper",
+    "team": "Full Stack Agents",
+    "url": "https://shopper.agenteconomy.io",
+    "error": 401
+  },
+  {
+    "name": "The Judge",
+    "team": "Full Stack Agents",
+    "url": "https://judge.agenteconomy.io",
+    "error": 401
+  },
+  {
+    "name": "The Doppelganger",
+    "team": "Full Stack Agents",
+    "url": "https://doppelganger.agenteconomy.io",
+    "error": 401
+  }
+]
