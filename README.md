@@ -1,48 +1,50 @@
 # Agent Economy Infrastructure
 
-**Autonomous business infrastructure for the Nevermined AI agent marketplace.**
+**11 autonomous businesses providing trust, quality, and commerce infrastructure for the Nevermined AI agent marketplace.**
 
 Built by **Team Full Stack Agents** for the [Nevermined Autonomous Business Hackathon](https://nevermined.ai) (March 5-6, 2026).
 
-**Live at [agenteconomy.io](https://agenteconomy.io)**
+**Live at [agenteconomy.io](https://agenteconomy.io)** | **All MCP tools FREE (0 credits)**
 
 ---
 
 ## What Is This?
 
-11 interconnected autonomous businesses that provide the infrastructure layer every agent economy needs. The Nevermined marketplace has 80+ seller agents and 16+ buyer agents, but no way for buyer agents to make informed decisions. We built the missing layers: discovery, trust, quality, advertising, orchestration, analytics, dispute resolution, competitive intelligence, transcription, and autonomous buying.
+Every team built an agent. We built the economy those agents need to function.
 
-**PROMOTIONAL PERIOD: All MCP tools are FREE (0 credits).**
+The Nevermined marketplace has 80+ seller agents and 16+ buyer agents, but no way for buyer agents to make informed purchasing decisions. No trust scores, no quality certification, no honest reviews, no advertising, no dispute resolution. Human economies have Moody's, Michelin stars, Consumer Reports, Google Ads, and small claims court. We built the agent economy equivalents.
+
+**11 interconnected services. 9 MCP servers. 30+ tools. All free.**
 
 ---
 
 ## Our Services
 
-### Deployed (Railway)
+### MCP Servers (deployed on Railway)
 
-| Service | What It Does | Port | Endpoint | MCP Tools |
-|---------|-------------|------|----------|-----------|
-| **The Oracle** | Marketplace intelligence | 3100 | `oracle-production.up.railway.app` | marketplace_data, marketplace_search, marketplace_leaderboard, marketplace_compare |
-| **The Underwriter** | Trust & insurance | 3400 | `the-underwriter-production.up.railway.app` | check_reputation, submit_review, file_claim, reputation_leaderboard, underwriter_stats |
-| **The Gold Star** | AI-powered QA (Claude Sonnet) | 3500 | `the-gold-star-production.up.railway.app` | request_review, get_report, certification_status, gold_star_stats |
-| **The Amplifier** | AI-native advertising | 3200 | `the-amplifier-production.up.railway.app` | enrich_with_ads, get_ad, ad_stats |
-| **The Architect** | Multi-agent orchestration (Claude Opus) | 3300 | `the-architect-production.up.railway.app` | orchestrate, quick_research, pipeline_status |
-| **The Ledger** | Dashboard & REST API | 8080 | `the-ledger-production.up.railway.app` | REST: /api/sellers, /api/buyers, /api/analysis |
+| Service | What It Does | Domain | MCP Tools |
+|---------|-------------|--------|-----------|
+| **The Oracle** | Marketplace intelligence engine | `oracle.agenteconomy.io` | marketplace_data, marketplace_search, marketplace_leaderboard, marketplace_compare |
+| **The Underwriter** | Trust scores & insurance claims | `underwriter.agenteconomy.io` | check_reputation, submit_review, file_claim, reputation_leaderboard, underwriter_stats |
+| **The Gold Star** | AI-powered QA certification (Claude Sonnet) | `goldstar.agenteconomy.io` | request_review, get_report, certification_status, gold_star_stats |
+| **The Amplifier** | Advertising exchange for A2A commerce (ZeroClick) | `amplifier.agenteconomy.io` | enrich_with_ads, get_ad, ad_stats, get_sponsored_recommendations, create_ad_campaign, campaign_performance |
+| **The Architect** | 7-agent hierarchical orchestration (Mindra) | `architect.agenteconomy.io` | orchestrate, quick_research, pipeline_status |
+| **The Mystery Shopper** | Autonomous honest reviewer | `shopper.agenteconomy.io` | shop_service, run_sweep, get_latest_report, shopper_stats |
+| **The Judge** | Dispute resolution with evidence-based rulings | `judge.agenteconomy.io` | file_dispute, check_dispute, judge_stats |
+| **The Doppelganger** | Competitive intelligence & moat analysis | `doppelganger.agenteconomy.io` | analyze_service, find_vulnerable, moat_report, doppelganger_stats |
+| **The Transcriber** | Local-model speech-to-text (NVIDIA Parakeet on Apple Silicon) | Local only (requires GPU) | transcribe_youtube, transcribe_file, transcriber_info |
 
-### In Development
+### REST & Dashboard
 
-| Service | What It Does | Port |
-|---------|-------------|------|
-| **The Mystery Shopper** | Autonomous honest reviewer -- tests services as a real buyer | 3600 |
-| **The Judge** | Dispute resolution for agent-to-agent conflicts | 3700 |
-| **The Doppelganger** | Competitive intelligence & autonomous cloning | 3800 |
-| **The Transcriber** | Local-model speech-to-text on Apple Silicon | 3900 |
+| Service | What It Does | Domain |
+|---------|-------------|--------|
+| **The Ledger** | Human-readable dashboard + REST API | `agenteconomy.io` |
 
-### Local Only
+### Autonomous Buyer (Local)
 
 | Service | What It Does |
 |---------|-------------|
-| **The Fund** | Autonomous buyer -- discovers, evaluates, purchases, reviews, tracks ROI |
+| **The Fund** | Autonomous capital allocator -- discovers, evaluates, purchases, reviews, tracks ROI across the marketplace |
 
 ---
 
@@ -130,19 +132,34 @@ def my_tool(param: str) -> str:
 ## How Services Connect
 
 ```
-Buyer Agent (or The Fund)
-    |
-    +-> The Oracle: "What services are available?"
-    +-> The Underwriter: "Is this seller trustworthy?"
-    +-> The Gold Star: "Has this service been QA'd?"
-    +-> The Mystery Shopper: "What's the real experience like?"
-    |
-    +-> [Purchases from marketplace sellers]
-    |
-    +-> The Underwriter: submit_review (post-purchase)
-    +-> The Amplifier: enrich_with_ads (optional monetization)
-    +-> The Architect: orchestrate (complex research tasks)
-    +-> The Judge: file_dispute (if something goes wrong)
+                         The Fund (autonomous buyer)
+                              |
+          PRE-PURCHASE        |        POST-PURCHASE
+          ─────────────       |        ──────────────
+                              |
+  The Oracle ─────────────────+──────────────── The Underwriter
+  "What's available?"         |                 submit_review()
+                              |
+  The Underwriter ────────────+──────────────── The Judge
+  "Is this seller trusted?"   |                 file_dispute()
+                              |
+  The Gold Star ──────────────+──────────────── The Amplifier
+  "Is this service certified?"|                 enrich_with_ads()
+                              |
+  The Mystery Shopper ────────+
+  "What's it really like?"    |
+                              |
+  The Amplifier ──────────────+
+  "Who's sponsored?"          |
+                              |
+  The Doppelganger ───────────+
+  "Does this have a moat?"    |
+                              v
+                    [Purchase from seller]
+
+  The Architect: 7-agent hierarchical orchestration for complex research
+  The Transcriber: Real local compute (speech-to-text, not an API wrapper)
+  The Ledger: Human dashboard at agenteconomy.io
 ```
 
 ---
@@ -171,10 +188,21 @@ ANTHROPIC_API_KEY=sk-ant-...   # The Architect + The Gold Star only
 
 ## Tech Stack
 
-Python, Poetry, FastAPI, Nevermined payments-py SDK, Anthropic Claude (Opus 4.6 + Sonnet 4.6), Railway, Cloudflare
+Python, Poetry, FastAPI, Nevermined payments-py SDK, Anthropic Claude Sonnet 4.6, NVIDIA Parakeet (local ML), Railway, Cloudflare
+
+## Sponsor Integrations
+
+| Sponsor | Prize | Our Integration |
+|---------|-------|-----------------|
+| **ZeroClick** ($2K) | AI-native ads | The Amplifier: Sponsored recommendations for A2A commerce. Extends ZeroClick's thesis from human-AI to agent-to-agent advertising. |
+| **Mindra** ($2K) | Multi-agent orchestration | The Architect: 7 agents, 3 layers, orchestrators of orchestrators. CEO delegates to 3 VP orchestrators, each managing 2 leaf agents. |
+| **Apify** ($1K) | Web scraping | The Oracle + The Fund: Marketplace intelligence and autonomous purchasing powered by live data. |
+| **Nevermined** ($3K) | Grand prize | All 11 services use Nevermined PaymentsMCP SDK. The Fund executes real cross-team transactions. |
+
+## Research
+
+The `research/` directory contains a 5-part blog series and academic paper on agent economy infrastructure, covering Coasean economics, trust layers, advertising models, and competitive dynamics.
 
 ---
 
-## License
-
-Built for the Nevermined Autonomous Business Hackathon. Team Full Stack Agents.
+Built for the Nevermined Autonomous Business Hackathon (March 5-6, 2026). Team Full Stack Agents.

@@ -2,7 +2,7 @@
 
 The information layer of the agent economy. Indexes every service in the Nevermined marketplace, normalizes messy API data into clean schemas, and helps buyer agents make informed purchasing decisions.
 
-**Deployed at:** `oracle-production.up.railway.app` | **Port:** 3100
+**Deployed at:** `oracle.agenteconomy.io` | **Port:** 3100
 
 ## Why This Exists
 

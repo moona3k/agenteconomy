@@ -1,20 +1,34 @@
-"""Transcription engine — runs Parakeet locally on Apple Silicon for fast speech-to-text.
+"""Transcription engine -- runs NVIDIA Parakeet locally on Apple Silicon via parakeet-mlx.
 
-This is the only agent in the marketplace providing REAL LOCAL COMPUTE.
-Every other agent wraps an API. We run the model on our MacBook.
+Assembly AI for AI agents, except free.
 """
 import os
-import json
-import time
 import shutil
-import tempfile
 import subprocess
+import tempfile
+import time
 from pathlib import Path
+
+# Lazy-load the model on first use
+_model = None
+
+
+def _get_model():
+    """Load and cache the Parakeet model."""
+    global _model
+    if _model is None:
+        from parakeet_mlx import from_pretrained
+        _model = from_pretrained("mlx-community/parakeet-tdt-0.6b-v2")
+    return _model
 
 
 def is_parakeet_available() -> bool:
-    """Check if parakeet-mlx is installed and available."""
-    return shutil.which("parakeet") is not None
+    """Check if parakeet-mlx is installed."""
+    try:
+        import parakeet_mlx  # noqa: F401
+        return True
+    except ImportError:
+        return False
 
 
 def transcribe_file(audio_path: str) -> dict:
@@ -26,25 +40,17 @@ def transcribe_file(audio_path: str) -> dict:
     if not path.exists():
         return {"error": f"File not found: {audio_path}"}
 
+    if not is_parakeet_available():
+        return {"error": "parakeet-mlx not installed. Install with: pip install parakeet-mlx"}
+
     start = time.time()
 
     try:
-        result = subprocess.run(
-            ["parakeet", str(path)],
-            capture_output=True,
-            text=True,
-            timeout=300,  # 5 min max
-        )
-
+        model = _get_model()
+        result = model.transcribe(path)
         elapsed = time.time() - start
 
-        if result.returncode != 0:
-            return {
-                "error": f"Parakeet failed: {result.stderr[:500]}",
-                "elapsed_seconds": round(elapsed, 2),
-            }
-
-        transcript = result.stdout.strip()
+        transcript = result.text.strip()
         return {
             "transcript": transcript,
             "source": str(path),
@@ -54,10 +60,12 @@ def transcribe_file(audio_path: str) -> dict:
             "model": "parakeet-mlx (NVIDIA Parakeet, Apple Silicon)",
         }
 
-    except subprocess.TimeoutExpired:
-        return {"error": "Transcription timed out (>5 minutes)"}
     except Exception as e:
-        return {"error": f"Transcription failed: {str(e)[:200]}"}
+        elapsed = time.time() - start
+        return {
+            "error": f"Transcription failed: {str(e)[:200]}",
+            "elapsed_seconds": round(elapsed, 2),
+        }
 
 
 def download_youtube_audio(url: str) -> str | None:
@@ -65,8 +73,14 @@ def download_youtube_audio(url: str) -> str | None:
 
     Returns the path to the downloaded audio file, or None on failure.
     """
-    if not shutil.which("yt-dlp"):
-        return None
+    yt_dlp = shutil.which("yt-dlp")
+    if not yt_dlp:
+        # Try via poetry venv
+        try:
+            import yt_dlp as _  # noqa: F401
+            yt_dlp = "yt-dlp"
+        except ImportError:
+            return None
 
     tmpdir = tempfile.mkdtemp(prefix="transcriber_")
     output_path = os.path.join(tmpdir, "audio.%(ext)s")
@@ -103,9 +117,6 @@ def download_youtube_audio(url: str) -> str | None:
 
 def transcribe_youtube(url: str) -> dict:
     """Download and transcribe a YouTube video."""
-    if not shutil.which("yt-dlp"):
-        return {"error": "yt-dlp not installed. Install with: pip install yt-dlp"}
-
     if not is_parakeet_available():
         return {"error": "parakeet-mlx not installed. Install with: pip install parakeet-mlx"}
 
@@ -115,7 +126,7 @@ def transcribe_youtube(url: str) -> dict:
     download_time = time.time() - download_start
 
     if not audio_path:
-        return {"error": f"Failed to download audio from: {url}"}
+        return {"error": f"Failed to download audio from: {url}. Ensure yt-dlp is installed."}
 
     # Transcribe
     result = transcribe_file(audio_path)
@@ -143,9 +154,9 @@ def get_capabilities() -> dict:
     has_ytdlp = shutil.which("yt-dlp") is not None
 
     return {
-        "service": "The Transcriber",
+        "service": "The Transcriber -- Assembly AI for AI Agents, Except Free",
         "model": "parakeet-mlx (NVIDIA Parakeet on Apple Silicon)",
-        "compute": "Local MacBook -- real compute, not an API wrapper",
+        "compute": "Local Apple Silicon -- real ML compute, not an API wrapper",
         "parakeet_installed": has_parakeet,
         "yt_dlp_installed": has_ytdlp,
         "supported_inputs": [
@@ -154,12 +165,11 @@ def get_capabilities() -> dict:
             "Video files (mp4, mkv, webm -- audio extracted)",
         ],
         "supported_outputs": ["Plain text transcript"],
-        "pricing": "1 credit per transcription (~$0.01)",
+        "pricing": "FREE (0 credits). Ad-supported via ZeroClick.",
         "max_duration": "5 minutes processing time per file",
         "limitations": [
             "English-optimized (Parakeet is primarily English)",
             "Processing time depends on audio length",
-            "Local compute means one transcription at a time",
             "No speaker diarization (yet)",
         ],
     }

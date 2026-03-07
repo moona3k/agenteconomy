@@ -164,45 +164,231 @@ class Portfolio:
         return sum(len(p.transactions) for p in self.providers.values())
 
     def get_report(self) -> str:
-        """Generate investment report for judges."""
+        """Generate comprehensive investment report for hackathon judges."""
+        import datetime
+
+        total_txns = self.total_transactions
+        total_credits = sum(p.total_spent for p in self.providers.values())
+        avg_quality = (
+            sum(p.avg_quality * len(p.transactions) for p in self.providers.values()) / total_txns
+            if total_txns > 0 else 0
+        )
+        overall_success = (
+            sum(sum(1 for t in p.transactions if t.success) for p in self.providers.values()) / total_txns
+            if total_txns > 0 else 0
+        )
+
+        # Categorize decisions
+        thesis_decisions = [d for d in self.decisions if d["type"] == "THESIS"]
+        adversarial_decisions = [d for d in self.decisions if d["type"] == "ADVERSARIAL"]
+        adversarial_passed = sum(1 for d in adversarial_decisions if "PASSED" in d["message"])
+        adversarial_failed = sum(1 for d in adversarial_decisions if "FAILED" in d["message"])
+        review_decisions = [d for d in self.decisions if d["type"] == "REVIEW"]
+        explore_decisions = [d for d in self.decisions if d["type"] == "EXPLORE"]
+        intel_decisions = [d for d in self.decisions if d["type"] == "INTEL"]
+
+        # Category breakdown
+        cat_stats: dict[str, dict] = {}
+        for p in self.providers.values():
+            cat = p.category
+            if cat not in cat_stats:
+                cat_stats[cat] = {"txns": 0, "credits": 0, "providers": 0}
+            cat_stats[cat]["txns"] += len(p.transactions)
+            cat_stats[cat]["credits"] += p.total_spent
+            cat_stats[cat]["providers"] += 1
+
+        # Unique external teams
+        external_teams = set(
+            p.team for p in self.providers.values() if p.team != "Full Stack Agents"
+        )
+
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         lines = [
-            "=" * 60,
-            "THE FUND — INVESTMENT REPORT",
-            "=" * 60,
-            f"",
-            f"Budget: {self.spent:.2f} / {self.total_budget:.2f} USDC spent",
-            f"Remaining: {self.remaining:.2f} USDC",
-            f"Providers used: {len(self.providers)}",
-            f"Total transactions: {sum(len(p.transactions) for p in self.providers.values())}",
-            f"Provider switches: {len(self.switches)}",
-            f"",
-            "--- PROVIDER PERFORMANCE ---",
+            "=" * 72,
+            "THE FUND -- INVESTMENT REPORT",
+            "Intelligence-Driven Autonomous Buyer",
+            f"Generated: {now}",
+            "=" * 72,
+            "",
+            "INVESTMENT THESIS",
+            "-" * 72,
+            "",
+            "  \"Markets are not given; they are made.\"",
+            "",
+            "  The Fund operates on a single conviction: the most valuable thing a",
+            "  buyer can do is not just consume services but build the information",
+            "  infrastructure that makes consumption rational. Every review we submit",
+            "  is a brick in the epistemic foundation of the marketplace. Every",
+            "  adversarial test is a stress inoculation that makes the ecosystem",
+            "  antifragile. Every reputation check before a purchase is a contribution",
+            "  to the Hayekian price signal network.",
+            "",
+            "  Nine frameworks ground every decision:",
+            "    Akerlof (1970)  -- Reviews prevent market collapse to lemons",
+            "    Hayek (1945)    -- Our measurements are decentralized price signals",
+            "    Coase (1937)    -- We buy capabilities, never build them",
+            "    Soros           -- Our reviews change the data we read (reflexivity)",
+            "    Taleb           -- Adversarial testing is the economy's immune system",
+            "    Hurwicz (2007)  -- Honest signals make truth-telling dominant strategy",
+            "    Ostrom (2009)   -- Reputation is a commons we govern by participation",
+            "    Kyle (1985)     -- Informed purchasing is a public good",
+            "    Principal-Agent -- Transparency solves the alignment problem",
+            "",
+            "",
+            "EXECUTIVE SUMMARY",
+            "-" * 72,
+            "",
+            f"  Total transactions:    {total_txns}",
+            f"  Total credits spent:   {total_credits}",
+            f"  USDC equivalent:       {self.spent:.2f}",
+            f"  Unique providers:      {len(self.providers)}",
+            f"  External teams tested: {len(external_teams)}",
+            f"  Provider switches:     {len(self.switches)}",
+            f"  Average quality:       {avg_quality:.1f}/10",
+            f"  Overall success rate:  {overall_success:.0%}",
+            "",
+            f"  Reviews submitted:     {len(review_decisions)}",
+            f"  Adversarial tests:     {len(adversarial_decisions)}",
+            f"    Passed:              {adversarial_passed}",
+            f"    Failed:              {adversarial_failed}",
+            f"  Intelligence queries:  {len(intel_decisions)}",
+            f"  External explorations: {len(explore_decisions)}",
+            "",
+            "",
+            "FIVE-PHASE CYCLE",
+            "-" * 72,
+            "",
+            "  Each 45-second cycle follows a deliberate sequence:",
+            "",
+            "  1. INTELLIGENCE (Hayek, Kyle)",
+            "     Query Oracle for marketplace leaderboard and search results.",
+            "     Check Underwriter for reputation of top-ranked services.",
+            "     -> Builds the information base for all subsequent decisions.",
+            "",
+            "  2. INFORMED PURCHASING (Coase, Kyle)",
+            "     Cross-compare services head-to-head via Oracle.",
+            "     Buy from Amplifier, Gold Star, Architect -- with purpose, not randomly.",
+            "     -> Intelligence gathered in Phase 1 determines what we compare and check.",
+            "",
+            "  3. ADVERSARIAL TESTING (Taleb)",
+            "     Send one edge case per cycle: empty strings, SQL injection, XSS,",
+            "     5000-char floods, unicode, null values, boolean injection.",
+            "     -> Failures trigger incident claims with The Underwriter.",
+            "     -> Services that survive become antifragile.",
+            "",
+            "  4. EXTERNAL EXPLORATION (Akerlof) -- every 5th cycle",
+            "     Use Oracle intelligence to prioritize which external sellers to try.",
+            "     Check reputation BEFORE buying. Subscribe, probe, review.",
+            "     -> Honest reviews prevent the marketplace from collapsing to lemons.",
+            "",
+            "  5. FEEDBACK LOOP (Soros, Ostrom, Hurwicz)",
+            "     Submit reviews for every purchase. These reviews change the",
+            "     reputation data we read next cycle -- a reflexive loop.",
+            "     Periodically measure our impact on the reputation leaderboard.",
+            "     Nominate top performers for Gold Star certification.",
+            "",
+            "",
+            "SPENDING BY CATEGORY",
+            "-" * 72,
+            "",
+        ]
+
+        for cat in sorted(cat_stats.keys()):
+            s = cat_stats[cat]
+            lines.append(f"  {cat:20s}  {s['txns']:4d} txns  {s['credits']:4d} credits  {s['providers']} providers")
+
+        lines += [
+            "",
+            "",
+            "PROVIDER PERFORMANCE (ranked by ROI)",
+            "-" * 72,
+            "",
         ]
 
         for key, p in sorted(self.providers.items(), key=lambda x: -x[1].avg_roi):
-            lines.append(f"")
-            lines.append(f"  {p.name} [{p.team}] ({p.category})")
-            lines.append(f"    Transactions: {len(p.transactions)}")
-            lines.append(f"    Avg Quality: {p.avg_quality:.1f}/10")
-            lines.append(f"    Avg ROI: {p.avg_roi:.0f}")
-            lines.append(f"    Total Spent: {p.total_spent} credits")
-            lines.append(f"    Success Rate: {p.success_rate:.0%}")
-            # Tool breakdown
             tool_counts: dict[str, int] = {}
             for t in p.transactions:
                 tool_counts[t.tool_name] = tool_counts.get(t.tool_name, 0) + 1
+
+            avg_latency = (
+                sum(t.latency_ms for t in p.transactions) / len(p.transactions)
+                if p.transactions else 0
+            )
+
+            lines.append(f"  {p.name} [{p.team}]")
+            lines.append(f"    Category:     {p.category}")
+            lines.append(f"    Transactions: {len(p.transactions)}")
+            lines.append(f"    Avg Quality:  {p.avg_quality:.1f}/10")
+            lines.append(f"    Avg ROI:      {p.avg_roi:.0f}")
+            lines.append(f"    Avg Latency:  {avg_latency:.0f}ms")
+            lines.append(f"    Credits Spent:{p.total_spent}")
+            lines.append(f"    Success Rate: {p.success_rate:.0%}")
             if tool_counts:
-                lines.append(f"    Tools used: {', '.join(f'{k}({v})' for k, v in tool_counts.items())}")
+                lines.append(f"    Tools:        {', '.join(f'{k} ({v})' for k, v in sorted(tool_counts.items(), key=lambda x: -x[1]))}")
+            lines.append("")
 
         if self.switches:
-            lines.append(f"")
-            lines.append("--- SWITCHING DECISIONS ---")
+            lines += [
+                "",
+                "PROVIDER SWITCHING DECISIONS",
+                "-" * 72,
+                "",
+            ]
             for s in self.switches:
-                lines.append(f"  {s['from']} -> {s['to']}: {s['reason']}")
+                lines.append(f"  {s['from']} -> {s['to']}")
+                lines.append(f"    Reason: {s['reason']}")
+                lines.append(f"    ROI improvement: {s['from_roi']:.0f} -> {s['to_roi']:.0f}")
+                lines.append("")
 
-        lines.append(f"")
-        lines.append("--- DECISION LOG ---")
-        for d in self.decisions[-20:]:  # Last 20 decisions
-            lines.append(f"  [{d['type']}] {d['message']}")
+        if adversarial_decisions:
+            lines += [
+                "",
+                "ADVERSARIAL TEST RESULTS",
+                "-" * 72,
+                "",
+            ]
+            for d in adversarial_decisions:
+                lines.append(f"  {d['message']}")
+            lines.append("")
+
+        # Key thesis moments from the log
+        lines += [
+            "",
+            "THESIS-DRIVEN DECISION LOG (last 30)",
+            "-" * 72,
+            "",
+        ]
+        thesis_and_key = [
+            d for d in self.decisions
+            if d["type"] in ("THESIS", "ADVERSARIAL", "SWITCH", "EXPLORE", "FEEDBACK", "INTEL")
+        ]
+        for d in thesis_and_key[-30:]:
+            lines.append(f"  [{d['type']:12s}] {d['message']}")
+
+        lines += [
+            "",
+            "",
+            "REFLEXIVITY EVIDENCE (Soros)",
+            "-" * 72,
+            "",
+            "  The Fund reads reputation data from The Underwriter, makes purchasing",
+            "  decisions based on that data, and submits reviews back to The Underwriter.",
+            "  The reputation data read in cycle N+1 reflects the reviews submitted in",
+            "  cycle N. This is not a bug -- it is the generative engine of the economy.",
+            "",
+            f"  Reviews submitted this session:   {len(review_decisions)}",
+            f"  Reputation checks performed:      {sum(1 for d in self.decisions if d['type'] == 'INTEL')}",
+            f"  Feedback measurements taken:      {sum(1 for d in self.decisions if d['type'] == 'FEEDBACK')}",
+            "",
+            "",
+            "=" * 72,
+            "  The Fund does not merely observe the agent economy -- it constitutes it.",
+            "  Our reviews change reputation. Our purchases create revenue signals.",
+            "  Our switching changes the competitive landscape. We are not passive",
+            "  allocators of capital; we are active participants in a reflexive system",
+            "  where observation and reality are entangled.",
+            "=" * 72,
+        ]
 
         return "\n".join(lines)

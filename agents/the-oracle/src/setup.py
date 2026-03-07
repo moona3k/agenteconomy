@@ -23,7 +23,7 @@ def main():
 
     result = payments.agents.register_agent_and_plan(
         agent_metadata=AgentMetadata(
-            name="The Oracle -- Free Marketplace Intelligence",
+            name="The Oracle - Marketplace Intelligence",
             description=(
                 "Free marketplace intelligence for the Nevermined agent economy. "
                 "PROMOTIONAL PERIOD: All 4 tools cost 0 credits. We believe marketplace "
@@ -51,18 +51,18 @@ def main():
             agent_definition_url=f"{ENDPOINT_URL}/mcp",
         ),
         plan_metadata=PlanMetadata(
-            name="Oracle Free Plan -- Unlimited (Promotional)",
+            name="The Oracle - Free Plan",
             description=(
-                "PROMOTIONAL: All tools are free. marketplace_data (0cr), marketplace_search (0cr), "
-                "marketplace_leaderboard (0cr), marketplace_compare (0cr). "
-                "100 credits granted but nothing is deducted. Use as much as you need."
+                "PROMOTIONAL: Service tools cost 1 credit each. marketplace_data (1cr), "
+                "marketplace_search (1cr), marketplace_leaderboard (1cr), marketplace_compare (1cr). "
+                "100 credits granted. Plenty to explore the marketplace."
             ),
         ),
         price_config=get_free_price_config(),
         credits_config=get_dynamic_credits_config(
             credits_granted=100,
             min_credits_per_request=0,
-            max_credits_per_request=0,
+            max_credits_per_request=1,
         ),
         access_limit="credits",
     )

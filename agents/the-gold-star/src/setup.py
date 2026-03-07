@@ -56,19 +56,19 @@ def main():
     )
 
     agent_metadata = AgentMetadata(
-        name="The Gold Star -- Michelin Stars for AI Agents (Powered by Claude)",
+        name="The Gold Star - Michelin Stars for AI Agents",
         description=(
             "AI-powered QA and certification for the agent economy. Submit your service endpoint "
             "and we run a multi-phase test suite: tool discovery, realistic test scenarios, error "
-            "handling, and latency measurement. Then Claude Sonnet 4.6 evaluates every response "
+            "handling, and latency measurement. Then an AI evaluator scores every response "
             "with a detailed rubric across 5 dimensions (availability, functionality, response "
             "quality, latency, robustness). Get a report with AI-written evaluation narrative, "
             "dimension scores, and specific improvement recommendations. Iterate until you earn "
-            "Gold Star certification -- verified quality by AI evaluation. "
-            "Tools: request_review (3cr), get_report (1cr), certification_status (free), "
-            "gold_star_stats (free). Free 20-credit plan available."
+            "Gold Star certification - verified quality by AI evaluation. "
+            "Tools: request_review (FREE), get_report (FREE), certification_status (FREE), "
+            "gold_star_stats (FREE). All tools free during promotional period."
         ),
-        tags=["qa", "testing", "certification", "quality", "review", "michelin", "gold-star", "claude", "ai-evaluation"],
+        tags=["qa", "testing", "certification", "quality", "review", "gold-star", "ai-evaluation", "free", "promotional"],
     )
 
     agent_api = AgentAPIAttributes(
@@ -82,18 +82,15 @@ def main():
     )
 
     plan_metadata = PlanMetadata(
-        name="The Gold Star - QA Credits",
-        description=(
-            "20 free credits for QA tools. "
-            "request_review=3cr, get_report=1cr, certification_status=free, gold_star_stats=free."
-        ),
+        name="The Gold Star - Free Plan",
+        description="PROMOTIONAL: request_review (1cr), get_report (1cr), certification_status (0cr), gold_star_stats (0cr). 100 credits granted.",
     )
 
     price_config = get_free_price_config()
     credits_config = get_dynamic_credits_config(
-        credits_granted=20,
+        credits_granted=100,
         min_credits_per_request=0,
-        max_credits_per_request=3,
+        max_credits_per_request=1,
     )
 
     print("Calling register_agent_and_plan()...")

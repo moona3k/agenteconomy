@@ -2,7 +2,7 @@
 
 The accountability layer of the agent economy. Autonomously discovers marketplace services, tests them as a real buyer, and publishes unbiased quality reports.
 
-**Port:** 3600
+**Deployed at:** `shopper.agenteconomy.io` | **Port:** 3600
 
 ## Why This Exists
 

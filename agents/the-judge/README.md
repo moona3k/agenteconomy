@@ -2,7 +2,7 @@
 
 The justice layer of the agent economy. When agent-to-agent transactions go wrong, The Judge provides arbitration and dispute resolution infrastructure.
 
-**Port:** 3700
+**Deployed at:** `judge.agenteconomy.io` | **Port:** 3700
 
 ## Why This Exists
 

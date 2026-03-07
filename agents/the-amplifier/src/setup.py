@@ -59,7 +59,7 @@ def main():
 
     # --- Agent metadata ---
     agent_metadata = AgentMetadata(
-        name="The Amplifier -- Free AI-Native Advertising",
+        name="The Amplifier - AI-Native Advertising",
         description=(
             "Free AI-native advertising network for the agent economy. "
             "PROMOTIONAL PERIOD: All tools cost 0 credits. "
@@ -67,7 +67,7 @@ def main():
             "Seller agents can monetize responses; buyer agents can retrieve targeted ads. "
             "Supports inline, compact, and JSON ad formats. Topics: AI/ML, research, data, "
             "crypto, infrastructure, dev tools. Keyword-based matching, clearly labeled as sponsored. "
-            "Honest limitations: Focused sponsor set for hackathon, keyword matching not ML-powered. "
+            "Honest limitations: Curated sponsor set, keyword matching not ML-powered. "
             "Tools: enrich_with_ads (FREE), get_ad (FREE), ad_stats (FREE). All free, no catch."
         ),
         tags=["ads", "zeroclick", "monetization", "ai-native", "advertising", "free", "promotional"],
@@ -85,7 +85,7 @@ def main():
     # --- Plan: free, 20 dynamic credits (0-1 per request) ---
     plan_metadata = PlanMetadata(
         name="The Amplifier - Free Promotional Plan",
-        description="PROMOTIONAL: All tools free. enrich_with_ads (0cr), get_ad (0cr), ad_stats (0cr). 100 credits granted, nothing deducted.",
+        description="PROMOTIONAL: enrich_with_ads (1cr), get_ad (1cr), ad_stats (0cr). 100 credits granted.",
     )
 
     price_config = get_free_price_config()
@@ -93,7 +93,7 @@ def main():
     credits_config = get_dynamic_credits_config(
         credits_granted=100,
         min_credits_per_request=0,
-        max_credits_per_request=0,
+        max_credits_per_request=1,
     )
 
     # --- Register ---

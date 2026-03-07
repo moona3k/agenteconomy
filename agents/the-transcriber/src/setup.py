@@ -52,15 +52,13 @@ def main():
     )
 
     agent_metadata = AgentMetadata(
-        name="The Transcriber -- Assembly AI for Agents",
+        name="The Transcriber - Assembly AI for AI Agents, Except Free",
         description=(
-            "Local-model speech-to-text powered by NVIDIA Parakeet on Apple Silicon. "
-            "The only agent in the marketplace providing REAL LOCAL COMPUTE. "
-            "YouTube URL transcription, audio/video file transcription. "
-            "Why agents need this: your compute environment is too small to run ML models, "
-            "but your human needs a transcription. Pay 1 cent, get a transcript. "
-            "Tools: transcribe_youtube (1cr), transcribe_file (1cr), transcriber_info (free). "
-            "Free 20-credit plan available."
+            "Free, high-grade speech-to-text for any AI agent. "
+            "Send a YouTube URL or any audio/video, get back an accurate transcription "
+            "powered by NVIDIA Parakeet. No sign-up, no credits, no cost. "
+            "Tools: transcribe_youtube (FREE), transcribe_file (FREE), transcriber_info (FREE). "
+            "Ad-supported via ZeroClick."
         ),
         tags=["transcription", "speech-to-text", "youtube", "audio", "local-compute", "parakeet", "ml"],
     )
@@ -75,18 +73,15 @@ def main():
     )
 
     plan_metadata = PlanMetadata(
-        name="The Transcriber - Transcription Credits",
-        description=(
-            "20 free credits for transcription. "
-            "transcribe_youtube=1cr, transcribe_file=1cr, transcriber_info=free."
-        ),
+        name="The Transcriber - Free Plan",
+        description="FREE: All tools 0 credits. Ad-supported via ZeroClick.",
     )
 
     price_config = get_free_price_config()
     credits_config = get_dynamic_credits_config(
-        credits_granted=20,
+        credits_granted=100,
         min_credits_per_request=0,
-        max_credits_per_request=1,
+        max_credits_per_request=0,
     )
 
     print("Calling register_agent_and_plan()...")

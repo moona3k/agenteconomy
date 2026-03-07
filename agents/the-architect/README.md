@@ -1,46 +1,70 @@
-# The Architect -- Multi-Agent Orchestration
+# The Architect -- 7-Agent Hierarchical Orchestration
 
-The intelligence layer of the agent economy. A 5-agent hierarchical pipeline powered by Claude Opus 4.6 that turns any question into an executive research report.
+Orchestrators of orchestrators. A 3-layer corporate org chart where a CEO delegates to VP-level orchestrators, each managing specialized leaf agents. 7 agents total, 3 layers deep, with both parallel and sequential orchestration patterns.
 
-**Deployed at:** `the-architect-production.up.railway.app` | **Port:** 3300
+**Deployed at:** `architect.agenteconomy.io` | **Port:** 3300 | **Mindra $2K Prize**
 
 ## Why This Exists
 
-Individual agents are good at narrow tasks. But real research requires multiple perspectives: someone to find relevant sources, someone to synthesize them, someone to extract insights, someone to check quality, and someone to write the final report. The Architect coordinates all of this in a single call.
+Individual agents are good at narrow tasks. Real research requires multiple perspectives coordinated across layers. The Architect implements hierarchical orchestration -- not just agents in a pipeline, but orchestrators managing orchestrators -- matching Mindra's criteria for scaled AI systems through structured delegation and layered decision-making.
 
-## How It Works
+## Architecture (3 Layers, 7 Agents)
 
 ```
-                CEO Orchestrator
-                     |
-    +--------+-------+-------+--------+
-    |        |       |       |        |
-Discovery  Research  Analysis   QA    Report
-  Agent     Agent     Agent   Agent   Agent
+                    Layer 1: CEO (orchestrator)
+                         |
+            +------------+------------+
+            |            |            |
+       Layer 2:     Layer 2:     Layer 2:
+    VP Intelligence  VP Research  VP Quality
+    (orchestrator)  (orchestrator) (orchestrator)
+         |               |              |
+    +----+----+     +----+----+    +----+----+
+    |         |     |         |    |         |
+Discovery  Market  Research Analysis  QA    Report
+ Agent    Scanner   Agent    Agent  Agent   Agent
+  (leaf)  (leaf)   (leaf)   (leaf) (leaf)  (leaf)
+
+          Layer 3: Leaf Agents (do the actual work)
 ```
 
-| Stage | Agent | What It Does |
-|-------|-------|-------------|
-| 1 | **Discovery** | Searches the Nevermined marketplace for relevant seller services |
-| 2 | **Research** | Synthesizes information on the topic, incorporating marketplace context |
-| 3 | **Analysis** | Distills research into actionable insights and recommendations |
-| 4 | **QA** | Reviews findings for accuracy, bias, and completeness (scored 1-10) |
-| 5 | **Report** | Produces a polished executive report combining all outputs |
+### Orchestration Patterns
+
+| Phase | Orchestrator | Leaf Agents | Pattern | Why |
+|-------|-------------|-------------|---------|-----|
+| 1 | **VP Intelligence** | Discovery + Market Scanner | **Parallel** | Both query the marketplace independently -- no dependency |
+| 2 | **VP Research** | Research + Analysis | **Parallel** | Both work from intelligence brief -- can synthesize independently |
+| 3 | **VP Quality** | QA -> Report | **Sequential** | Quality gate: QA must review before Report incorporates feedback |
+
+### What Each Agent Does
+
+| Agent | Layer | Role |
+|-------|-------|------|
+| **CEO** | 1 (orchestrator) | Top-level coordinator. Delegates to 3 VPs, synthesizes final output. |
+| **VP Intelligence** | 2 (orchestrator) | Runs Discovery + Market Scanner in parallel. Produces intelligence brief. |
+| **VP Research** | 2 (orchestrator) | Runs Research + Analysis in parallel using intelligence brief. |
+| **VP Quality** | 2 (orchestrator) | Runs QA then Report sequentially. Quality gate before publication. |
+| **Discovery** | 3 (leaf) | Searches Nevermined marketplace for services matching the query. |
+| **Market Scanner** | 3 (leaf) | Analyzes competitive landscape: categories, teams, endpoint availability. |
+| **Research** | 3 (leaf) | Synthesizes findings using Claude Sonnet. |
+| **Analysis** | 3 (leaf) | Distills data into actionable insights and recommendations. |
+| **QA** | 3 (leaf) | Reviews for accuracy, bias, completeness. Scores 1-10. |
+| **Report** | 3 (leaf) | Produces executive report incorporating QA feedback. |
 
 ## Tools (All FREE)
 
 | Tool | Description |
 |------|-------------|
-| `orchestrate` | Full 5-agent pipeline. Submit any topic, get an executive report with quality review. 15-45 seconds. |
-| `quick_research` | Fast 2-agent version (Research + Analysis only). Good for simpler questions. |
-| `pipeline_status` | Health check and usage stats. |
+| `orchestrate` | Full 7-agent hierarchical pipeline. Submit any topic, get an executive report with marketplace intelligence, research, analysis, QA review. 15-45 seconds. |
+| `quick_research` | Fast 2-agent version (Research + Analysis only). |
+| `pipeline_status` | Architecture details, health check, and usage stats. |
 
 ### Honest Limitations
 
 - Full pipeline takes 15-45 seconds depending on topic complexity and marketplace API speed.
-- Reports are analytical synthesis, not primary research. The agents reason about available information, they don't generate new data.
-- QA review is a single LLM judgment, not ground truth verification. It catches obvious errors and bias, not subtle inaccuracies.
-- We're absorbing the Claude API costs because we want you to see what hierarchical agent orchestration can do.
+- Reports are analytical synthesis, not primary research. Agents reason about available information, they don't generate new data.
+- QA review is a single LLM judgment, not ground truth verification.
+- We absorb the Claude API costs so you can see what hierarchical orchestration looks like.
 
 ## Quick Start
 
@@ -61,18 +85,12 @@ poetry run python -m src.server  # Starts on port 3300
 | `/llms.txt` | Machine-readable service docs for AI agents |
 | `/.well-known/agent.json` | A2A-compatible agent card |
 
-## Example Queries
-
-- "AI agent marketplace trends and monetization strategies"
-- "Compare decentralized vs centralized payment protocols for AI services"
-- "What are the most underserved categories in the Nevermined marketplace?"
-
 ## Environment Variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `NVM_API_KEY` | Yes | Nevermined API key |
-| `ANTHROPIC_API_KEY` | Yes | For Claude Opus 4.6 pipeline |
+| `ANTHROPIC_API_KEY` | Yes | For Claude Sonnet 4.6 pipeline |
 | `NVM_ENVIRONMENT` | No | Default: `sandbox` |
 | `NVM_AGENT_ID` | Auto | Set by `src.setup` |
 | `NVM_PLAN_ID` | Auto | Set by `src.setup` |
@@ -81,4 +99,4 @@ poetry run python -m src.server  # Starts on port 3300
 
 ## Part of the Agent Economy
 
-The Architect is one of 11 services at [agenteconomy.io](https://agenteconomy.io). It can independently purchase services from other marketplace sellers during its research pipeline -- making it both a seller (of orchestration) and a buyer (of marketplace data).
+The Architect is one of 11 services at [agenteconomy.io](https://agenteconomy.io). Its Discovery and Market Scanner agents query the Nevermined marketplace directly, making it both a seller (of orchestration) and a consumer (of marketplace data).

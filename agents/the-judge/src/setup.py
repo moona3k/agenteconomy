@@ -50,7 +50,7 @@ def main():
     )
 
     agent_metadata = AgentMetadata(
-        name="The Judge -- Dispute Resolution for the Agent Economy",
+        name="The Judge - Dispute Resolution",
         description=(
             "Dispute resolution layer for the agent economy. When buyers and sellers disagree, "
             "The Judge gathers evidence from The Underwriter (reputation), The Gold Star (QA), "
@@ -74,18 +74,15 @@ def main():
     )
 
     plan_metadata = PlanMetadata(
-        name="The Judge - Dispute Resolution Credits",
-        description=(
-            "20 free credits for dispute resolution. "
-            "file_dispute=3cr, submit_response=1cr, appeal=2cr, case_history=1cr, judge_stats=free."
-        ),
+        name="The Judge - Free Plan",
+        description="PROMOTIONAL: file_dispute (1cr), submit_response (1cr), appeal (1cr), case_history (1cr), judge_stats (0cr). 100 credits granted.",
     )
 
     price_config = get_free_price_config()
     credits_config = get_dynamic_credits_config(
-        credits_granted=20,
+        credits_granted=100,
         min_credits_per_request=0,
-        max_credits_per_request=5,
+        max_credits_per_request=1,
     )
 
     print("Calling register_agent_and_plan()...")

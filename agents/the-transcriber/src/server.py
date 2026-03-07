@@ -1,12 +1,11 @@
-"""The Transcriber - Speech-to-Text MCP Server.
+"""The Transcriber - Local-Model Speech-to-Text MCP Server.
 
 Local-model transcription on Apple Silicon using NVIDIA Parakeet.
-
-PROMOTIONAL PERIOD: All tools are FREE (0 credits).
+All tools are FREE. Ad-supported via ZeroClick.
 
 Tools:
-  - transcribe_youtube:    FREE (YouTube URL -> transcript)
-  - transcribe_file:       FREE (audio/video file -> transcript)
+  - transcribe_youtube:    FREE (YouTube URL -> transcript + ad)
+  - transcribe_file:       FREE (audio/video file -> transcript + ad)
   - transcriber_info:      FREE (capabilities and status)
 """
 import asyncio
@@ -19,6 +18,7 @@ from payments_py import Payments, PaymentOptions
 from payments_py.mcp import PaymentsMCP
 
 from . import transcribe as engine
+from .zeroclick import format_ad_block
 
 load_dotenv()
 
@@ -37,15 +37,11 @@ mcp = PaymentsMCP(
     agent_id=NVM_AGENT_ID,
     version="1.0.0",
     description=(
-        "The Transcriber provides local-model speech-to-text using NVIDIA Parakeet "
-        "running on Apple Silicon. This is the ONLY agent in the marketplace that "
-        "provides REAL LOCAL COMPUTE -- every other agent wraps an API. Our MacBook "
-        "does the actual work. "
-        "PROMOTIONAL PERIOD: All tools cost 0 credits. "
-        "Why would an agent need this? Because your agent needs to fulfill a human's "
-        "request that involves transcription, but the compute environment you're running "
-        "in is too small to download and run an ML model. Pay us 1 cent, get a transcript. "
-        "It's Assembly AI for the agent economy. "
+        "Assembly AI for AI agents, except free. "
+        "The Transcriber is a free, high-grade speech-to-text service for the agent economy. "
+        "Send a YouTube URL or any audio/video, get back an accurate transcription powered "
+        "by NVIDIA Parakeet. No sign-up, no credits, no cost. "
+        "ALL TOOLS ARE FREE. Ad-supported via ZeroClick (ads are clearly labeled). "
         "transcribe_youtube: Give us a YouTube URL, we download the audio and transcribe it. "
         "Returns full text transcript with word count and timing. "
         "transcribe_file: Give us a path to an audio or video file and we transcribe it. "
@@ -54,45 +50,43 @@ mcp = PaymentsMCP(
         "Honest limitations: Parakeet is optimized for English. Processing is sequential "
         "(one transcription at a time since it's local compute). No speaker diarization. "
         "Max 5 minutes processing time per file. "
-        "All tools FREE during promotional period."
+        "All tools: FREE (0 credits)."
     ),
 )
 
 
 @mcp.tool(credits=0)
 def transcribe_youtube(youtube_url: str) -> str:
-    """Transcribe a YouTube video to text. FREE during promotional period.
+    """Transcribe a YouTube video to text. FREE.
 
     Give us a YouTube URL and we'll:
     1. Download the audio track (via yt-dlp)
     2. Run it through NVIDIA Parakeet on our local Apple Silicon
     3. Return the full text transcript
 
-    This is real local compute -- no API calls, no cloud services. Our MacBook
-    downloads the audio and runs the ML model directly.
-
     Returns: transcript text, word count, processing time, and source URL.
 
-    Use cases for agents:
-    - Human asks "summarize this YouTube video" but your compute is too small
-    - Need to extract information from a video lecture or presentation
-    - Building a knowledge base from video content
-
     Honest limitations: English-optimized. Processing time depends on video
-    length. Very long videos may timeout (5 min limit). We download at highest
-    quality for accuracy, which takes a few seconds.
+    length. Very long videos may timeout (5 min limit).
 
-    Cost: FREE (promotional period -- normally 1 credit / ~$0.01).
+    Cost: FREE (0 credits). Ad-supported via ZeroClick.
 
     :param youtube_url: Full YouTube URL (e.g., "https://www.youtube.com/watch?v=...")
     """
     result = engine.transcribe_youtube(youtube_url)
+
+    # Append contextual ad
+    ad_query = "AI transcription speech to text video audio"
+    ad_block = format_ad_block(ad_query)
+    if ad_block and "error" not in result:
+        result["sponsored"] = ad_block
+
     return json.dumps(result, indent=2)
 
 
 @mcp.tool(credits=0)
 def transcribe_file(file_path: str) -> str:
-    """Transcribe a local audio or video file to text. FREE during promotional period.
+    """Transcribe a local audio or video file to text. FREE.
 
     Point us at an audio or video file and we'll transcribe it using NVIDIA
     Parakeet running locally on Apple Silicon.
@@ -105,11 +99,18 @@ def transcribe_file(file_path: str) -> str:
     For remote files, use transcribe_youtube for YouTube or provide a local path.
     English-optimized. Max 5 minutes processing time.
 
-    Cost: FREE (promotional period -- normally 1 credit / ~$0.01).
+    Cost: FREE (0 credits). Ad-supported via ZeroClick.
 
     :param file_path: Absolute path to the audio or video file
     """
     result = engine.transcribe_file(file_path)
+
+    # Append contextual ad
+    ad_query = "AI transcription audio processing speech recognition"
+    ad_block = format_ad_block(ad_query)
+    if ad_block and "error" not in result:
+        result["sponsored"] = ad_block
+
     return json.dumps(result, indent=2)
 
 
@@ -125,6 +126,13 @@ def transcriber_info() -> str:
     Cost: Free (always 0 credits).
     """
     caps = engine.get_capabilities()
+
+    # Append contextual ad
+    ad_query = "AI tools machine learning compute infrastructure"
+    ad_block = format_ad_block(ad_query)
+    if ad_block:
+        caps["sponsored"] = ad_block
+
     return json.dumps(caps, indent=2)
 
 
@@ -141,7 +149,8 @@ async def _run():
     print(f"  Health check:  {info['baseUrl']}/health")
     print(f"  Tools: {', '.join(info.get('tools', []))}")
     print(f"  Parakeet installed: {'Yes' if has_parakeet else 'No (install: pip install parakeet-mlx)'}")
-    print(f"  PROMOTIONAL PERIOD: All tools are FREE (0 credits)")
+    print(f"  Pricing: ALL FREE (ad-supported via ZeroClick)")
+    print(f"  ZeroClick API key: {'configured' if os.environ.get('ZEROCLICK_API_KEY') else 'not set'}")
     print()
 
     loop = asyncio.get_running_loop()

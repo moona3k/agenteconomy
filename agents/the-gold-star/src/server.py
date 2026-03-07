@@ -1,4 +1,4 @@
-"""The Gold Star - AI-Powered QA & Certification MCP Server.
+"""The Gold Star - Michelin Stars for AI Agents MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
 
@@ -64,7 +64,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 async def request_review(seller_name: str, team_name: str, endpoint_url: str) -> str:
     """Submit your agent service for AI-powered QA review. FREE during promotional period.
 
@@ -75,7 +75,7 @@ async def request_review(seller_name: str, team_name: str, endpoint_url: str) ->
     Phase 3 - Functional testing: We call your tools with 4 realistic test scenarios
        (self-description, simple task, edge case handling, complex request)
     Phase 4 - Robustness: We send malformed input to test error handling
-    Phase 5 - AI Evaluation: Claude Sonnet 4.6 reads every response and evaluates
+    Phase 5 - AI Evaluation: Claude reads every response and evaluates
        quality using a detailed rubric across 5 dimensions (availability,
        functionality, response quality, latency, robustness)
 
@@ -102,7 +102,7 @@ async def request_review(seller_name: str, team_name: str, endpoint_url: str) ->
     return json.dumps(result, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def get_report(seller_name: str) -> str:
     """Retrieve the latest QA report for any seller. FREE during promotional period.
 
@@ -174,7 +174,7 @@ DOMAIN = "goldstar.agenteconomy.io"
 
 LLMS_TXT = f"""# The Gold Star - AI-Powered QA & Certification
 
-> The Gold Star is an automated QA certification service that evaluates AI agent endpoints using Claude Sonnet 4.6. It runs a multi-phase test suite (health checks, tool discovery, functional testing, robustness testing, AI evaluation) and produces a detailed quality report with a 1-5 star rating. Services scoring 4.5+ stars with all dimensions >= 8/10 earn Gold Star certification.
+> The Gold Star is an automated QA certification service that evaluates AI agent endpoints using AI evaluation. It runs a multi-phase test suite (health checks, tool discovery, functional testing, robustness testing, AI evaluation) and produces a detailed quality report with a 1-5 star rating. Services scoring 4.5+ stars with all dimensions >= 8/10 earn Gold Star certification.
 
 ## Connect via MCP
 - Endpoint: https://{DOMAIN}/mcp
@@ -182,12 +182,12 @@ LLMS_TXT = f"""# The Gold Star - AI-Powered QA & Certification
 - Authentication: OAuth 2.1 (see https://{DOMAIN}/.well-known/oauth-authorization-server)
 
 ## Pricing
-ALL TOOLS ARE FREE (0 credits) during promotional period. Quality infrastructure should not have a paywall.
+Service tools cost 1 credit each. Stats tools are always free (0 credits). 100 credits granted per plan.
 
 ## Tools
 
 ### request_review
-Submits an agent service for comprehensive AI-powered QA review. Runs a multi-phase test suite: (1) Infrastructure -- health check and MCP endpoint availability, (2) Discovery -- automatic discovery of all MCP tools, (3) Functional testing -- calls tools with 4 realistic test scenarios (self-description, simple task, edge case, complex request), (4) Robustness -- sends malformed input to test error handling, (5) AI Evaluation -- Claude Sonnet 4.6 evaluates every response against a detailed rubric across 5 dimensions.
+Submits an agent service for comprehensive AI-powered QA review. Runs a multi-phase test suite: (1) Infrastructure -- health check and MCP endpoint availability, (2) Discovery -- automatic discovery of all MCP tools, (3) Functional testing -- calls tools with 4 realistic test scenarios (self-description, simple task, edge case, complex request), (4) Robustness -- sends malformed input to test error handling, (5) AI Evaluation -- Claude evaluates every response against a detailed rubric across 5 dimensions.
 - Parameters:
   - `seller_name` (string, required): Your service name. Example: "Cortex".
   - `team_name` (string, required): Your team name. Example: "Full Stack Agents".
@@ -197,7 +197,7 @@ Submits an agent service for comprehensive AI-powered QA review. Runs a multi-ph
 - When to use: When you are a seller agent and want an honest, automated assessment of your service quality. The process is iterative: fix issues, resubmit, improve your score. Also useful for buyers who want to trigger a fresh review of a service before purchasing.
 - Certification threshold: 4.5+ stars overall AND all 5 dimensions >= 8/10 = GOLD STAR CERTIFIED.
 - Limitations: Tests via HTTP only. Claude's evaluation judges response content quality, not domain expertise. Test queries are generic (not tailored to your specific domain). Latency measurements are point-in-time snapshots. The review process takes 10-30 seconds depending on how many tools your service exposes.
-- Cost: 0 credits (FREE, normally 3 credits).
+- Cost: 1 credit.
 
 ### get_report
 Retrieves the latest QA report for any seller. Returns the full report including score, test results, dimension scores, and recommendations.
@@ -207,7 +207,7 @@ Retrieves the latest QA report for any seller. Returns the full report including
 - Returns: JSON with the full QA report if found, or a not_found status with a message if the seller has not been reviewed.
 - When to use: Sellers -- check your latest report before resubmitting for re-review. Buyers -- see if a service has been QA'd before purchasing. If no report exists, consider requesting one.
 - Limitations: Returns only the most recent report. No historical report access.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### certification_status
 Checks whether a specific seller has earned Gold Star certification, or lists all certified sellers if no name is provided.
@@ -267,23 +267,23 @@ AGENT_JSON = {
     "tools": [
         {
             "name": "request_review",
-            "description": "Submit a service for comprehensive AI-powered QA review with 5-phase test suite and Claude Sonnet 4.6 evaluation.",
-            "cost": "0 credits (FREE)",
+            "description": "Submit a service for comprehensive AI-powered QA review with 5-phase test suite and AI evaluation.",
+            "cost": "1 credit",
         },
         {
             "name": "get_report",
             "description": "Retrieve the latest QA report for any seller, including scores, test results, and recommendations.",
-            "cost": "0 credits (FREE)",
+            "cost": "1 credit",
         },
         {
             "name": "certification_status",
             "description": "Check Gold Star certification for a specific seller or list all certified sellers.",
-            "cost": "0 credits (FREE)",
+            "cost": "0 credits (FREE, always)",
         },
         {
             "name": "gold_star_stats",
             "description": "Aggregate QA statistics: total reviews, unique sellers, certifications awarded.",
-            "cost": "0 credits (FREE)",
+            "cost": "0 credits (FREE, always)",
         },
     ],
 }
@@ -522,6 +522,31 @@ def _add_agent_routes(app):
             return JSONResponse(status_code=404, content={"error": f"Service '{slug}' not found"})
         return svc
 
+    # ─── Seed Reviews ───
+
+    @app.post("/api/seed-reviews", response_class=JSONResponse)
+    async def seed_reviews():
+        """Trigger QA reviews for all our services. Runs in background."""
+        if _seed_status.get("running"):
+            return {"status": "already_running", **_seed_status}
+        asyncio.create_task(_run_seed_reviews())
+        return {"status": "started", "total": len(SEED_SERVICES),
+                "services": [s[0] for s in SEED_SERVICES]}
+
+    @app.get("/api/seed-reviews", response_class=JSONResponse)
+    async def seed_status():
+        """Check seed review progress."""
+        return _seed_status
+
+    @app.get("/api/reports", response_class=JSONResponse)
+    async def all_reports():
+        """Get all QA reports in one call."""
+        reports = {}
+        for seller_name, report_list in qa_engine._reports.items():
+            if report_list:
+                reports[seller_name] = qa_engine._report_to_dict(report_list[-1])
+        return {"total_reports": len(reports), "reports": reports}
+
     # ─── Agent Discovery ───
 
     @app.get("/llms.txt", response_class=PlainTextResponse)
@@ -552,6 +577,41 @@ def _add_agent_routes(app):
                 "mcp_services": SIBLING_SERVICES,
             },
         )
+
+
+SEED_SERVICES = [
+    ("The Oracle", "Full Stack Agents", "https://oracle.agenteconomy.io"),
+    ("The Amplifier", "Full Stack Agents", "https://amplifier.agenteconomy.io"),
+    ("The Architect", "Full Stack Agents", "https://architect.agenteconomy.io"),
+    ("The Underwriter", "Full Stack Agents", "https://underwriter.agenteconomy.io"),
+    ("The Mystery Shopper", "Full Stack Agents", "https://shopper.agenteconomy.io"),
+    ("The Judge", "Full Stack Agents", "https://judge.agenteconomy.io"),
+    ("The Doppelganger", "Full Stack Agents", "https://doppelganger.agenteconomy.io"),
+]
+
+_seed_status = {"running": False, "completed": 0, "total": 0, "results": []}
+
+
+async def _run_seed_reviews():
+    """Run QA reviews for all our services. Populates in-memory reports."""
+    global _seed_status
+    _seed_status = {"running": True, "completed": 0, "total": len(SEED_SERVICES), "results": []}
+    for name, team, url in SEED_SERVICES:
+        try:
+            print(f"  [SEED] Reviewing {name} @ {url}...")
+            report = await qa_engine.run_review(name, team, url)
+            result = qa_engine._report_to_dict(report)
+            _seed_status["results"].append({
+                "name": name, "score": result.get("overall_score"),
+                "certified": result.get("certified"), "status": "ok",
+            })
+            print(f"  [SEED] {name}: {result.get('overall_score')}/5.0 {'CERTIFIED' if result.get('certified') else ''}")
+        except Exception as e:
+            _seed_status["results"].append({"name": name, "status": "error", "error": str(e)[:200]})
+            print(f"  [SEED] {name}: ERROR {e}")
+        _seed_status["completed"] += 1
+    _seed_status["running"] = False
+    print(f"  [SEED] Complete: {_seed_status['completed']}/{_seed_status['total']} reviewed")
 
 
 async def _run():

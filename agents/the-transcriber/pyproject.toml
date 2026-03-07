@@ -12,6 +12,7 @@ uvicorn = ">=0.34.2,<1.0.0"
 httpx = "^0.28.0"
 python-dotenv = "^1.0.0"
 yt-dlp = ">=2024.0.0"
+parakeet-mlx = "^0.5.1"
 
 [build-system]
 requires = ["poetry-core"]

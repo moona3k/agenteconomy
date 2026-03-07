@@ -19,6 +19,7 @@ from payments_py import Payments, PaymentOptions
 from payments_py.mcp import PaymentsMCP
 
 from .agents import ceo_orchestrate, research_agent, analysis_agent
+from .zeroclick import fetch_zeroclick_offers, format_offers_text
 
 load_dotenv()
 
@@ -37,89 +38,113 @@ mcp = PaymentsMCP(
     agent_id=NVM_AGENT_ID,
     version="1.0.0",
     description=(
-        "The Architect is a multi-agent orchestration engine for the agent economy. "
-        "PROMOTIONAL PERIOD: All tools cost 0 credits -- including the full 5-agent pipeline. "
-        "Here's what makes this genuinely useful: instead of you having to chain multiple API "
-        "calls, parse results, check quality, and compile reports yourself, we run 5 specialized "
-        "agents in sequence -- Discovery, Research, Analysis, QA, and Report -- each independently "
-        "capable of buying services from the Nevermined marketplace. "
-        "orchestrate: Submit any topic and get back an executive report with marketplace context, "
-        "structured analysis, quality review (scored 1-10), and actionable recommendations. "
-        "This is the tool we'd recommend if you need thorough, multi-perspective research. "
+        "The Architect is a 3-layer hierarchical multi-agent orchestration engine -- "
+        "orchestrators of orchestrators, like a corporate org chart. "
+        "PROMOTIONAL PERIOD: All tools cost 0 credits. "
+        "ARCHITECTURE: 7 agents across 3 layers. "
+        "Layer 1 (CEO): Top-level orchestrator that delegates to 3 VP-level orchestrators. "
+        "Layer 2 (VPs): VP Intelligence (orchestrates Discovery + Market Scanner in parallel), "
+        "VP Research (orchestrates Research + Analysis in parallel), VP Quality (orchestrates "
+        "QA -> Report sequentially as a quality gate). "
+        "Layer 3 (Leaf agents): Discovery, Market Scanner, Research, Analysis, QA, Report. "
+        "Each VP makes independent orchestration decisions: VP Intelligence parallelizes market "
+        "scanning, VP Research parallelizes synthesis, VP Quality enforces sequential quality gates. "
+        "orchestrate: Submit any topic. The CEO dispatches it through the full hierarchy. "
+        "7 agents collaborate to produce an executive report with marketplace intelligence, "
+        "competitive landscape, structured analysis, quality review, and recommendations. "
         "quick_research: Faster 2-agent version (Research + Analysis) for simpler questions. "
-        "Same quality per-agent, just fewer stages. "
-        "pipeline_status: Check if we're operational before submitting a request. "
-        "Honest limitations: Each agent call uses Claude, so the full pipeline takes "
-        "15-45 seconds depending on topic complexity. We depend on the Nevermined discovery API "
-        "for marketplace data, so if that's slow, we're slow. The QA agent scores on a 1-10 scale "
-        "but it's a single LLM's judgment, not ground truth verification. Our reports are "
-        "synthesized analysis, not primary research -- we don't scrape the web or access databases. "
-        "All tools FREE. We're absorbing the Claude API costs because we want you to see what "
-        "hierarchical agent orchestration can do."
+        "pipeline_status: Check operational status and architecture details. "
+        "This architecture matches the Mindra pattern: 5+ specialized agents producing deeper "
+        "outputs through coordinated multi-agent collaboration, with hierarchical orchestration "
+        "(orchestrators of orchestrators) scaling through structured delegation. "
+        "Uses Nevermined for marketplace discovery. Powered by Claude Sonnet. "
+        "Honest limitations: Full pipeline takes 15-45 seconds. QA is one LLM's judgment. "
+        "Reports are analytical synthesis, not primary research. "
+        "All tools FREE. We're absorbing Claude API costs."
     ),
 )
 
 _requests_served = 0
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def orchestrate(query: str) -> str:
-    """Run the full 5-agent hierarchical pipeline to produce an executive report. FREE during promotional period.
+    """Run the full 7-agent, 3-layer hierarchical pipeline. FREE during promotional period.
 
-    This is our flagship tool and the one we're most proud of. Five specialized agents,
-    each powered by Claude, work in sequence on your question:
+    This is orchestrators of orchestrators -- a corporate org chart for AI:
 
-    1. Discovery Agent -- searches the Nevermined marketplace for relevant services and
-       data sources. This grounds the research in what's actually available in the economy.
-    2. Research Agent -- synthesizes findings into key data points, trends, and observations.
-       Focuses on what matters, not noise.
-    3. Analysis Agent -- produces actionable insights and concrete recommendations.
-       Connects the dots between findings.
-    4. QA Agent -- reviews everything for accuracy, consistency, bias, and completeness.
-       Scores the report 1-10 and flags issues. This is the step most pipelines skip.
-    5. Report Agent -- compiles everything into a structured executive report with
-       Executive Summary, Key Findings, Analysis, Recommendations, and Quality Notes.
+    Layer 1 - CEO (this orchestrator):
+      Dispatches to three VP-level orchestrators in sequence.
 
-    We built this because we believe the real power of agents isn't individual capability --
-    it's structured collaboration. Five agents checking each other's work produce something
-    better than any single agent could.
+    Layer 2 - VP Orchestrators:
+      VP Intelligence: parallelizes Discovery + Market Scanner
+      VP Research: parallelizes Research + Analysis (using intelligence)
+      VP Quality: sequentially runs QA -> Report (quality gate)
 
-    Returns: pipeline execution log, marketplace services discovered, and the full report.
+    Layer 3 - Leaf Agents (6 specialized workers):
+      Discovery Agent: finds marketplace services matching your query
+      Market Scanner Agent: competitive landscape, category distribution, team counts
+      Research Agent: synthesizes key findings and trends via Claude
+      Analysis Agent: produces actionable insights and recommendations
+      QA Agent: reviews for accuracy, consistency, bias (scores 1-10)
+      Report Agent: compiles the executive report
 
-    Honest limitations: Takes 15-45 seconds for the full pipeline. Quality depends on
-    what the Discovery agent finds in the marketplace. The QA agent is one LLM's opinion,
-    not a fact-check against external sources. Reports are analytical synthesis, not
-    primary research. If the topic is very niche, the marketplace might not have relevant
-    services, and the report will lean more on general analysis.
+    Returns: full architecture details (layers, agents, orchestrators), pipeline
+    execution log showing which VPs ran which agents, marketplace intelligence,
+    and the final executive report.
 
-    Cost: FREE (promotional period -- normally 5 credits). We're covering the Claude API costs.
+    Honest limitations: Takes 15-45 seconds for 7 agents. QA is one LLM's opinion.
+    Reports are synthesis, not primary research. Marketplace data depends on
+    Nevermined Discovery API availability.
 
-    :param query: The research topic or question (e.g., "AI agent marketplace trends", "best web scraping services", "autonomous agent economy analysis", "comparison of research tools")
+    Cost: FREE (promotional period -- normally 5 credits). Claude API costs absorbed.
+
+    :param query: The research topic or question (e.g., "AI agent marketplace trends", "best web scraping services", "autonomous agent economy analysis")
     """
     global _requests_served
     _requests_served += 1
 
     result = ceo_orchestrate(query)
 
+    arch = result.get("architecture", {})
     output_lines = [
-        f"ORCHESTRATION COMPLETE -- {result['agents_used']} agents used",
+        f"HIERARCHICAL ORCHESTRATION COMPLETE",
+        f"  Layers: {arch.get('layers', 3)} | Total agents: {arch.get('total_agents', 7)}",
+        f"  Orchestrators: {', '.join(arch.get('orchestrators', []))}",
+        f"  Leaf agents: {', '.join(arch.get('leaf_agents', []))}",
+        f"  Pattern: {arch.get('pattern', 'hierarchical')}",
+        f"",
         f"Query: {result['query']}",
         f"Marketplace services discovered: {result['sources']['marketplace_services_found']}",
         f"",
-        "Pipeline execution:",
+        "Pipeline execution (orchestrators of orchestrators):",
     ]
     for step in result["pipeline"]:
-        output_lines.append(f"  Step {step['step']}: {step['agent']} -> {step['status']}")
+        agents = ", ".join(step.get("agents", []))
+        output_lines.append(f"  Phase {step['phase']}: {step['orchestrator']} [{agents}] -> {step['status']}")
+
+    # Market structure from Market Scanner
+    market = result.get("sources", {}).get("market_structure", {})
+    if market.get("status") == "success":
+        output_lines.append(f"\nMarket Intelligence:")
+        output_lines.append(f"  Total services: {market.get('total_services', '?')}")
+        output_lines.append(f"  Total teams: {market.get('total_teams', '?')}")
+        output_lines.append(f"  Live endpoints: {market.get('services_with_endpoints', '?')}")
 
     output_lines.append(f"\n{'='*60}")
     output_lines.append("EXECUTIVE REPORT")
     output_lines.append(f"{'='*60}\n")
     output_lines.append(result["report"])
 
+    # Append contextual ZeroClick sponsored offers relevant to the research topic
+    zc_text = format_offers_text(query)
+    if zc_text:
+        output_lines.append(zc_text)
+
     return "\n".join(output_lines)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def quick_research(query: str) -> str:
     """Run a fast 2-agent pipeline (Research + Analysis) for simpler questions. FREE during promotional period.
 
@@ -147,10 +172,13 @@ def quick_research(query: str) -> str:
     research = research_agent(query)
     analysis = analysis_agent(research.get("findings", query))
 
+    zc_text = format_offers_text(query)
+
     return (
         f"QUICK RESEARCH: {query}\n\n"
         f"FINDINGS:\n{research.get('findings', 'N/A')}\n\n"
         f"ANALYSIS:\n{analysis.get('insights', 'N/A')}"
+        f"{zc_text}"
     )
 
 
@@ -166,10 +194,21 @@ def pipeline_status() -> str:
     """
     return json.dumps({
         "status": "operational",
-        "agents": ["discovery", "research", "analysis", "qa", "report"],
-        "agent_count": 5,
-        "orchestration": "hierarchical (CEO -> 5 specialists)",
+        "architecture": {
+            "layers": 3,
+            "total_agents": 7,
+            "pattern": "hierarchical orchestration (orchestrators of orchestrators)",
+            "layer_1_orchestrator": "CEO",
+            "layer_2_orchestrators": {
+                "vp_intelligence": {"agents": ["discovery", "market_scanner"], "execution": "parallel"},
+                "vp_research": {"agents": ["research", "analysis"], "execution": "parallel"},
+                "vp_quality": {"agents": ["qa", "report"], "execution": "sequential (quality gate)"},
+            },
+            "layer_3_leaf_agents": ["discovery", "market_scanner", "research", "analysis", "qa", "report"],
+        },
         "requests_served": _requests_served,
+        "model": "claude-sonnet-4-6",
+        "marketplace_integration": "Nevermined Discovery API",
         "promotional_period": True,
         "all_tools_free": True,
     }, indent=2)
@@ -177,9 +216,9 @@ def pipeline_status() -> str:
 
 DOMAIN = "architect.agenteconomy.io"
 
-LLMS_TXT = f"""# The Architect - Multi-Agent Orchestration
+LLMS_TXT = f"""# The Architect - Hierarchical Multi-Agent Orchestration
 
-> The Architect runs a 5-agent hierarchical pipeline powered by Claude to produce executive-quality research reports on any topic. It handles discovery, research, analysis, quality assurance, and report compilation -- so you submit a question and get back a structured, reviewed report.
+> The Architect runs a 7-agent, 3-layer hierarchical pipeline -- orchestrators of orchestrators, like a corporate org chart. CEO orchestrator delegates to VP Intelligence (Discovery + Market Scanner in parallel), VP Research (Research + Analysis in parallel), and VP Quality (QA -> Report with quality gate). Powered by Claude Sonnet. Uses Nevermined marketplace data.
 
 ## Connect via MCP
 - Endpoint: https://{DOMAIN}/mcp
@@ -187,19 +226,18 @@ LLMS_TXT = f"""# The Architect - Multi-Agent Orchestration
 - Authentication: OAuth 2.1 (see https://{DOMAIN}/.well-known/oauth-authorization-server)
 
 ## Pricing
-ALL TOOLS ARE FREE (0 credits) during promotional period. We are absorbing the Claude API costs.
+Service tools cost 1 credit each. Stats tools are always free (0 credits). 100 credits granted per plan.
 
 ## Tools
 
 ### orchestrate
-Runs the full 5-agent hierarchical pipeline on your query. The agents work in sequence: (1) Discovery Agent scans the Nevermined marketplace for relevant services, (2) Research Agent synthesizes key findings, (3) Analysis Agent produces actionable insights and recommendations, (4) QA Agent reviews for accuracy, consistency, and bias (scores 1-10), (5) Report Agent compiles everything into a structured executive report with Executive Summary, Key Findings, Analysis, Recommendations, and Quality Notes.
+Runs the full 7-agent, 3-layer hierarchical pipeline. CEO orchestrator delegates to 3 VP orchestrators, each managing 2 leaf agents. Architecture: CEO -> VP Intelligence (Discovery + Market Scanner in parallel) -> VP Research (Research + Analysis in parallel) -> VP Quality (QA -> Report sequentially). 7 agents, 3 orchestrators, 4 leaf agents, 3 layers deep.
 - Parameters:
-  - `query` (string, required): The research topic or question. Works best with broad analytical questions. Examples: "AI agent marketplace trends", "best web scraping services", "autonomous agent economy analysis", "comparison of research tools".
-  - Example: `{{"query": "AI agent marketplace trends"}}`
-- Returns: Pipeline execution log (which agents ran, status of each), count of marketplace services discovered, and the full executive report.
-- When to use: When you need thorough, multi-perspective research with quality review. Best for strategic questions, market analysis, technology comparisons, or any topic that benefits from structured analytical thinking. Use this when the stakes justify waiting 15-45 seconds.
-- Limitations: Takes 15-45 seconds for the full pipeline. Quality depends on what the Discovery agent finds in the marketplace. The QA score is one LLM's judgment, not external fact-checking. Reports are analytical synthesis, not primary research (no web scraping or database access). Very niche topics may yield thinner marketplace context.
-- Cost: 0 credits (FREE, normally 5 credits).
+  - `query` (string, required): The research topic or question. Examples: "AI agent marketplace trends", "best web scraping services", "autonomous agent economy analysis".
+- Returns: Full architecture details (layers, agents, orchestrators, pattern), pipeline execution log showing which VPs orchestrated which agents, marketplace intelligence (services found, market structure, team counts), and the final executive report.
+- When to use: When you need thorough, multi-perspective research with quality review and marketplace grounding. The hierarchical architecture produces deeper, higher-quality outputs through coordinated multi-agent collaboration.
+- Limitations: Takes 15-45 seconds for 7 agents. QA is one LLM's judgment. Reports are synthesis, not primary research.
+- Cost: 1 credit.
 
 ### quick_research
 Runs a faster 2-agent pipeline (Research + Analysis) that skips marketplace discovery, quality review, and formal report formatting. You get raw findings plus analytical insights.
@@ -209,7 +247,7 @@ Runs a faster 2-agent pipeline (Research + Analysis) that skips marketplace disc
 - Returns: Two sections -- FINDINGS (key data points and observations) and ANALYSIS (insights and recommendations).
 - When to use: For simpler questions where you want fast results and can evaluate quality yourself. Good for brainstorming, quick market checks, or when you do not need the full 5-agent treatment. Same per-agent quality (Claude), just fewer stages.
 - Limitations: No marketplace grounding (skips Discovery), no quality review (skips QA), less structured output. Faster but less thorough.
-- Cost: 0 credits (FREE, normally 2 credits).
+- Cost: 1 credit.
 
 ### pipeline_status
 Returns operational status, list of all 5 agent names, orchestration type, and total requests served since startup.
@@ -236,13 +274,13 @@ The Architect is one of eleven services at agenteconomy.io — all FREE during p
 
 AGENT_JSON = {
     "name": "The Architect",
-    "description": "Multi-agent orchestration engine for the agent economy. Runs a 5-agent pipeline (Discovery, Research, Analysis, QA, Report) to produce executive-quality research reports on any topic. Also offers a faster 2-agent mode. All tools FREE during promotional period.",
+    "description": "3-layer hierarchical multi-agent orchestration -- orchestrators of orchestrators. CEO orchestrator delegates to VP Intelligence (Discovery + Market Scanner), VP Research (Research + Analysis), VP Quality (QA + Report). 7 agents, 3 layers, structured delegation. Uses Nevermined marketplace data. All tools FREE.",
     "url": f"https://{DOMAIN}",
     "provider": {
         "organization": "Agent Economy Infrastructure",
         "url": "https://agenteconomy.io",
     },
-    "version": "1.0.0",
+    "version": "2.0.0",
     "protocol": "mcp",
     "mcp_endpoint": f"https://{DOMAIN}/mcp",
     "documentation": f"https://{DOMAIN}/llms.txt",
@@ -256,21 +294,28 @@ AGENT_JSON = {
         "type": "oauth2",
         "discovery": f"https://{DOMAIN}/.well-known/oauth-authorization-server",
     },
+    "architecture": {
+        "layers": 3,
+        "total_agents": 7,
+        "pattern": "hierarchical orchestration (orchestrators of orchestrators)",
+        "orchestrators": ["CEO", "VP Intelligence", "VP Research", "VP Quality"],
+        "leaf_agents": ["Discovery", "Market Scanner", "Research", "Analysis", "QA", "Report"],
+    },
     "tools": [
         {
             "name": "orchestrate",
-            "description": "Full 5-agent Claude pipeline producing executive research reports. Takes 15-45 seconds.",
-            "cost": "0 credits (FREE)",
+            "description": "Full 7-agent, 3-layer hierarchical pipeline. CEO -> 3 VP orchestrators -> 6 leaf agents. Executive research reports with marketplace intelligence.",
+            "cost": "1 credit",
         },
         {
             "name": "quick_research",
-            "description": "Fast 2-agent pipeline (Research + Analysis) for simpler questions. Same quality per-agent, fewer stages.",
-            "cost": "0 credits (FREE)",
+            "description": "Fast 2-agent pipeline (Research + Analysis) for simpler questions.",
+            "cost": "1 credit",
         },
         {
             "name": "pipeline_status",
-            "description": "Check pipeline operational status and request count.",
-            "cost": "0 credits (FREE)",
+            "description": "Architecture details, agent count, orchestration pattern, and usage stats.",
+            "cost": "0 credits (FREE, always)",
         },
     ],
 }

@@ -2,7 +2,7 @@
 
 The transparency layer of the agent economy. Analyzes marketplace services, identifies competitive patterns, and surfaces the uncomfortable truths that make markets more efficient.
 
-**Port:** 3800
+**Deployed at:** `doppelganger.agenteconomy.io` | **Port:** 3800
 
 ## Why This Exists
 

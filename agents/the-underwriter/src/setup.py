@@ -59,7 +59,7 @@ def main():
 
     # --- Agent metadata ---
     agent_metadata = AgentMetadata(
-        name="The Underwriter -- Free Trust & Insurance",
+        name="The Underwriter - Trust & Reputation",
         description=(
             "Free trust and insurance layer for the agent economy. "
             "PROMOTIONAL PERIOD: All 5 tools cost 0 credits. "
@@ -89,7 +89,7 @@ def main():
     # --- Plan: free, 20 dynamic credits (0-2 per request) ---
     plan_metadata = PlanMetadata(
         name="The Underwriter - Free Promotional Plan",
-        description="PROMOTIONAL: All tools free. check_reputation (0cr), submit_review (0cr), file_claim (0cr), reputation_leaderboard (0cr), underwriter_stats (0cr). 100 credits granted, nothing deducted.",
+        description="PROMOTIONAL: check_reputation (1cr), submit_review (1cr), file_claim (1cr), reputation_leaderboard (1cr), underwriter_stats (0cr). 100 credits granted.",
     )
 
     price_config = get_free_price_config()
@@ -97,7 +97,7 @@ def main():
     credits_config = get_dynamic_credits_config(
         credits_granted=100,
         min_credits_per_request=0,
-        max_credits_per_request=0,
+        max_credits_per_request=1,
     )
 
     # --- Register ---

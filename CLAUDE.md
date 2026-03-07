@@ -29,10 +29,10 @@ This file provides guidance to AI coding agents working in this repository.
 | The Architect | `agents/the-architect/` | 3300 | the-architect-production.up.railway.app | MCP | Deployed |
 | The Ledger | `agents/the-ledger/` | 8080 | the-ledger-production.up.railway.app | REST | Deployed |
 | The Fund | `agents/the-fund/` | - | N/A | Script | Local only |
-| The Mystery Shopper | `agents/the-mystery-shopper/` | 3600 | - | MCP | In dev |
-| The Judge | `agents/the-judge/` | 3700 | - | MCP | In dev |
-| The Doppelganger | `agents/the-doppelganger/` | 3800 | - | MCP | In dev |
-| The Transcriber | `agents/the-transcriber/` | 3900 | - | MCP | In dev |
+| The Mystery Shopper | `agents/the-mystery-shopper/` | 3600 | shopper.agenteconomy.io | MCP | Deployed |
+| The Judge | `agents/the-judge/` | 3700 | judge.agenteconomy.io | MCP | Deployed |
+| The Doppelganger | `agents/the-doppelganger/` | 3800 | doppelganger.agenteconomy.io | MCP | Deployed |
+| The Transcriber | `agents/the-transcriber/` | 3900 | Local only (Apple Silicon) | MCP | Local only |
 
 ### Nevermined upstream examples (not ours, from fork):
 - `agents/buyer-simple-agent/` - Example A2A buyer

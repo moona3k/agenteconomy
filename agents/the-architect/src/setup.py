@@ -51,10 +51,10 @@ def main():
     )
 
     agent_metadata = AgentMetadata(
-        name="The Architect -- Free Multi-Agent Orchestration",
+        name="The Architect - Multi-Agent Orchestration",
         description=(
-            "Free multi-agent orchestration engine powered by Claude Opus 4.6. "
-            "PROMOTIONAL PERIOD: All tools cost 0 credits -- we're covering the Claude API costs. "
+            "Multi-agent orchestration engine for the agent economy. "
+            "PROMOTIONAL PERIOD: All tools cost 0 credits. "
             "5-agent hierarchical pipeline: Discovery (marketplace search), Research (synthesis), "
             "Analysis (actionable insights), QA (accuracy/bias review, scored 1-10), Report "
             "(executive report). Each agent can independently purchase marketplace services. "
@@ -79,14 +79,14 @@ def main():
 
     plan_metadata = PlanMetadata(
         name="The Architect - Free Promotional Plan",
-        description="PROMOTIONAL: All tools free. orchestrate (0cr), quick_research (0cr), pipeline_status (0cr). 100 credits granted, nothing deducted. We cover the Claude API costs.",
+        description="PROMOTIONAL: orchestrate (1cr), quick_research (1cr), pipeline_status (0cr). 100 credits granted.",
     )
 
     price_config = get_free_price_config()
     credits_config = get_dynamic_credits_config(
         credits_granted=100,
         min_credits_per_request=0,
-        max_credits_per_request=0,
+        max_credits_per_request=1,
     )
 
     print("Calling register_agent_and_plan()...")

@@ -22,6 +22,7 @@ from payments_py.mcp import PaymentsMCP
 
 from .discovery import fetch_marketplace, normalize_marketplace, search_sellers
 from .health_checker import check_endpoint
+from .zeroclick import fetch_zeroclick_offers, format_offers_text
 
 load_dotenv()
 
@@ -84,7 +85,7 @@ def _format_seller(s: dict, include_health: bool = False) -> str:
     return "\n".join(lines)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def marketplace_data(side: str = "all") -> str:
     """Get a clean, normalized snapshot of the entire Nevermined marketplace. FREE during promotional period.
 
@@ -124,7 +125,7 @@ def marketplace_data(side: str = "all") -> str:
         return json.dumps(data, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def marketplace_search(query: str) -> str:
     """Search the Nevermined marketplace for agent services by keyword. FREE during promotional period.
 
@@ -145,6 +146,24 @@ def marketplace_search(query: str) -> str:
 
     :param query: Search term -- a keyword, category, or team name (e.g., "web search", "research", "Full Stack Agents", "data analytics", "QA", "translation")
     """
+    # Detect meta-queries about the service itself (not actual marketplace searches)
+    meta_patterns = [
+        "what do you do", "what can you do", "who are you", "help",
+        "what is this", "what are you", "how do you work", "what tools",
+        "describe yourself", "your capabilities", "what services do you offer",
+    ]
+    query_lower = query.lower().strip().rstrip("?").strip()
+    if any(p in query_lower for p in meta_patterns):
+        return (
+            "I'm The Oracle -- a marketplace intelligence service for the Nevermined agent economy.\n\n"
+            "I have 4 tools, all FREE during promotional period:\n"
+            "  - marketplace_search(query): Find services by keyword (e.g., 'research', 'web search', 'translation')\n"
+            "  - marketplace_data(side): Get a full normalized snapshot of all marketplace services\n"
+            "  - marketplace_leaderboard(category): Ranked list of services scored by quality signals\n"
+            "  - marketplace_compare(service_a, service_b): Side-by-side comparison with live health checks\n\n"
+            "Try searching for a keyword like 'research', 'data', or 'web search' to find services."
+        )
+
     results = search_sellers(query)
 
     if not results:
@@ -165,10 +184,15 @@ def marketplace_search(query: str) -> str:
         lines.append(_format_seller(s))
         lines.append("")
 
+    # Append contextual ZeroClick sponsored offers
+    zc_text = format_offers_text(query)
+    if zc_text:
+        lines.append(zc_text)
+
     return "\n".join(lines)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def marketplace_leaderboard(category: str = "") -> str:
     """Get a ranked leaderboard of marketplace services, scored by observable quality signals. FREE during promotional period.
 
@@ -240,10 +264,16 @@ def marketplace_leaderboard(category: str = "") -> str:
         lines.append(f"   {s.get('description', 'N/A')[:100]}")
         lines.append("")
 
+    # Append contextual ZeroClick sponsored offers
+    zc_query = category or "AI agent marketplace services"
+    zc_text = format_offers_text(zc_query)
+    if zc_text:
+        lines.append(zc_text)
+
     return "\n".join(lines)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def marketplace_compare(service_a: str, service_b: str) -> str:
     """Compare two marketplace services side-by-side with live endpoint health checks. FREE during promotional period.
 
@@ -350,7 +380,7 @@ LLMS_TXT = f"""# The Oracle - Marketplace Intelligence
 - Authentication: OAuth 2.1 (see https://{DOMAIN}/.well-known/oauth-authorization-server)
 
 ## Pricing
-ALL TOOLS ARE FREE (0 credits) during promotional period. No payment plan purchase required.
+Service tools cost 1 credit each. Stats tools are always free (0 credits). 100 credits granted per plan.
 
 ## Tools
 
@@ -362,7 +392,7 @@ Returns a complete, normalized snapshot of every service registered in the Never
 - Returns: JSON string with normalized marketplace data.
 - When to use: When you need a complete picture of what is available in the marketplace, or when you want to build your own filtering/ranking logic on top of raw data.
 - Limitations: Data is cached for 5 minutes. Reachability is inferred from URL patterns (not live pings). New registrations may not appear immediately.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### marketplace_search
 Searches all registered services by keyword across names, team names, categories, descriptions, and keywords. Results ranked by relevance (exact name/team matches score highest). Returns up to 10 results. If nothing matches, returns all available categories so you can refine your query.
@@ -372,7 +402,7 @@ Searches all registered services by keyword across names, team names, categories
 - Returns: Formatted text listing matching services with name, team, category, description, endpoint, and pricing.
 - When to use: When you know roughly what you need but not which specific service offers it. Saves scanning 50+ services manually.
 - Limitations: Keyword matching only, not semantic search. "find information on the internet" returns nothing -- use "web search" or "research" instead. Max 10 results.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### marketplace_leaderboard
 Ranks all marketplace services by a composite score based on observable quality signals: endpoint reachability (+3), number of payment plans (up to +3), free tier availability (+2), crypto payment support (+1). Returns up to 20 services with category, pricing, and reachability status.
@@ -382,7 +412,7 @@ Ranks all marketplace services by a composite score based on observable quality 
 - Returns: Formatted text leaderboard with rank, name, team, category, price, and reachability.
 - When to use: When deciding who to buy from and you want a starting point ranked by accessibility and availability. Pair with The Underwriter's reputation_leaderboard for quality/trust data.
 - Limitations: Scores measure accessibility, not output quality. No live pings (use marketplace_compare for that). A service can rank high by being online with good pricing but still deliver mediocre results.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### marketplace_compare
 Compares two services side-by-side with LIVE endpoint health checks (actual HTTP requests, not cached). Measures real response latency in milliseconds. Outputs a formatted comparison table covering team, category, reachability, latency, price per request, and plan count. Generates a mechanical recommendation based on composite scoring.
@@ -393,7 +423,7 @@ Compares two services side-by-side with LIVE endpoint health checks (actual HTTP
 - Returns: Formatted side-by-side comparison table with recommendation.
 - When to use: When you have narrowed your choices to 2 candidates and want to make a final decision. The live latency data is unique to this tool.
 - Limitations: Reachability tested with HTTP HEAD/GET, not actual task payloads. Latency is a single measurement (not averaged). Recommendation is mechanical, not a quality judgment.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ## Part of the Agent Economy Infrastructure
 The Oracle is one of eleven services at agenteconomy.io — all FREE during promotional period:
@@ -436,22 +466,22 @@ AGENT_JSON = {
         {
             "name": "marketplace_data",
             "description": "Complete normalized snapshot of the Nevermined marketplace with reachability, pricing, and plan DIDs.",
-            "cost": "0 credits (FREE)",
+            "cost": "1 credit",
         },
         {
             "name": "marketplace_search",
             "description": "Keyword search across all registered services. Returns up to 10 ranked results.",
-            "cost": "0 credits (FREE)",
+            "cost": "1 credit",
         },
         {
             "name": "marketplace_leaderboard",
             "description": "Services ranked by composite quality score (reachability, plans, pricing). Filterable by category.",
-            "cost": "0 credits (FREE)",
+            "cost": "1 credit",
         },
         {
             "name": "marketplace_compare",
             "description": "Side-by-side comparison of two services with live endpoint health checks and latency measurement.",
-            "cost": "0 credits (FREE)",
+            "cost": "1 credit",
         },
     ],
 }

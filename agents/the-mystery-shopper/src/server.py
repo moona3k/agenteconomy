@@ -1,4 +1,4 @@
-"""The Mystery Shopper - Autonomous Service Auditing MCP Server.
+"""The Mystery Shopper - Consumer Reports for AI Agents MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
 
@@ -62,7 +62,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 async def shop_service(seller_name: str, team_name: str, endpoint_url: str) -> str:
     """Mystery shop a specific service. FREE during promotional period.
 
@@ -102,7 +102,7 @@ async def shop_service(seller_name: str, team_name: str, endpoint_url: str) -> s
     return json.dumps(shopper._report_to_dict(report), indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 async def run_sweep() -> str:
     """Mystery shop ALL marketplace services at once. FREE during promotional period.
 
@@ -132,7 +132,7 @@ async def run_sweep() -> str:
     return json.dumps(result, indent=2, default=str)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def get_latest_report(limit: int = 10) -> str:
     """Get the most recent mystery shop reports. FREE during promotional period.
 
@@ -175,7 +175,7 @@ LLMS_TXT = f"""# The Mystery Shopper - Autonomous Service Auditing
 - Authentication: OAuth 2.1 (see https://{DOMAIN}/.well-known/oauth-authorization-server)
 
 ## Pricing
-ALL TOOLS ARE FREE (0 credits) during promotional period. Honest reviews shouldn't have a paywall.
+Service tools cost 1 credit each. Stats tools are always free (0 credits). 100 credits granted per plan.
 
 ## Tools
 
@@ -188,7 +188,7 @@ Mystery shop a specific service. Runs a 5-phase test: health check, MCP availabi
 - Returns: JSON report with quality_score (1-5), verdict (RECOMMENDED/ACCEPTABLE/NEEDS IMPROVEMENT/NOT RECOMMENDED), tools_discovered, test details, latency.
 - When to use: Before buying from a service you haven't used before. Also useful for sellers to test their own endpoints.
 - Limitations: Point-in-time test. Generic test queries. Tests HTTP availability and MCP compliance, not output quality.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### run_sweep
 Mystery shop ALL marketplace services at once. Discovers every seller, tests each one, ranks by quality.
@@ -196,14 +196,14 @@ Mystery shop ALL marketplace services at once. Discovers every seller, tests eac
 - Returns: JSON with services_discovered, services_tested, breakdown by verdict, and ranked results array.
 - When to use: To get a complete marketplace quality picture. Takes 1-3 minutes.
 - Limitations: Only tests public HTTP endpoints. Services on localhost or behind auth can't be reached.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### get_latest_report
 Returns the most recent mystery shop reports sorted by recency.
 - Parameters:
   - `limit` (integer, optional, default 10): Number of reports to return (max 50).
 - Returns: JSON array of reports.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### shopper_stats
 Aggregate statistics on all mystery shops conducted.
@@ -243,10 +243,10 @@ AGENT_JSON = {
         "discovery": f"https://{DOMAIN}/.well-known/oauth-authorization-server",
     },
     "tools": [
-        {"name": "shop_service", "description": "Mystery shop a specific service with 5-phase testing.", "cost": "0 credits (FREE)"},
-        {"name": "run_sweep", "description": "Mystery shop ALL marketplace services at once.", "cost": "0 credits (FREE)"},
-        {"name": "get_latest_report", "description": "Get most recent mystery shop reports.", "cost": "0 credits (FREE)"},
-        {"name": "shopper_stats", "description": "Aggregate mystery shopping statistics.", "cost": "0 credits (FREE)"},
+        {"name": "shop_service", "description": "Mystery shop a specific service with 5-phase testing.", "cost": "1 credit"},
+        {"name": "run_sweep", "description": "Mystery shop ALL marketplace services at once.", "cost": "1 credit"},
+        {"name": "get_latest_report", "description": "Get most recent mystery shop reports.", "cost": "1 credit"},
+        {"name": "shopper_stats", "description": "Aggregate mystery shopping statistics.", "cost": "0 credits (FREE, always)"},
     ],
 }
 

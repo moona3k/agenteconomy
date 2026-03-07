@@ -4,7 +4,7 @@ import httpx
 from typing import Optional
 
 
-def check_endpoint(url: str, timeout: float = 10.0) -> dict:
+def check_endpoint(url: str, timeout: float = 5.0) -> dict:
     """Check if an endpoint is reachable and measure latency."""
     blocked = ("localhost", "127.0.0.1", "0.0.0.0", "::1", ".internal", "169.254.", "10.", "192.168.")
     if not url or any(b in url.lower() for b in blocked):
@@ -15,12 +15,16 @@ def check_endpoint(url: str, timeout: float = 10.0) -> dict:
         return {"reachable": False, "reason": "invalid_url", "latency_ms": None}
 
     try:
-        start = time.time()
         # Try health endpoint first, then root
         for path in ["/health", ""]:
             try:
                 test_url = url.rstrip("/") + path
-                resp = httpx.get(test_url, timeout=timeout, follow_redirects=True)
+                start = time.time()
+                resp = httpx.head(test_url, timeout=timeout, follow_redirects=True)
+                # Some servers reject HEAD, fall back to GET
+                if resp.status_code == 405:
+                    start = time.time()
+                    resp = httpx.get(test_url, timeout=timeout, follow_redirects=True)
                 latency = (time.time() - start) * 1000
                 return {
                     "reachable": True,

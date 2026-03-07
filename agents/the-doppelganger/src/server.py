@@ -1,4 +1,4 @@
-"""The Doppelganger - Competitive Intelligence MCP Server.
+"""The Doppelganger - Competitive Intelligence & Autonomous Cloning MCP Server.
 
 PROMOTIONAL PERIOD: All tools are FREE (0 credits).
 
@@ -68,7 +68,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 async def analyze_service(seller_name: str) -> str:
     """Deep competitive analysis of a specific service. FREE during promotional period.
 
@@ -105,7 +105,7 @@ async def analyze_service(seller_name: str) -> str:
     return json.dumps(doppelganger._analysis_to_dict(analysis), indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 async def find_vulnerable(max_results: int = 10) -> str:
     """Scan marketplace for services most vulnerable to competition. FREE.
 
@@ -135,7 +135,7 @@ async def find_vulnerable(max_results: int = 10) -> str:
     }, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 async def moat_report() -> str:
     """Full marketplace defensibility report. FREE during promotional period.
 
@@ -188,7 +188,7 @@ LLMS_TXT = """# The Doppelganger - Competitive Intelligence
 - Authentication: OAuth 2.1 (see https://doppelganger.agenteconomy.io/.well-known/oauth-authorization-server)
 
 ## Pricing
-ALL TOOLS ARE FREE (0 credits) during promotional period. Market transparency shouldn't have a paywall.
+Service tools cost 1 credit each. Stats tools are always free (0 credits). 100 credits granted per plan.
 
 ## Tools
 
@@ -199,7 +199,7 @@ Deep moat analysis of a specific service. Discovers MCP tools, detects signals o
 - Returns: JSON with moat_score, vulnerability (trivial/easy/moderate/hard/fortress), reasoning, and clone blueprint (name, tools, estimated dev time, price undercut).
 - When to use: Before entering a market segment, to understand if the incumbents are defensible.
 - Limitations: Heuristic-based analysis from descriptions and tool schemas, not source code review.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### find_vulnerable
 Scan entire marketplace for services most vulnerable to competition. Ranks by lowest moat score.
@@ -207,14 +207,14 @@ Scan entire marketplace for services most vulnerable to competition. Ranks by lo
   - `max_results` (integer, optional, default 10): Max results (max 25).
 - Returns: JSON array of most-vulnerable services with moat analysis and clone blueprints.
 - When to use: To identify market opportunities where you could compete effectively.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### moat_report
 Full marketplace defensibility report with aggregate stats, vulnerability breakdown, top 5 most/least defensible, and market insight narrative.
 - Parameters: None.
 - Returns: JSON with marketplace_moat_score, vulnerability_breakdown, most_vulnerable, most_defensible, and insight narrative.
 - When to use: To understand the overall defensibility of the agent economy.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### doppelganger_stats
 Aggregate analysis statistics: total analyzed, average moat, easily clonable count.
@@ -255,10 +255,10 @@ AGENT_JSON = {
         "discovery": f"https://{DOMAIN}/.well-known/oauth-authorization-server",
     },
     "tools": [
-        {"name": "analyze_service", "description": "Deep moat analysis with clone blueprint for a specific service.", "cost": "0 credits (FREE)"},
-        {"name": "find_vulnerable", "description": "Scan marketplace for most clonable services.", "cost": "0 credits (FREE)"},
-        {"name": "moat_report", "description": "Full marketplace defensibility report.", "cost": "0 credits (FREE)"},
-        {"name": "doppelganger_stats", "description": "Aggregate analysis statistics.", "cost": "0 credits (FREE)"},
+        {"name": "analyze_service", "description": "Deep moat analysis with clone blueprint for a specific service.", "cost": "1 credit"},
+        {"name": "find_vulnerable", "description": "Scan marketplace for most clonable services.", "cost": "1 credit"},
+        {"name": "moat_report", "description": "Full marketplace defensibility report.", "cost": "1 credit"},
+        {"name": "doppelganger_stats", "description": "Aggregate analysis statistics.", "cost": "0 credits (FREE, always)"},
     ],
 }
 

@@ -52,13 +52,13 @@ def main():
     )
 
     agent_metadata = AgentMetadata(
-        name="The Mystery Shopper -- Consumer Reports for AI Agents",
+        name="The Mystery Shopper - Consumer Reports for AI Agents",
         description=(
             "Autonomous honest reviewer of the agent economy. Discovers all marketplace services, "
             "tests them anonymously as a regular buyer, and publishes detailed quality reports with "
             "1-5 star scores. Like Consumer Reports -- unbiased, thorough, and transparent. "
-            "Tools: shop_service (5cr), run_sweep (5cr), get_latest_report (1cr), shopper_stats (free). "
-            "Free 20-credit plan available."
+            "Tools: shop_service (FREE), run_sweep (FREE), get_latest_report (FREE), shopper_stats (FREE). "
+            "All tools free during promotional period."
         ),
         tags=["mystery-shopper", "reviews", "quality", "testing", "consumer-reports", "honest", "autonomous"],
     )
@@ -74,18 +74,15 @@ def main():
     )
 
     plan_metadata = PlanMetadata(
-        name="The Mystery Shopper - Review Credits",
-        description=(
-            "20 free credits for mystery shopping. "
-            "shop_service=5cr, run_sweep=5cr, get_latest_report=1cr, shopper_stats=free."
-        ),
+        name="The Mystery Shopper - Free Plan",
+        description="PROMOTIONAL: shop_service (1cr), run_sweep (1cr), get_latest_report (1cr), shopper_stats (0cr). 100 credits granted.",
     )
 
     price_config = get_free_price_config()
     credits_config = get_dynamic_credits_config(
-        credits_granted=20,
+        credits_granted=100,
         min_credits_per_request=0,
-        max_credits_per_request=5,
+        max_credits_per_request=1,
     )
 
     print("Calling register_agent_and_plan()...")

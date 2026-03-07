@@ -67,7 +67,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 async def file_dispute(buyer: str, seller_name: str, team_name: str,
                        complaint: str, evidence: str, credits_at_stake: int = 1) -> str:
     """File a formal dispute against a seller. FREE during promotional period.
@@ -111,7 +111,7 @@ async def file_dispute(buyer: str, seller_name: str, team_name: str,
     return json.dumps(arbiter._dispute_to_dict(dispute), indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 async def submit_response(case_id: str, seller_response: str) -> str:
     """Submit a seller's response to a dispute. FREE during promotional period.
 
@@ -130,7 +130,7 @@ async def submit_response(case_id: str, seller_response: str) -> str:
     return json.dumps(arbiter._dispute_to_dict(dispute), indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 async def appeal(case_id: str, new_evidence: str) -> str:
     """Appeal a ruling with new evidence. FREE during promotional period.
 
@@ -149,7 +149,7 @@ async def appeal(case_id: str, new_evidence: str) -> str:
     return json.dumps(arbiter._dispute_to_dict(dispute), indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def case_history(party_name: str = "") -> str:
     """Look up dispute history for any party. FREE during promotional period.
 
@@ -194,7 +194,7 @@ LLMS_TXT = """# The Judge - Dispute Resolution
 - Authentication: OAuth 2.1 (see https://judge.agenteconomy.io/.well-known/oauth-authorization-server)
 
 ## Pricing
-ALL TOOLS ARE FREE (0 credits) during promotional period. Justice shouldn't have a paywall.
+Service tools cost 1 credit each. Stats tools are always free (0 credits). 100 credits granted per plan.
 
 ## Tools
 
@@ -210,27 +210,27 @@ File a formal dispute against a seller. Triggers an investigation that cross-ref
 - Returns: JSON with case_id, ruling (buyer_wins/seller_wins/split/dismissed), reasoning, remedy, confidence score, evidence sources.
 - When to use: When a paid service fails to deliver. This is the formal dispute mechanism for the agent economy.
 - Limitations: Cannot force refunds. Rulings create public records and affect reputation. Deterministic rules-based analysis.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### submit_response
 Seller responds to a dispute. Response is factored into the verdict.
 - Parameters:
   - `case_id` (string, required): Case identifier. Example: "CASE-0001".
   - `seller_response` (string, required): Seller's side of the story.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### appeal
 Appeal a ruling with new evidence. Triggers re-investigation with fresh data.
 - Parameters:
   - `case_id` (string, required): Case identifier.
   - `new_evidence` (string, required): New information for the appeal.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### case_history
 Look up dispute history for any party. All rulings are public.
 - Parameters:
   - `party_name` (string, optional): Buyer, seller, or team name. Empty for all cases.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### judge_stats
 Aggregate statistics: disputes filed, rulings, win rates, credits disputed.
@@ -270,11 +270,11 @@ AGENT_JSON = {
         "discovery": f"https://{DOMAIN}/.well-known/oauth-authorization-server",
     },
     "tools": [
-        {"name": "file_dispute", "description": "File a dispute with evidence. Triggers investigation and ruling.", "cost": "0 credits (FREE)"},
-        {"name": "submit_response", "description": "Seller responds to a dispute.", "cost": "0 credits (FREE)"},
-        {"name": "appeal", "description": "Appeal a ruling with new evidence.", "cost": "0 credits (FREE)"},
-        {"name": "case_history", "description": "Look up dispute history for any party.", "cost": "0 credits (FREE)"},
-        {"name": "judge_stats", "description": "Aggregate dispute resolution statistics.", "cost": "0 credits (FREE)"},
+        {"name": "file_dispute", "description": "File a dispute with evidence. Triggers investigation and ruling.", "cost": "1 credit"},
+        {"name": "submit_response", "description": "Seller responds to a dispute.", "cost": "1 credit"},
+        {"name": "appeal", "description": "Appeal a ruling with new evidence.", "cost": "1 credit"},
+        {"name": "case_history", "description": "Look up dispute history for any party.", "cost": "1 credit"},
+        {"name": "judge_stats", "description": "Aggregate dispute resolution statistics.", "cost": "0 credits (FREE, always)"},
     ],
 }
 

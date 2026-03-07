@@ -7,47 +7,69 @@ from typing import Optional
 DISCOVERY_URL = "https://nevermined.ai/hackathon/register/api/discover"
 CACHE_TTL = 300  # 5 minutes
 
-_cache = {"sellers": None, "buyers": None, "ts": 0, "meta": None}
+_cache = {"sellers": None, "buyers": None, "ts_sellers": 0, "ts_buyers": 0, "meta": None}
+_normalized_cache = {"data": None, "ts": 0}
 
 
 def fetch_marketplace(side: str = "sell", force: bool = False) -> list:
     """Fetch sellers or buyers from the discovery API. Caches for 5 min."""
     now = time.time()
     key = "sellers" if side == "sell" else "buyers"
+    ts_key = f"ts_{key}"
 
-    if not force and _cache[key] and (now - _cache["ts"]) < CACHE_TTL:
+    if not force and _cache[key] and (now - _cache[ts_key]) < CACHE_TTL:
         return _cache[key]
 
     api_key = os.environ.get("NVM_API_KEY", "")
-    resp = httpx.get(
-        DISCOVERY_URL,
-        params={"side": side},
-        headers={"x-nvm-api-key": api_key},
-        timeout=15,
-    )
-    resp.raise_for_status()
-    data = resp.json()
-    items = data.get(key, [])
-    _cache[key] = items
-    _cache["ts"] = now
-    if "meta" in data:
-        _cache["meta"] = data["meta"]
-    return items
+    try:
+        resp = httpx.get(
+            DISCOVERY_URL,
+            params={"side": side},
+            headers={"x-nvm-api-key": api_key},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        items = data.get(key, [])
+        _cache[key] = items
+        _cache[ts_key] = now
+        if "meta" in data:
+            _cache["meta"] = data["meta"]
+        return items
+    except Exception as e:
+        print(f"[discovery] fetch error ({side}): {e}")
+        return _cache.get(key) or []
 
 
 def search_sellers(query: str) -> list:
-    """Search sellers by name, team, category, or description."""
+    """Search sellers by name, team, category, or description.
+
+    Supports multi-word queries: each word is matched independently,
+    and scores accumulate. "AI research agents" matches services in
+    AI/ML, Research, or with "agent" in their name.
+    """
     sellers = fetch_marketplace("sell")
     q = query.lower()
+    words = [w for w in q.split() if len(w) > 1]
     results = []
     for s in sellers:
         score = 0
         for field in ["name", "teamName", "category", "description"]:
             val = s.get(field, "").lower()
+            # Exact phrase match scores highest
             if q in val:
-                score += 2 if field in ("name", "teamName") else 1
-        if any(q in kw.lower() for kw in s.get("keywords", [])):
-            score += 1
+                score += 4 if field in ("name", "teamName") else 2
+            # Individual word matches
+            for w in words:
+                if w in val:
+                    score += 2 if field in ("name", "teamName") else 1
+        for kw in s.get("keywords", []):
+            kw_lower = kw.lower()
+            if q in kw_lower:
+                score += 2
+            for w in words:
+                if w in kw_lower:
+                    score += 1
         if score > 0:
             results.append({**s, "_score": score})
     results.sort(key=lambda x: -x["_score"])
@@ -115,7 +137,11 @@ def _normalize_buyer(b: dict) -> dict:
 
 
 def normalize_marketplace() -> dict:
-    """Return a clean, normalized snapshot of the full marketplace."""
+    """Return a clean, normalized snapshot of the full marketplace. Cached."""
+    now = time.time()
+    if _normalized_cache["data"] and (now - _normalized_cache["ts"]) < CACHE_TTL:
+        return _normalized_cache["data"]
+
     sellers_raw = fetch_marketplace("sell")
     buyers_raw = fetch_marketplace("buy")
 
@@ -154,7 +180,7 @@ def normalize_marketplace() -> dict:
     crypto_count = sum(1 for s in sellers if s["hasCrypto"])
     fiat_count = sum(1 for s in sellers if s["hasFiat"])
 
-    return {
+    result = {
         "summary": {
             "totalSellers": len(sellers),
             "totalBuyers": len(buyers),
@@ -171,3 +197,6 @@ def normalize_marketplace() -> dict:
         "sellers": sellers,
         "buyers": buyers,
     }
+    _normalized_cache["data"] = result
+    _normalized_cache["ts"] = time.time()
+    return result

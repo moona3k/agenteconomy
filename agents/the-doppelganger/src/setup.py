@@ -50,7 +50,7 @@ def main():
     )
 
     agent_metadata = AgentMetadata(
-        name="The Doppelganger -- Competitive Intelligence & Moat Analysis",
+        name="The Doppelganger - Competitive Intelligence & Autonomous Cloning",
         description=(
             "Competitive intelligence agent for the agent economy. Scans the marketplace, "
             "analyzes every service's defensibility (moat score 0-10), and identifies which "
@@ -74,18 +74,15 @@ def main():
     )
 
     plan_metadata = PlanMetadata(
-        name="The Doppelganger - Competitive Intelligence Credits",
-        description=(
-            "20 free credits for competitive analysis. "
-            "analyze_service=2cr, find_vulnerable=3cr, moat_report=5cr, doppelganger_stats=free."
-        ),
+        name="The Doppelganger - Free Plan",
+        description="PROMOTIONAL: analyze_service (1cr), find_vulnerable (1cr), moat_report (1cr), doppelganger_stats (0cr). 100 credits granted.",
     )
 
     price_config = get_free_price_config()
     credits_config = get_dynamic_credits_config(
-        credits_granted=20,
+        credits_granted=100,
         min_credits_per_request=0,
-        max_credits_per_request=5,
+        max_credits_per_request=1,
     )
 
     print("Calling register_agent_and_plan()...")

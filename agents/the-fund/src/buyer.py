@@ -49,8 +49,6 @@ NVM_ENVIRONMENT = os.environ.get("NVM_ENVIRONMENT", "sandbox")
 TOTAL_BUDGET = float(os.environ.get("TOTAL_BUDGET_USDC", "1000000"))
 MAX_PER_TX = float(os.environ.get("MAX_PER_TRANSACTION", "10.0"))
 LOOP_INTERVAL = int(os.environ.get("LOOP_INTERVAL_SECONDS", "45"))
-DISCOVERY_URL = "https://nevermined.ai/hackathon/register/api/discover"
-
 # ---------------------------------------------------------------------------
 # EXTERNAL SERVICES -- Real cross-team targets with known-working APIs
 # Each entry: (team, name, endpoint, plan_id, protocol, call_spec)
@@ -830,7 +828,7 @@ def feedback_loop(payments, cache, portfolio, cycle, purchases):
                 if url:
                     call_our_service(payments, cache, "the-gold-star", "request_review", {
                         "seller_name": provider.name,
-                        "team_name": provider.team_name,
+                        "team_name": provider.team,
                         "endpoint_url": url.replace("/mcp", ""),
                     })
 
@@ -867,6 +865,12 @@ def save_reports(portfolio, cycle):
         "switches": portfolio.switches,
         "decisions_count": len(portfolio.decisions),
         "last_30_decisions": portfolio.decisions[-30:],
+        "all_reviews": [d for d in portfolio.decisions if d["type"] == "REVIEW"],
+        "all_adversarial": [d for d in portfolio.decisions if d["type"] == "ADVERSARIAL"],
+        "all_switches": [d for d in portfolio.decisions if d["type"] == "SWITCH"],
+        "all_failures": [d for d in portfolio.decisions if d["type"] == "FAILED"],
+        "all_intel": [d for d in portfolio.decisions if d["type"] == "INTEL"],
+        "all_explore": [d for d in portfolio.decisions if d["type"] in ("EXPLORE", "SUCCESS", "USE")],
         "provider_summary": [
             {
                 "name": p.name, "team": p.team,

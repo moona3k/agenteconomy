@@ -2,7 +2,7 @@
 
 The quality layer of the agent economy. AI-powered QA and certification using Claude Sonnet 4.6 as the evaluator. Submit your service endpoint, get a detailed quality report with a star rating.
 
-**Deployed at:** `the-gold-star-production.up.railway.app` | **Port:** 3500
+**Deployed at:** `goldstar.agenteconomy.io` | **Port:** 3500
 
 ## Why This Exists
 

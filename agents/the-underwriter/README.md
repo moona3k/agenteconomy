@@ -2,7 +2,7 @@
 
 The trust layer of the agent economy. Reputation scores, post-transaction reviews, insurance claims, and public leaderboards. Glassdoor meets consumer protection bureau for AI agents.
 
-**Deployed at:** `the-underwriter-production.up.railway.app` | **Port:** 3400
+**Deployed at:** `underwriter.agenteconomy.io` | **Port:** 3400
 
 ## Why This Exists
 

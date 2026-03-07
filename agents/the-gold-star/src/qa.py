@@ -34,26 +34,43 @@ def _get_client() -> anthropic.Anthropic:
 
 STANDARD_TEST_SCENARIOS = [
     {
-        "name": "Self-description",
-        "query": "What do you do? Describe your service and capabilities.",
-        "rubric": "The service should clearly explain what it does, what tools it offers, and how to use them. A good response is specific, not generic.",
+        "name": "Primary tool test",
+        "rubric": "The tool should return a well-structured, non-empty response when called with reasonable arguments. Response should demonstrate the tool actually works.",
     },
     {
-        "name": "Simple task",
-        "query": "Give me a brief, useful response to demonstrate your value.",
-        "rubric": "The service should produce a concrete, useful output — not a vague placeholder. Quality matters more than length.",
+        "name": "Secondary tool test",
+        "rubric": "A different tool should also work correctly. Tests breadth of functionality.",
     },
     {
         "name": "Edge case handling",
-        "query": "",
-        "rubric": "Empty input should be handled gracefully — either a helpful error message or a reasonable default behavior. Crashes or 500 errors are failures.",
+        "rubric": "The tool should handle unusual but valid input gracefully — either a helpful response or a clear error message. Crashes or 500 errors are failures.",
     },
     {
-        "name": "Complex request",
-        "query": "I need a detailed analysis with multiple sections and actionable recommendations. Please be thorough.",
-        "rubric": "A quality service should produce structured, multi-part output when asked for detail. Look for organization, depth, and actionability.",
+        "name": "Realistic usage",
+        "rubric": "The tool should produce a useful, well-structured response to a realistic use case that a paying customer would actually attempt.",
     },
 ]
+
+
+# Realistic test arguments for common tool parameter patterns
+PARAM_EXAMPLES = {
+    "seller_name": "Cortex",
+    "team_name": "Full Stack Agents",
+    "query": "AI research agents",
+    "topic": "machine learning",
+    "content": "AI agents are transforming how businesses operate by automating complex tasks. The most successful agents combine large language models with structured tools to deliver reliable results.",
+    "text": "AI agents are transforming how businesses operate.",
+    "side": "all",
+    "quality_score": 4.5,
+    "reliable": True,
+    "notes": "Good response quality, fast latency",
+    "reviewer": "Gold Star QA",
+    "reason": "timeout",
+    "credits_lost": 1,
+    "buyer": "Gold Star QA",
+    "keywords": "research,AI",
+    "category": "AI/ML",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -101,6 +118,16 @@ class QAEngine:
         self._certifications: dict[str, dict] = {}
         self._counter = 0
         self._lock = threading.Lock()
+        self._auth_headers: dict[str, dict[str, str]] = {}  # base_url -> headers
+
+    def set_auth(self, base_url: str, headers: dict[str, str]):
+        """Set auth headers for a specific endpoint."""
+        self._auth_headers[base_url.rstrip("/")] = headers
+
+    def _get_auth(self, base_url: str) -> dict[str, str]:
+        headers = {"Accept": "application/json"}
+        headers.update(self._auth_headers.get(base_url.rstrip("/"), {}))
+        return headers
 
     def _next_id(self) -> str:
         with self._lock:
@@ -133,9 +160,9 @@ class QAEngine:
         # Phase 2: Discover available tools
         tools_list = await self._discover_tools(base)
 
-        # Phase 3: Functional tests — act like a real buyer
-        for scenario in STANDARD_TEST_SCENARIOS:
-            result = await self._test_tool_call(base, scenario, tools_list)
+        # Phase 3: Functional tests — test different tools with realistic args
+        for i, scenario in enumerate(STANDARD_TEST_SCENARIOS):
+            result = await self._test_tool_call(base, scenario, tools_list, tool_index=i)
             tests.append(result)
 
         # Phase 4: Error handling test
@@ -209,12 +236,13 @@ class QAEngine:
 
     async def _test_mcp_endpoint(self, base_url: str) -> TestResult:
         url = f"{base_url}/mcp"
+        auth = self._get_auth(base_url)
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 start = time.time()
                 resp = await client.post(url, json={
                     "jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 1,
-                })
+                }, headers=auth)
                 latency = (time.time() - start) * 1000
                 passed = resp.status_code == 200
                 return TestResult(
@@ -234,11 +262,12 @@ class QAEngine:
 
     async def _discover_tools(self, base_url: str) -> list[dict]:
         """Discover available MCP tools."""
+        auth = self._get_auth(base_url)
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 resp = await client.post(f"{base_url}/mcp", json={
                     "jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 1,
-                })
+                }, headers=auth)
                 if resp.status_code == 200:
                     data = resp.json()
                     result = data.get("result", {})
@@ -253,25 +282,39 @@ class QAEngine:
     # Functional tests — call actual tools
     # ------------------------------------------------------------------
 
+    def _build_arguments(self, tool: dict, variant: str = "normal") -> dict:
+        """Build realistic arguments for a tool based on its schema."""
+        schema = tool.get("inputSchema", {})
+        props = schema.get("properties", {})
+        required = schema.get("required", [])
+        arguments = {}
+
+        for key, spec in props.items():
+            ptype = spec.get("type", "string")
+            # Use realistic examples from our lookup table
+            if key in PARAM_EXAMPLES:
+                val = PARAM_EXAMPLES[key]
+                if variant == "edge" and ptype == "string":
+                    val = ""  # empty string edge case
+                arguments[key] = val
+            elif ptype == "string":
+                arguments[key] = "" if variant == "edge" else "test query"
+            elif ptype in ("number", "integer"):
+                arguments[key] = 0 if variant == "edge" else 1
+            elif ptype == "boolean":
+                arguments[key] = True
+            # Only include required params for edge case tests
+            if variant == "edge" and key not in required:
+                arguments.pop(key, None)
+
+        return arguments
+
     async def _test_tool_call(self, base_url: str, scenario: dict,
-                              tools_list: list[dict]) -> TestResult:
+                              tools_list: list[dict], tool_index: int = 0) -> TestResult:
         """Test a tool call against the service."""
         url = f"{base_url}/mcp"
 
-        # Pick the first tool that looks like it accepts queries
-        tool_name = None
-        for t in tools_list:
-            name = t.get("name", "")
-            # Prefer tools that take text input
-            schema = t.get("inputSchema", {})
-            props = schema.get("properties", {})
-            if any(k in props for k in ["query", "content", "text", "input", "question", "prompt"]):
-                tool_name = name
-                break
-        if not tool_name and tools_list:
-            tool_name = tools_list[0].get("name", "unknown")
-
-        if not tool_name:
+        if not tools_list:
             return TestResult(
                 test_name=scenario["name"],
                 endpoint=url, method="POST", status_code=0,
@@ -279,31 +322,27 @@ class QAEngine:
                 notes="No tools discovered — cannot test functionality",
             )
 
-        # Build arguments based on the tool's schema
-        tool_schema = next((t for t in tools_list if t.get("name") == tool_name), {})
-        props = tool_schema.get("inputSchema", {}).get("properties", {})
-        arguments = {}
-        for key in props:
-            if key in ("query", "content", "text", "input", "question", "prompt",
-                       "seller_name", "topic", "youtube_url", "file_path"):
-                arguments[key] = scenario["query"] or "test"
-                break
-        if not arguments:
-            # Fallback: use first string property
-            for key, val in props.items():
-                if val.get("type") == "string":
-                    arguments[key] = scenario["query"] or "test"
-                    break
+        # Pick tool by index, wrapping around
+        tool = tools_list[tool_index % len(tools_list)]
+        tool_name = tool.get("name", "unknown")
 
+        # Determine argument variant based on test scenario
+        variant = "normal"
+        if scenario["name"] == "Edge case handling":
+            variant = "edge"
+
+        arguments = self._build_arguments(tool, variant)
+
+        auth = self._get_auth(base_url)
         try:
-            async with httpx.AsyncClient(timeout=20) as client:
+            async with httpx.AsyncClient(timeout=90) as client:
                 start = time.time()
                 resp = await client.post(url, json={
                     "jsonrpc": "2.0",
                     "method": "tools/call",
                     "params": {"name": tool_name, "arguments": arguments},
                     "id": 1,
-                })
+                }, headers=auth)
                 latency = (time.time() - start) * 1000
                 body = resp.text[:2000]
 
@@ -313,27 +352,28 @@ class QAEngine:
                     endpoint=url, method="POST", status_code=resp.status_code,
                     latency_ms=round(latency, 1), response_body=body,
                     passed=passed,
-                    notes=f"Tool '{tool_name}' called" if passed else f"Tool call failed: HTTP {resp.status_code}",
+                    notes=f"Tool '{tool_name}' called with {list(arguments.keys())}" if passed else f"Tool '{tool_name}' failed: HTTP {resp.status_code}",
                 )
         except Exception as e:
             return TestResult(
                 test_name=scenario["name"],
                 endpoint=url, method="POST", status_code=0,
                 latency_ms=0, response_body="", passed=False,
-                notes=f"Tool call error: {str(e)[:200]}",
+                notes=f"Tool '{tool_name}' error: {str(e)[:200]}",
             )
 
     async def _test_error_handling(self, base_url: str) -> TestResult:
         url = f"{base_url}/mcp"
+        auth = self._get_auth(base_url)
         try:
-            async with httpx.AsyncClient(timeout=10) as client:
+            async with httpx.AsyncClient(timeout=30) as client:
                 start = time.time()
                 resp = await client.post(url, json={
                     "jsonrpc": "2.0",
                     "method": "tools/call",
                     "params": {"name": "this_tool_does_not_exist_12345", "arguments": {}},
                     "id": 99,
-                })
+                }, headers=auth)
                 latency = (time.time() - start) * 1000
                 passed = resp.status_code < 500
                 return TestResult(

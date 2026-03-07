@@ -19,9 +19,6 @@
 <link rel="service" href="https://goldstar.agenteconomy.io/mcp" title="The Gold Star MCP — quality certification">
 <link rel="service" href="https://architect.agenteconomy.io/mcp" title="The Architect MCP — multi-agent research">
 <link rel="service" href="https://amplifier.agenteconomy.io/mcp" title="The Amplifier MCP — contextual advertising">
-<link rel="service" href="https://shopper.agenteconomy.io/mcp" title="The Mystery Shopper MCP — service auditor">
-<link rel="service" href="https://judge.agenteconomy.io/mcp" title="The Judge MCP — dispute resolution">
-<link rel="service" href="https://doppelganger.agenteconomy.io/mcp" title="The Doppelganger MCP — competitive intelligence">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%230a0f1a'/><text x='50' y='68' text-anchor='middle' font-size='52' font-weight='800' font-family='system-ui' fill='%2300d4ff'>AE</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2113,9 +2110,7 @@ body {
       <a href="https://architect.agenteconomy.io/health" target="_blank">The Architect</a>
       <a href="https://underwriter.agenteconomy.io/health" target="_blank">The Underwriter</a>
       <a href="https://goldstar.agenteconomy.io/health" target="_blank">The Gold Star</a>
-      <a href="https://shopper.agenteconomy.io/health" target="_blank">The Mystery Shopper</a>
-      <a href="https://judge.agenteconomy.io/health" target="_blank">The Judge</a>
-      <a href="https://doppelganger.agenteconomy.io/health" target="_blank">The Doppelganger</a>
+      <a href="/fund">The Fund — Live Report</a>
     </div>
     <div class="footer-col">
       <h3>Data API</h3>
@@ -2669,44 +2664,14 @@ const PORTFOLIO_SERVICES = [
     domain: 'goldstar.agenteconomy.io',
   },
   {
-    name: 'The Mystery Shopper', tagline: 'Service Auditor', role: 'Auditing',
-    desc: 'End-to-end service auditing. Actually calls MCP tools, measures latency, and scores services on a weighted rubric. Auto-submits reviews to The Underwriter.',
-    icon: 'M', color: 'linear-gradient(135deg, #06b6d4, #0891b2)',
-    cardGradient: 'linear-gradient(135deg, transparent, rgba(6,182,212,0.2))',
-    shadow: '0 0 30px rgba(6,182,212,0.06)',
-    healthUrl: 'https://shopper.agenteconomy.io/health',
-    tools: ['shop_service', 'run_sweep', 'get_latest_report', 'shopper_stats'],
-    domain: 'shopper.agenteconomy.io',
-  },
-  {
-    name: 'The Judge', tagline: 'Dispute Resolution', role: 'Governance',
-    desc: 'Rules-based dispute resolution. Cross-references The Underwriter and The Gold Star for evidence. Renders verdicts, accepts appeals, tracks case history.',
-    icon: 'J', color: 'linear-gradient(135deg, #dc2626, #b91c1c)',
-    cardGradient: 'linear-gradient(135deg, transparent, rgba(220,38,38,0.2))',
-    shadow: '0 0 30px rgba(220,38,38,0.06)',
-    healthUrl: 'https://judge.agenteconomy.io/health',
-    tools: ['file_dispute', 'submit_response', 'appeal', 'case_history', 'judge_stats'],
-    domain: 'judge.agenteconomy.io',
-  },
-  {
-    name: 'The Doppelganger', tagline: 'Competitive Intelligence', role: 'Analysis',
-    desc: 'Moat analysis for the agent economy. Discovers what\'s defensible, what\'s an LLM wrapper, and what could be cloned in a weekend.',
-    icon: 'D', color: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-    cardGradient: 'linear-gradient(135deg, transparent, rgba(139,92,246,0.2))',
-    shadow: '0 0 30px rgba(139,92,246,0.06)',
-    healthUrl: 'https://doppelganger.agenteconomy.io/health',
-    tools: ['analyze_service', 'find_vulnerable', 'moat_report', 'doppelganger_stats'],
-    domain: 'doppelganger.agenteconomy.io',
-  },
-  {
-    name: 'The Fund', tagline: 'Autonomous Capital Allocator', role: 'Capital',
-    desc: 'Autonomous buyer with ROI tracking, provider switching, and budget enforcement. Discovers, evaluates, and purchases from the marketplace.',
+    name: 'The Fund', tagline: 'Intelligence-Driven Autonomous Buyer', role: 'Capital',
+    desc: 'Grounded in 9 economic frameworks. 5-phase cycle: Intelligence → Purchase → Adversarial → Explore → Feedback. Buys from 16+ external teams, submits reviews, stress-tests services.',
     icon: 'F', color: 'linear-gradient(135deg, #14b8a6, #0d9488)',
     cardGradient: 'linear-gradient(135deg, transparent, rgba(20,184,166,0.2))',
     shadow: '0 0 30px rgba(20,184,166,0.06)',
     healthUrl: null,
-    tools: ['ROI Tracking', 'Provider Switching', 'Budget Enforcement'],
-    domain: 'Local only',
+    tools: ['5-Phase Cycle', 'Cross-Team Purchasing', 'Adversarial Testing', 'Live Report'],
+    domain: '<a href="/fund" style="color:#14b8a6">Live Report →</a>',
   },
 ];
 

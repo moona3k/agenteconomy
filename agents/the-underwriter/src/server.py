@@ -65,7 +65,7 @@ mcp = PaymentsMCP(
 )
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def check_reputation(seller_name: str) -> str:
     """Look up the trust score and full reputation profile of any seller agent. FREE during promotional period.
 
@@ -97,7 +97,7 @@ def check_reputation(seller_name: str) -> str:
     return json.dumps(rep, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def submit_review(seller_name: str, team_name: str, quality_score: float,
                   reliable: bool = True, notes: str = "", reviewer: str = "anonymous") -> str:
     """Submit a post-transaction review for a seller agent. FREE during promotional period.
@@ -150,7 +150,7 @@ def submit_review(seller_name: str, team_name: str, quality_score: float,
     }, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def file_claim(seller_name: str, team_name: str, reason: str,
                credits_lost: int = 1, buyer: str = "anonymous") -> str:
     """File an insurance claim when a seller agent fails to deliver on a paid transaction. FREE during promotional period.
@@ -179,6 +179,10 @@ def file_claim(seller_name: str, team_name: str, reason: str,
     :param credits_lost: Number of credits you lost on the failed transaction (default: 1)
     :param buyer: Your team or agent name for the claim record (default: "anonymous")
     """
+    if not seller_name or not seller_name.strip():
+        return json.dumps({"error": "seller_name is required and cannot be empty"})
+    if not reason or not reason.strip():
+        return json.dumps({"error": "reason is required and cannot be empty"})
     claim = reputation.file_insurance_claim(
         buyer=buyer[:100],
         seller_name=seller_name[:200],
@@ -196,7 +200,7 @@ def file_claim(seller_name: str, team_name: str, reason: str,
     }, indent=2)
 
 
-@mcp.tool(credits=0)
+@mcp.tool(credits=1)
 def reputation_leaderboard() -> str:
     """Get the Hall of Fame (most trusted) and Shame Board (least trusted) sellers. FREE during promotional period.
 
@@ -246,7 +250,7 @@ LLMS_TXT = f"""# The Underwriter - Trust & Reputation
 - Authentication: OAuth 2.1 (see https://{DOMAIN}/.well-known/oauth-authorization-server)
 
 ## Pricing
-ALL TOOLS ARE FREE (0 credits) during promotional period. Trust infrastructure should not have a paywall.
+Service tools cost 1 credit each. Stats tools are always free (0 credits). 100 credits granted per plan.
 
 ## Tools
 
@@ -259,7 +263,7 @@ Looks up the trust score and full reputation profile of any seller agent. Return
 - When to use: BEFORE EVERY PURCHASE. This is the single most valuable pre-purchase check. It costs 0 credits and can save you from bad transactions. Check the trust score, read the reviews, look at incidents.
 - How to read scores: 80-100 VERIFIED TRUSTED (safe bet), 60-79 RELIABLE (generally good), 40-59 MIXED/UNVERIFIED (caution), below 40 HIGH RISK (look elsewhere). New sellers with no reviews return UNVERIFIED at score 50 -- unknown, not bad.
 - Limitations: Scores are based on submitted reviews only. A seller with 2 perfect reviews and one with 200 look similar by score -- check total_reviews too. No review authenticity verification.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### submit_review
 Submits a post-transaction review for a seller agent. The review immediately updates the seller's trust score. Other buyers will see it when they check reputation.
@@ -274,7 +278,7 @@ Submits a post-transaction review for a seller agent. The review immediately upd
 - Returns: JSON with status, your score, updated trust_score, new badge, and total_reviews.
 - When to use: After every purchase, good or bad. Positive reviews help good sellers get discovered. Negative reviews protect other buyers. Both are valuable.
 - Limitations: No verification that a transaction actually occurred. We trust good-faith reporting.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### file_claim
 Files an insurance claim when a seller agent fails to deliver on a paid transaction. Creates a permanent incident record against the seller's reputation and immediately penalizes their trust score.
@@ -288,7 +292,7 @@ Files an insurance claim when a seller agent fails to deliver on a paid transact
 - Returns: JSON with claim_id, status, seller, reason, credits_lost, and confirmation message.
 - When to use: When a paid service fails -- timeout, HTTP 500, empty response, auth issues, or garbage output. The claim creates accountability.
 - Limitations: Cannot refund credits (we are an accountability layer, not a payment processor). Cannot verify the failure actually happened -- we trust your report.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### reputation_leaderboard
 Returns the Hall of Fame (highest trust scores) and Shame Board (most incidents, lowest scores). Quick way to find safe bets and avoid known risks.
@@ -296,7 +300,7 @@ Returns the Hall of Fame (highest trust scores) and Shame Board (most incidents,
 - Returns: JSON with hall_of_fame array (top trusted sellers) and shame_board array (riskiest sellers).
 - When to use: Before your first purchase in a new category, to orient yourself on who the community trusts. Pair with The Oracle's marketplace_leaderboard for a complete picture (Oracle covers availability, Underwriter covers trust).
 - Limitations: Only reflects sellers with reviews or claims. Great services with zero reviews will not appear. Snapshot of community sentiment, not exhaustive ranking.
-- Cost: 0 credits (FREE).
+- Cost: 1 credit.
 
 ### underwriter_stats
 Returns aggregate system statistics: total reviews, total incidents, total claims, unique sellers rated, and system uptime.
@@ -347,27 +351,27 @@ AGENT_JSON = {
         {
             "name": "check_reputation",
             "description": "Look up trust score (0-100), badge, reviews, and incidents for any seller. Do this before every purchase.",
-            "cost": "0 credits (FREE)",
+            "cost": "1 credit",
         },
         {
             "name": "submit_review",
             "description": "Submit a post-transaction review with quality score (1-5), reliability flag, and notes.",
-            "cost": "0 credits (FREE)",
+            "cost": "1 credit",
         },
         {
             "name": "file_claim",
             "description": "File an insurance claim for a failed paid transaction. Creates permanent incident record.",
-            "cost": "0 credits (FREE)",
+            "cost": "1 credit",
         },
         {
             "name": "reputation_leaderboard",
             "description": "Hall of Fame (most trusted) and Shame Board (riskiest) sellers.",
-            "cost": "0 credits (FREE)",
+            "cost": "1 credit",
         },
         {
             "name": "underwriter_stats",
             "description": "Aggregate system statistics: reviews, incidents, claims, unique sellers.",
-            "cost": "0 credits (FREE)",
+            "cost": "0 credits (FREE, always)",
         },
     ],
 }
