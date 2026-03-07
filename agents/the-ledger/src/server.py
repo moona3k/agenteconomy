@@ -44,10 +44,10 @@ def llms_txt():
     """
     return """# Agent Economy Infrastructure — agenteconomy.io
 
-> Five live MCP services, a REST dashboard, and an autonomous buyer agent that together
-> form a self-sustaining agent economy on the Nevermined marketplace. Services discover,
-> evaluate, certify, research, and monetize AI agents. Each MCP tool call costs 1 credit
-> — every call is a real Nevermined transaction generating on-chain economic activity.
+> Nine MCP services, a REST dashboard, and an autonomous buyer agent for discovering,
+> evaluating, certifying, researching, auditing, adjudicating, transcribing, analyzing,
+> and monetizing AI agents on the Nevermined marketplace. All MCP tools cost 0 credits
+> during the promotional period.
 
 ## Quick Start for AI Agents
 
@@ -81,7 +81,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Oracle — Marketplace Intelligence
 - MCP endpoint: https://oracle.agenteconomy.io/mcp
-- Cost: 1 credit per tool call
+- Cost: FREE (0 credits, all tools)
 
 ### Tools
 
@@ -133,7 +133,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Underwriter — Trust and Insurance
 - MCP endpoint: https://underwriter.agenteconomy.io/mcp
-- Cost: 1 credit per tool call
+- Cost: FREE (0 credits, all tools)
 
 ### Tools
 
@@ -190,7 +190,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Gold Star — Quality Certification
 - MCP endpoint: https://goldstar.agenteconomy.io/mcp
-- Cost: 1 credit per tool call
+- Cost: FREE (0 credits, all tools)
 
 ### Tools
 
@@ -234,11 +234,11 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Architect — Multi-Agent Research
 - MCP endpoint: https://architect.agenteconomy.io/mcp
-- Cost: 1 credit per tool call
+- Cost: FREE (0 credits, all tools)
 
 ### Tools
 
-**orchestrate** — Full 5-agent pipeline producing an executive report.
+**orchestrate** — Full 7-agent, 3-layer hierarchical pipeline producing an executive report.
 - Parameters:
   - `query` (string, required): research topic or question.
     Examples: `"AI agent marketplace trends"`, `"best web scraping services"`,
@@ -272,52 +272,106 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ---
 
-## The Amplifier — Contextual Advertising
+## The Amplifier — ZeroClick-Powered AI-Native Advertising
 - MCP endpoint: https://amplifier.agenteconomy.io/mcp
-- Cost: 1 credit per tool call
+- Cost: FREE (0 credits, all tools)
+- Powered by: ZeroClick AI-native ad API (live offers from real brands)
 
 ### Tools
 
-**enrich_with_ads** — Append a contextual sponsored ad to any text content.
+**zeroclick_offers** — Fetch real-time contextual offers from ZeroClick's AI-native ad API.
 - Parameters:
-  - `content` (string, required): your full response text. The ad is appended; your
-    content is returned unchanged.
-  - `ad_style` (string, optional, default `"inline"`): `"inline"` (human-readable block),
-    `"compact"` (single line), or `"json"` (structured data with sponsor, headline, body,
-    cta, url fields)
-- Returns: Your original content with a clearly-labeled sponsored ad appended.
-- When to use: You are a seller agent and want to add a non-intrusive revenue stream
-  to your responses.
-- Limitations: Keyword-based topic matching. Focused sponsor set. If content is very
-  niche, you may get a generic ad.
+  - `query` (string, required): contextual query for ad matching.
+    Examples: `"best running shoes"`, `"AI development tools"`, `"cloud hosting for startups"`
+  - `limit` (integer, optional, default 3): max offers to return (1-8)
+- Returns: JSON with live offers from real brands (title, sponsor, description, CTA,
+  click URL, image URL, pricing). Contextually matched by ZeroClick's AI engine.
+- When to use: Monetize your agent with real, relevant ads from ZeroClick's advertiser
+  network. Returns live brand offers (Nike, Atlassian, Lenovo, etc.).
+
+**get_sponsored_recommendations** — Marketplace recommendations with SPONSORED placements.
+- Parameters:
+  - `intent` (string, required): what the buyer agent needs.
+    Examples: `"web scraping"`, `"research"`, `"data analytics"`, `"QA testing"`
+  - `max_results` (integer, optional, default 5): max organic results (max 15)
+- Returns: JSON with ranked results (organic marketplace + SPONSORED ZeroClick offers),
+  each with name, endpoint, plan_did, pricing, relevance_score, and type.
+- When to use: Before purchasing. Combines marketplace intelligence with ZeroClick ads.
+
+**enrich_with_ads** — Append a ZeroClick-powered contextual ad to any text content.
+- Parameters:
+  - `content` (string, required): your full response text (ad appended, content unchanged)
+  - `ad_style` (string, optional, default `"inline"`): `"inline"`, `"compact"`, or `"json"`
+- Returns: Your content with a clearly-labeled sponsored ad appended.
+- When to use: Add a non-intrusive revenue stream to your agent responses.
+
+**create_ad_campaign** — Register a seller ad campaign for SPONSORED placement.
+- Parameters:
+  - `seller_name`, `team_name`, `keywords` (comma-separated), `headline`, `body`
+  - `budget_credits` (integer, optional, default 100)
+- Returns: Campaign object. Appears as SPONSORED when buyers search matching intents.
 
 **get_ad** — Standalone contextual ad for a topic.
 - Parameters:
-  - `topic` (string, required): topic for matching.
-    Examples: `"AI research"`, `"crypto trading"`, `"data analytics"`, `"cloud infrastructure"`
-  - `style` (string, optional, default `"inline"`): same options as enrich_with_ads
-- Returns: A single ad without surrounding content.
-- When to use: You want precise control over ad placement — dashboards, directories,
-  recommendation lists alongside organic results.
-- Limitations: Returns one ad per call. No frequency caps or sponsor exclusions.
+  - `topic` (string, required): topic for matching
+  - `style` (string, optional, default `"inline"`): output format
+- Returns: A single ad. ZeroClick API for generic queries, curated catalog for known topics.
 
-**ad_stats** — Ad network statistics.
+**ad_stats** — Ad network statistics including ZeroClick API usage.
 - Parameters: none
-- Returns: JSON with total impressions, unique sponsors, topic categories with available ads.
-- When to use: Understanding the ad network's reach before integrating.
+- Returns: JSON with impressions, ZeroClick API call counts, hit rates, campaigns.
+
+---
+
+## The Transcriber — Free Speech-to-Text
+- MCP endpoint: https://transcriber.agenteconomy.io/mcp
+- Cost: FREE (0 credits). Ad-supported via ZeroClick.
+
+Assembly AI for AI agents, except free. Send a YouTube URL or any audio/video file,
+get back an accurate transcription powered by NVIDIA Parakeet on Apple Silicon.
+No sign-up, no credits, no cost. Every response includes a clearly-labeled ZeroClick
+contextual ad — that's how we keep it free.
+
+### Tools
+
+**transcribe_youtube** — Transcribe a YouTube video to text. FREE.
+- Parameters:
+  - `youtube_url` (string, required): Full YouTube URL (e.g., "https://www.youtube.com/watch?v=...")
+- Returns: JSON with transcript text, word_count, elapsed_seconds, source_url, model info,
+  and a clearly-labeled sponsored ad block.
+- When to use: You need to transcribe a YouTube video — a lecture, podcast, interview,
+  meeting recording, or any video with speech.
+- Limitations: English-optimized. Processing time depends on video length. Very long
+  videos may timeout (5 min limit).
+
+**transcribe_file** — Transcribe a local audio or video file. FREE.
+- Parameters:
+  - `file_path` (string, required): Absolute path to the audio or video file.
+    Supported formats: wav, mp3, m4a, flac, ogg, mp4, mkv, webm.
+- Returns: JSON with transcript text, word_count, elapsed_seconds, source path,
+  model info, and a clearly-labeled sponsored ad block.
+- When to use: You have an audio or video file that needs transcription.
+- Limitations: File must be accessible from the server. English-optimized. Max 5 min processing.
+
+**transcriber_info** — Service capabilities and status. FREE.
+- Parameters: none
+- Returns: JSON with model info, supported formats, compute details, and system status.
+- When to use: Check if the service is ready before sending transcription requests.
 
 ---
 
 ## The Mystery Shopper — Service Auditor
-- MCP endpoint: https://shopper.agenteconomy.io/mcp
-- Cost: 1 credit per tool call
+- MCP endpoint: https://the-mystery-shopper-production.up.railway.app/mcp
+- Plan ID: 2876283519375110740982326210740975510367395120091489043995135396590336460727
+- Cost: FREE (0 credits, all tools)
 
 ### Tools
 
 **shop_service** — End-to-end audit of a single service.
 - Parameters:
-  - `service_name` (string, required): name of the service to audit.
-  - `endpoint_url` (string, required): base URL of the service.
+  - `seller_name` (string, required): name of the service to audit. Example: `"Cortex"`
+  - `team_name` (string, required): team operating the service. Example: `"Full Stack Agents"`
+  - `endpoint_url` (string, required): base URL. Example: `"https://service.railway.app"`
 - Returns: JSON audit report with weighted scores (health 20%, MCP 20%, tool discovery 20%,
   functional tests 25%, latency 15%), overall grade, and pass/fail determination.
 - When to use: Before purchasing a service — verify it actually works, responds correctly,
@@ -334,11 +388,11 @@ skip directly to The Architect. For disputes, file with The Judge.
 - Limitations: Takes 30-90 seconds depending on marketplace size. Rate-limited to
   prevent abuse.
 
-**get_latest_report** — Retrieve the most recent audit for a service.
+**get_latest_report** — Retrieve the most recent audit reports.
 - Parameters:
-  - `service_name` (string, required): name of the service.
-- Returns: Cached audit report if available, or null.
-- When to use: Quick lookup without re-running an audit.
+  - `limit` (integer, optional, default 10): number of reports to return (max 50).
+- Returns: Array of recent audit reports, or empty if none.
+- When to use: Quick lookup of recent audits without re-running.
 
 **shopper_stats** — Aggregate audit statistics.
 - Parameters: none
@@ -347,19 +401,20 @@ skip directly to The Architect. For disputes, file with The Judge.
 ---
 
 ## The Judge — Dispute Resolution
-- MCP endpoint: https://judge.agenteconomy.io/mcp
-- Cost: 1 credit per tool call
+- MCP endpoint: https://the-judge-production.up.railway.app/mcp
+- Plan ID: 12053604955084041292320306081257285897079995331071506486332857592957939330877
+- Cost: FREE (0 credits, all tools)
 
 ### Tools
 
 **file_dispute** — Open a dispute case against a seller.
 - Parameters:
-  - `buyer` (string, required): your identifier.
-  - `seller_name` (string, required): the service you're disputing.
-  - `reason` (string, required): what went wrong (e.g., "service returned garbage",
-    "timeout after payment", "response didn't match description").
+  - `buyer` (string, required): your team or agent name. Example: `"BuyerBot"`
+  - `seller_name` (string, required): the service you're disputing. Example: `"Cortex"`
+  - `team_name` (string, required): team operating the service. Example: `"Full Stack Agents"`
+  - `complaint` (string, required): what went wrong. Example: `"Service returned empty response after payment"`
+  - `evidence` (string, required): supporting details. Example: `"Transaction ID: TX-123, got HTTP 500"`
   - `credits_at_stake` (int, optional, default 1): credits involved.
-  - `evidence` (string, optional): logs, screenshots, transaction IDs.
 - Returns: Case object with case_id, status "open", and auto-gathered evidence from
   The Underwriter and The Gold Star.
 - When to use: After a paid transaction goes wrong. The Judge cross-references trust
@@ -369,8 +424,8 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 **submit_response** — Seller responds to a dispute.
 - Parameters:
-  - `case_id` (string, required): the dispute case ID.
-  - `response` (string, required): seller's defense or explanation.
+  - `case_id` (string, required): the dispute case ID. Example: `"CASE-0001"`
+  - `seller_response` (string, required): your defense or explanation of what happened.
 - Returns: Updated case with seller response recorded and verdict rendered.
 - When to use: You're a seller and have been named in a dispute.
 
@@ -381,9 +436,9 @@ skip directly to The Architect. For disputes, file with The Judge.
 - Returns: Re-evaluated case with updated verdict.
 - When to use: You disagree with the verdict and have new evidence.
 
-**case_history** — View all disputes for a seller.
+**case_history** — View all disputes.
 - Parameters:
-  - `seller_name` (string, optional): filter by seller. Omit for all cases.
+  - `party_name` (string, optional): name of buyer, seller, or team. Omit for all cases.
 - Returns: Array of case summaries with verdicts and outcomes.
 
 **judge_stats** — Aggregate dispute statistics.
@@ -393,15 +448,15 @@ skip directly to The Architect. For disputes, file with The Judge.
 ---
 
 ## The Doppelganger — Competitive Intelligence
-- MCP endpoint: https://doppelganger.agenteconomy.io/mcp
-- Cost: 1 credit per tool call
+- MCP endpoint: https://the-doppelganger-production.up.railway.app/mcp
+- Plan ID: 40680696104453239909361394554545001181085103432850956497688401229644769083536
+- Cost: FREE (0 credits, all tools)
 
 ### Tools
 
 **analyze_service** — Deep moat analysis of a single service.
 - Parameters:
-  - `service_name` (string, required): target service name.
-  - `endpoint_url` (string, required): base URL of the service.
+  - `seller_name` (string, required): target service name. Example: `"Cortex"`
 - Returns: JSON with moat_score (0-10), vulnerability rating (trivial/easy/moderate/hard/
   fortress), detected signals (proprietary data, real compute, integrations, network effects,
   LLM wrapper indicators), clone blueprint with estimated dev time and price undercut.
@@ -428,33 +483,6 @@ skip directly to The Architect. For disputes, file with The Judge.
 **doppelganger_stats** — Service usage statistics.
 - Parameters: none
 - Returns: JSON with total analyses, services scanned, average moat score.
-
----
-
-## The Transcriber — Local-Model Speech-to-Text
-- MCP endpoint: https://transcriber.agenteconomy.io/mcp
-- Cost: 1 credit per tool call
-
-### Tools
-
-**transcribe_youtube** — Transcribe a YouTube video to text.
-- Parameters:
-  - `youtube_url` (string, required): full YouTube URL.
-- Returns: JSON with transcript text, word count, processing time, source URL.
-- When to use: When you need text from a YouTube video but your compute environment
-  is too small to run an ML model. We download audio and run NVIDIA Parakeet locally.
-- Limitations: English-optimized. Very long videos may timeout (5 min limit).
-
-**transcribe_file** — Transcribe a local audio or video file.
-- Parameters:
-  - `file_path` (string, required): absolute path to audio/video file.
-- Returns: JSON with transcript text, word count, processing time, source path.
-- Supported formats: wav, mp3, m4a, flac, ogg, mp4, mkv, webm.
-- Limitations: File must be accessible from the server's filesystem. English-optimized.
-
-**transcriber_info** — Get capabilities and system status.
-- Parameters: none
-- Returns: JSON with model info, supported formats, compute details.
 
 ---
 
@@ -513,11 +541,15 @@ Install: pip install payments-py httpx
 
     # Plan IDs (pick the services you need):
     PLANS = {
-        "oracle":      "73832576591113218627249140062481319784526101948276910427168459563781622307151",
-        "underwriter": "108289525728886290523358160114949466457088917231870074042604244210937761689110",
-        "gold_star":   "86107591125963957406574553233076282216940031177768083482829930136762279428594",
-        "amplifier":   "31307392809981293956301786331179599135979548398803667593789184055010190785367",
-        "architect":   "31307392809981293956301786331179599135979548398803667593789184055010190785367",
+        "oracle":         "49986146016946951596359904822933725452431879589377003162453696949953495113815",
+        "underwriter":    "108289525728886290523358160114949466457088917231870074042604244210937761689110",
+        "gold_star":      "86107591125963957406574553233076282216940031177768083482829930136762279428594",
+        "amplifier":      "73832576591113218627249140062481319784526101948276910427168459563781622307151",
+        "architect":      "31307392809981293956301786331179599135979548398803667593789184055010190785367",
+        "shopper":        "2876283519375110740982326210740975510367395120091489043995135396590336460727",
+        "judge":          "12053604955084041292320306081257285897079995331071506486332857592957939330877",
+        "doppelganger":   "40680696104453239909361394554545001181085103432850956497688401229644769083536",
+        "transcriber":    "58306673084908087585440878705147632312565709671415378222837289446099441841545",
     }
 
     # Subscribe once per plan:
@@ -584,22 +616,49 @@ Install: pip install payments-py httpx
             "ad_style": "inline"
         }))
 
+    # Audit a service before purchasing
+    print(mcp_call("https://the-mystery-shopper-production.up.railway.app/mcp",
+        PLANS["shopper"], "shop_service", {
+            "seller_name": "Cortex",
+            "team_name": "Full Stack Agents",
+            "endpoint_url": "https://cortex.example.com"
+        }))
+
+    # File a dispute if a service fails
+    print(mcp_call("https://the-judge-production.up.railway.app/mcp",
+        PLANS["judge"], "file_dispute", {
+            "buyer": "YourTeamName",
+            "seller_name": "FailedService",
+            "team_name": "TheirTeam",
+            "complaint": "Service returned empty response after payment",
+            "evidence": "Transaction TX-123, got HTTP 500 at 2026-03-06T12:00:00Z"
+        }))
+
+    # Analyze a competitor's moat
+    print(mcp_call("https://the-doppelganger-production.up.railway.app/mcp",
+        PLANS["doppelganger"], "analyze_service", {
+            "seller_name": "Cortex"
+        }))
+
 ---
 
 ## Connection Details
 
-All MCP services accept connections at their /mcp path. Each tool call costs 1 credit
+All MCP services accept connections at their /mcp path. All tools cost 0 credits
 during the promotional period. Subscribe to a plan via the Nevermined SDK to get
 an x402 access token, then pass it as a Bearer token in the Authorization header.
 
-| Service         | MCP Endpoint                                   | Plan ID (last 8 digits) |
-|-----------------|------------------------------------------------|------------------------|
-| The Oracle      | https://oracle.agenteconomy.io/mcp             | ...307151 |
-| The Underwriter | https://underwriter.agenteconomy.io/mcp        | ...689110 |
-| The Gold Star   | https://goldstar.agenteconomy.io/mcp           | ...428594 |
-| The Architect   | https://the-architect-production.up.railway.app/mcp | ...785367 |
-| The Amplifier   | https://the-amplifier-production.up.railway.app/mcp | ...785367 |
-| The Ledger      | https://agenteconomy.io (REST, no MCP)         | N/A |
+| Service            | MCP Endpoint                                | Plan ID (last 8 digits) |
+|--------------------|---------------------------------------------|------------------------|
+| The Oracle         | https://oracle.agenteconomy.io/mcp                        | ...307151 |
+| The Underwriter    | https://underwriter.agenteconomy.io/mcp                   | ...689110 |
+| The Gold Star      | https://goldstar.agenteconomy.io/mcp                      | ...428594 |
+| The Architect      | https://the-architect-production.up.railway.app/mcp       | ...785367 |
+| The Amplifier      | https://the-amplifier-production.up.railway.app/mcp       | ...785367 |
+| The Mystery Shopper| https://the-mystery-shopper-production.up.railway.app/mcp | ...460727 |
+| The Judge          | https://the-judge-production.up.railway.app/mcp           | ...330877 |
+| The Doppelganger   | https://the-doppelganger-production.up.railway.app/mcp    | ...083536 |
+| The Ledger         | https://agenteconomy.io (REST, no MCP)                    | N/A |
 
 ## Contact
 - Team: Full Stack Agents (B3 Labs)
@@ -614,11 +673,11 @@ def agent_json():
     return {
         "name": "Agent Economy Infrastructure",
         "description": (
-            "Five live MCP services, a REST dashboard, and an autonomous buyer forming a self-sustaining agent economy. "
+            "Nine MCP services, a REST dashboard, and an autonomous buyer for the Nevermined agent marketplace. "
             "Discover services (Oracle), check trust (Underwriter), verify quality (Gold Star), "
-            "audit services (Mystery Shopper), resolve disputes (Judge), analyze competitive moats "
-            "(Doppelganger), transcribe audio (Transcriber), run multi-agent research (Architect), "
-            "and monetize responses with ads (Amplifier). Each MCP tool call costs 1 credit — real Nevermined transactions."
+            "audit services (Mystery Shopper), resolve disputes (Judge), analyze competitive moats (Doppelganger), "
+            "run multi-agent research (Architect), and monetize responses with ads (Amplifier). "
+            "All MCP tools cost 0 credits during the promotional period."
         ),
         "url": "https://agenteconomy.io",
         "provider": {
@@ -637,7 +696,7 @@ def agent_json():
                 "role": "Marketplace intelligence — discover, search, rank, and compare services.",
                 "endpoint": "https://oracle.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "1 credit per tool call",
+                "pricing": "FREE (0 credits, all tools)",
                 "tools": [
                     {
                         "name": "marketplace_data",
@@ -669,7 +728,7 @@ def agent_json():
                 "role": "Trust and insurance — reputation scores, post-transaction reviews, failure claims.",
                 "endpoint": "https://underwriter.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "1 credit per tool call",
+                "pricing": "FREE (0 credits, all tools)",
                 "tools": [
                     {
                         "name": "check_reputation",
@@ -716,7 +775,7 @@ def agent_json():
                 "role": "Quality certification — AI-powered multi-phase QA testing.",
                 "endpoint": "https://goldstar.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "1 credit per tool call",
+                "pricing": "FREE (0 credits, all tools)",
                 "tools": [
                     {
                         "name": "request_review",
@@ -746,14 +805,14 @@ def agent_json():
             },
             {
                 "name": "The Architect",
-                "role": "Multi-agent research — 5-agent pipeline producing executive reports.",
+                "role": "Multi-agent research — 7-agent, 3-layer hierarchical pipeline producing executive reports.",
                 "endpoint": "https://architect.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "1 credit per tool call",
+                "pricing": "FREE (0 credits, all tools)",
                 "tools": [
                     {
                         "name": "orchestrate",
-                        "description": "Full 5-agent pipeline: Discovery, Research, Analysis, QA, Report. Returns structured executive report. Takes 15-45 seconds.",
+                        "description": "Full 7-agent, 3-layer hierarchical pipeline: Discovery, Research, Analysis, QA, Report. Returns structured executive report. Takes 15-45 seconds.",
                         "parameters": {"query": "string, required: research topic or question"},
                     },
                     {
@@ -773,7 +832,7 @@ def agent_json():
                 "role": "Contextual advertising — non-intrusive sponsored content for agent responses.",
                 "endpoint": "https://amplifier.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "1 credit per tool call",
+                "pricing": "FREE (0 credits, all tools)",
                 "tools": [
                     {
                         "name": "enrich_with_ads",
@@ -803,31 +862,12 @@ def agent_json():
                 "role": "Service auditor — end-to-end testing, scoring, and sweep audits of MCP services.",
                 "endpoint": "https://shopper.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "1 credit per tool call",
+                "pricing": "FREE (0 credits, all tools)",
                 "tools": [
-                    {
-                        "name": "shop_service",
-                        "description": "End-to-end audit of a single service with weighted scoring across health, MCP, discovery, functional tests, and latency.",
-                        "parameters": {
-                            "service_name": "string, required: name of service to audit",
-                            "endpoint_url": "string, required: base URL of the service",
-                        },
-                    },
-                    {
-                        "name": "run_sweep",
-                        "description": "Audit all live MCP services in the marketplace. Auto-submits reviews to The Underwriter.",
-                        "parameters": {},
-                    },
-                    {
-                        "name": "get_latest_report",
-                        "description": "Retrieve the most recent audit report for a service.",
-                        "parameters": {"service_name": "string, required"},
-                    },
-                    {
-                        "name": "shopper_stats",
-                        "description": "Aggregate audit statistics: total audits, pass rates, average scores.",
-                        "parameters": {},
-                    },
+                    {"name": "shop_service", "description": "End-to-end audit with weighted scoring.", "parameters": {"service_name": "string, required", "endpoint_url": "string, required"}},
+                    {"name": "run_sweep", "description": "Audit all live MCP services. Auto-submits reviews.", "parameters": {}},
+                    {"name": "get_latest_report", "description": "Most recent audit report for a service.", "parameters": {"service_name": "string, required"}},
+                    {"name": "shopper_stats", "description": "Aggregate audit statistics.", "parameters": {}},
                 ],
             },
             {
@@ -835,45 +875,13 @@ def agent_json():
                 "role": "Dispute resolution — file disputes, submit responses, appeal verdicts, case history.",
                 "endpoint": "https://judge.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "1 credit per tool call",
+                "pricing": "FREE (0 credits, all tools)",
                 "tools": [
-                    {
-                        "name": "file_dispute",
-                        "description": "Open a dispute case. Auto-gathers evidence from The Underwriter and The Gold Star.",
-                        "parameters": {
-                            "buyer": "string, required: your identifier",
-                            "seller_name": "string, required: the service you're disputing",
-                            "reason": "string, required: what went wrong",
-                            "credits_at_stake": "int, optional (default 1)",
-                            "evidence": "string, optional: logs, transaction IDs",
-                        },
-                    },
-                    {
-                        "name": "submit_response",
-                        "description": "Seller responds to a dispute. Triggers verdict rendering.",
-                        "parameters": {
-                            "case_id": "string, required",
-                            "response": "string, required: seller's defense",
-                        },
-                    },
-                    {
-                        "name": "appeal",
-                        "description": "Appeal a verdict with new evidence. One appeal per case.",
-                        "parameters": {
-                            "case_id": "string, required",
-                            "new_evidence": "string, required",
-                        },
-                    },
-                    {
-                        "name": "case_history",
-                        "description": "View all disputes, optionally filtered by seller.",
-                        "parameters": {"seller_name": "string, optional"},
-                    },
-                    {
-                        "name": "judge_stats",
-                        "description": "Aggregate dispute statistics: cases, verdicts, appeal rates.",
-                        "parameters": {},
-                    },
+                    {"name": "file_dispute", "description": "Open a dispute case. Auto-gathers evidence.", "parameters": {"buyer": "string, required", "seller_name": "string, required", "reason": "string, required"}},
+                    {"name": "submit_response", "description": "Seller responds to a dispute.", "parameters": {"case_id": "string, required", "response": "string, required"}},
+                    {"name": "appeal", "description": "Appeal a verdict with new evidence.", "parameters": {"case_id": "string, required", "new_evidence": "string, required"}},
+                    {"name": "case_history", "description": "View all disputes, optionally filtered by seller.", "parameters": {"seller_name": "string, optional"}},
+                    {"name": "judge_stats", "description": "Aggregate dispute statistics.", "parameters": {}},
                 ],
             },
             {
@@ -881,31 +889,12 @@ def agent_json():
                 "role": "Competitive intelligence — moat analysis, vulnerability scanning, clone blueprints.",
                 "endpoint": "https://doppelganger.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "1 credit per tool call",
+                "pricing": "FREE (0 credits, all tools)",
                 "tools": [
-                    {
-                        "name": "analyze_service",
-                        "description": "Deep moat analysis: score (0-10), vulnerability rating, defensibility signals, clone blueprint.",
-                        "parameters": {
-                            "service_name": "string, required: target service name",
-                            "endpoint_url": "string, required: base URL",
-                        },
-                    },
-                    {
-                        "name": "find_vulnerable",
-                        "description": "Scan marketplace for easily clonable services, ranked by vulnerability.",
-                        "parameters": {"max_results": "int, optional (default 10)"},
-                    },
-                    {
-                        "name": "moat_report",
-                        "description": "Executive summary of marketplace defensibility: average moats, LLM wrapper percentage.",
-                        "parameters": {},
-                    },
-                    {
-                        "name": "doppelganger_stats",
-                        "description": "Service usage statistics.",
-                        "parameters": {},
-                    },
+                    {"name": "analyze_service", "description": "Deep moat analysis: score, vulnerability, clone blueprint.", "parameters": {"service_name": "string, required", "endpoint_url": "string, required"}},
+                    {"name": "find_vulnerable", "description": "Scan marketplace for easily clonable services.", "parameters": {"max_results": "int, optional (default 10)"}},
+                    {"name": "moat_report", "description": "Executive summary of marketplace defensibility.", "parameters": {}},
+                    {"name": "doppelganger_stats", "description": "Service usage statistics.", "parameters": {}},
                 ],
             },
             {
@@ -913,25 +902,40 @@ def agent_json():
                 "role": "Local-model speech-to-text on Apple Silicon using NVIDIA Parakeet.",
                 "endpoint": "https://transcriber.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "1 credit per tool call",
+                "pricing": "FREE (0 credits). Ad-supported.",
                 "tools": [
                     {
                         "name": "transcribe_youtube",
-                        "description": "YouTube URL to full text transcript with word count and timing.",
-                        "parameters": {
-                            "youtube_url": "string, required: full YouTube URL",
-                        },
+                        "description": "YouTube URL -> full text transcript. Downloads audio, runs NVIDIA Parakeet locally. FREE.",
+                        "parameters": {"youtube_url": "string, required: full YouTube URL"},
                     },
                     {
                         "name": "transcribe_file",
-                        "description": "Transcribe a local audio or video file to text.",
-                        "parameters": {
-                            "file_path": "string, required: absolute path to audio/video file",
-                        },
+                        "description": "Audio/video file -> full text transcript. Supports wav, mp3, m4a, flac, ogg, mp4, mkv, webm. FREE.",
+                        "parameters": {"file_path": "string, required: absolute path to audio/video file"},
                     },
                     {
                         "name": "transcriber_info",
-                        "description": "Capabilities, supported formats, and system status.",
+                        "description": "Service capabilities, model info, supported formats, and system status. FREE.",
+                        "parameters": {},
+                    },
+                ],
+            },
+            {
+                "name": "The Fund",
+                "role": "Intelligence-driven autonomous buyer — 5-phase cycle across 16+ external teams.",
+                "endpoint": "https://agenteconomy.io/fund",
+                "protocol": "rest",
+                "pricing": "Not a public service — generates transactions autonomously",
+                "tools": [
+                    {
+                        "name": "live_report",
+                        "description": "View The Fund's live investment report at /fund",
+                        "parameters": {},
+                    },
+                    {
+                        "name": "api_data",
+                        "description": "GET /api/fund for raw JSON investment data",
                         "parameters": {},
                     },
                 ],
@@ -1400,7 +1404,7 @@ _MCP_SERVICES = [
         "color": "#a78bfa",
         "icon": "R",
         "tools": [
-            ("orchestrate", "Full 5-agent pipeline: Discovery, Research, Analysis, QA, Report"),
+            ("orchestrate", "Full 7-agent, 3-layer hierarchical pipeline: Discovery, Research, Analysis, QA, Report"),
             ("quick_research", "Fast 2-agent pipeline (Research + Analysis)"),
             ("pipeline_status", "Operational health check"),
         ],
@@ -1441,64 +1445,64 @@ _MCP_SERVICES = [
         "slug": "mystery-shopper",
         "name": "The Mystery Shopper",
         "tagline": "Service Auditor",
-        "desc": "End-to-end service auditing. Actually calls MCP tools, measures latency, and scores services on a weighted rubric. Auto-submits reviews to The Underwriter.",
+        "desc": "End-to-end service auditing with weighted scoring across health, MCP discovery, functional tests, and latency. Auto-submits reviews to The Underwriter.",
         "url": "https://shopper.agenteconomy.io",
         "mcp": "https://shopper.agenteconomy.io/mcp",
-        "color": "#06b6d4",
+        "color": "#f59e0b",
         "icon": "M",
         "tools": [
-            ("shop_service", "End-to-end audit with weighted scoring across 5 dimensions"),
-            ("run_sweep", "Audit all live MCP services in the marketplace"),
-            ("get_latest_report", "Retrieve most recent audit report for a service"),
-            ("shopper_stats", "Aggregate audit statistics"),
+            ("shop_service", "End-to-end audit of a single service with weighted scoring."),
+            ("run_sweep", "Audit all live MCP services in the marketplace."),
+            ("get_latest_report", "Retrieve the most recent audit report for a service."),
+            ("shopper_stats", "Aggregate audit statistics."),
         ],
     },
     {
         "slug": "judge",
         "name": "The Judge",
         "tagline": "Dispute Resolution",
-        "desc": "Rules-based dispute resolution. Cross-references The Underwriter and The Gold Star for evidence. Renders verdicts, accepts appeals, tracks case history.",
+        "desc": "File disputes, submit seller responses, appeal verdicts. Auto-gathers evidence from The Underwriter and The Gold Star to render deterministic rulings.",
         "url": "https://judge.agenteconomy.io",
         "mcp": "https://judge.agenteconomy.io/mcp",
         "color": "#dc2626",
         "icon": "J",
         "tools": [
-            ("file_dispute", "Open a dispute case with auto-gathered evidence"),
-            ("submit_response", "Seller responds to a dispute"),
-            ("appeal", "Appeal a verdict with new evidence"),
-            ("case_history", "View all disputes, optionally filtered by seller"),
-            ("judge_stats", "Aggregate dispute statistics"),
+            ("file_dispute", "Open a dispute case. Auto-gathers evidence and renders verdict."),
+            ("submit_response", "Seller responds to a dispute."),
+            ("appeal", "Appeal a verdict with new evidence (one per case)."),
+            ("case_history", "View all disputes, optionally filtered by seller."),
+            ("judge_stats", "Aggregate dispute statistics."),
         ],
     },
     {
         "slug": "doppelganger",
         "name": "The Doppelganger",
         "tagline": "Competitive Intelligence",
-        "desc": "Moat analysis for the agent economy. Discovers what's defensible, what's an LLM wrapper, and what could be cloned in a weekend. Proves that wrappers have no moat.",
+        "desc": "Analyzes competitive moats and vulnerability in AI services. Detects LLM wrappers, scores defensibility, and generates clone blueprints with estimated dev time.",
         "url": "https://doppelganger.agenteconomy.io",
         "mcp": "https://doppelganger.agenteconomy.io/mcp",
-        "color": "#8b5cf6",
+        "color": "#7c3aed",
         "icon": "D",
         "tools": [
-            ("analyze_service", "Deep moat analysis with vulnerability rating and clone blueprint"),
-            ("find_vulnerable", "Scan marketplace for easily clonable services"),
-            ("moat_report", "Executive summary of marketplace defensibility"),
-            ("doppelganger_stats", "Service usage statistics"),
+            ("analyze_service", "Deep moat analysis: score (0-10), vulnerability rating, clone blueprint."),
+            ("find_vulnerable", "Scan marketplace for easily clonable services."),
+            ("moat_report", "Executive summary of marketplace defensibility."),
+            ("doppelganger_stats", "Service usage statistics."),
         ],
     },
     {
         "slug": "transcriber",
         "name": "The Transcriber",
-        "tagline": "Local-Model Speech-to-Text",
-        "desc": "NVIDIA Parakeet on Apple Silicon. Real local compute, not an API wrapper. Transcribe YouTube videos and audio files to text.",
+        "tagline": "Free Speech-to-Text",
+        "desc": "Assembly AI for AI agents, except free. Send a YouTube URL or any audio/video, get back an accurate transcription powered by NVIDIA Parakeet. Ad-supported via ZeroClick.",
         "url": "https://transcriber.agenteconomy.io",
         "mcp": "https://transcriber.agenteconomy.io/mcp",
-        "color": "#22d3ee",
+        "color": "#06b6d4",
         "icon": "T",
         "tools": [
-            ("transcribe_youtube", "YouTube URL to full text transcript"),
-            ("transcribe_file", "Audio/video file to text transcript"),
-            ("transcriber_info", "Capabilities, supported formats, and system status"),
+            ("transcribe_youtube", "YouTube URL -> full text transcript. FREE."),
+            ("transcribe_file", "Audio/video file -> transcript. Supports wav, mp3, m4a, flac, ogg, mp4, mkv, webm. FREE."),
+            ("transcriber_info", "Service capabilities, model info, and system status. FREE."),
         ],
     },
     {
@@ -1514,7 +1518,7 @@ _MCP_SERVICES = [
             ("5-Phase Cycle", "Intel → Buy → Adversarial → Explore → Feedback every 45s"),
             ("Cross-Team Purchasing", "Buys from 16+ external teams with real x402 tokens"),
             ("Adversarial Testing", "SQL injection, XSS, unicode, floods — stress-tests the economy"),
-            ("Live Report", '<a href="/fund" style="color:#14b8a6">View live investment report →</a>'),
+            ("Live Report", "Real-time investment data at agenteconomy.io/fund"),
         ],
     },
 ]
@@ -1567,6 +1571,13 @@ async def services_page():
                 <pre class="s-code">curl https://agenteconomy.io/api/analysis</pre>
                 <div class="s-connect-hint">No authentication required. JSON responses.</div>
             </div>'''
+        elif svc["slug"] == "fund":
+            mcp_block = '''<div class="s-connect">
+                <div class="s-connect-title">Live Investment Report</div>
+                <pre class="s-code"><a href="/fund" style="color:#14b8a6">agenteconomy.io/fund</a>  — real-time thesis, transactions, provider rankings
+<a href="/api/fund" style="color:#94a3c0">agenteconomy.io/api/fund</a> — raw JSON data</pre>
+                <div class="s-connect-hint">Updates every 45 seconds as The Fund completes cycles</div>
+            </div>'''
 
         links_html = ""
         if svc["url"]:
@@ -1587,7 +1598,7 @@ async def services_page():
                 </div>
             </div>
             <p class="s-desc">{_esc(svc["desc"])}</p>
-            <div class="s-tools-title">{"Tools" if svc["mcp"] else "Endpoints"} <span class="s-free">1 credit/call</span></div>
+            <div class="s-tools-title">{"Tools" if svc["mcp"] else "Endpoints"} <span class="s-free">{"FREE (ad-supported)" if svc["slug"] == "transcriber" else "FREE (0 credits)"}</span></div>
             <div class="s-tools">{tools_html}</div>
             {mcp_block}
             <div class="s-links">{links_html}</div>
@@ -1602,7 +1613,7 @@ _SERVICES_TEMPLATE = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Services — Agent Economy</title>
-<meta name="description" content="10 autonomous services powering the Nevermined AI agent marketplace. MCP connection instructions, live health status, and tool documentation.">
+<meta name="description" content="7 autonomous services forming a self-sustaining agent economy on the Nevermined marketplace. MCP connection instructions, live health status, and tool documentation.">
 <!-- AI Agent Discovery -->
 <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly documentation for AI agents">
 <link rel="alternate" type="application/json" href="/.well-known/agent.json" title="A2A agent card with all services and tools">
