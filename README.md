@@ -1,6 +1,6 @@
 # Agent Economy Infrastructure
 
-**11 autonomous businesses providing trust, quality, and commerce infrastructure for the Nevermined AI agent marketplace.**
+**9 autonomous businesses providing trust, quality, and commerce infrastructure for the Nevermined AI agent marketplace.**
 
 Built by **Team Full Stack Agents** for the [Nevermined Autonomous Business Hackathon](https://nevermined.ai) (March 5-6, 2026).
 
