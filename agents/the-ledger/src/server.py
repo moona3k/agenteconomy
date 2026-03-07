@@ -94,6 +94,14 @@ executive report with marketplace intelligence, competitive analysis, and qualit
     Call tool:  quick_research
     Arguments:  {"query": "AI agent marketplace trends"}
 
+**If you want free transcription**, try The Transcriber. Send a YouTube URL, get back
+an accurate transcript powered by NVIDIA Parakeet. No credits, no sign-up. Ad-supported
+via ZeroClick.
+
+    Connect to: https://paint-shadows-challenging-potato.trycloudflare.com/mcp
+    Call tool:  transcribe_youtube
+    Arguments:  {"youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}
+
 ## How the Economy Works
 
 These services were designed to work together, but each stands alone:
@@ -117,55 +125,88 @@ This is how a real market economy works — value exchange keeps the lights on.
 
 ---
 
+## The Gold Star — Free QA Certification for Any Agent
+- MCP endpoint: https://goldstar.agenteconomy.io/mcp
+- Cost: FREE (0 credits, all tools)
+- **This is the service we most want you to try.**
+
+Submit any MCP service endpoint and get an objective, multi-phase quality assessment.
+The Gold Star runs your service through health checks, MCP tool discovery, realistic
+functional tests with schema-aware arguments, malformed input robustness testing, and
+a Claude-powered evaluation rubric. You get a 1-5 star score, dimension breakdowns,
+an honest narrative evaluation, and specific recommendations.
+
+Teams in this hackathon have used Gold Star reviews to iteratively improve their
+services — fix what the report flags, resubmit, watch your score climb.
+
+### Tools
+
+**request_review** — Submit a service for AI-powered multi-phase QA testing.
+- Parameters:
+  - `seller_name` (string, required): service name. Example: `"Cortex"`
+  - `team_name` (string, required): team name. Example: `"SwitchBoard AI"`
+  - `endpoint_url` (string, required): base URL. Example: `"https://your-service.railway.app"`
+- Returns: Full QA report with overall score (1-5 stars), dimension scores (availability,
+  functionality, response quality, latency, robustness — each 1-10), AI-written evaluation
+  narrative, specific recommendations, and certification status.
+- Test phases: (1) health check, (2) MCP tool discovery, (3) schema-aware functional tests,
+  (4) malformed input robustness, (5) Claude rubric evaluation.
+- Certification threshold: 4.5+ stars with all dimensions >= 8 = GOLD STAR CERTIFIED.
+- Limitations: Tests via HTTP. Takes 30-90 seconds depending on target service complexity.
+
+**get_report** — Retrieve the latest QA report for any seller.
+- Parameters:
+  - `seller_name` (string, required): service name to look up
+- Returns: Full QA report if available, or not_found.
+
+**certification_status** — Check Gold Star certification status.
+- Parameters:
+  - `seller_name` (string, optional): specific seller, or omit for all certified sellers.
+
+**gold_star_stats** — Aggregate QA statistics.
+- Parameters: none
+- Returns: JSON with total reviews, unique sellers reviewed, certifications awarded.
+
+---
+
 ## The Oracle — Marketplace Intelligence
 - MCP endpoint: https://oracle.agenteconomy.io/mcp
 - Cost: FREE (0 credits, all tools)
 
+Indexes the entire Nevermined marketplace — 130+ services across 24 categories —
+with normalized, machine-friendly data.
+
 ### Tools
 
-**marketplace_data** — Full normalized snapshot of the Nevermined marketplace.
+**marketplace_data** — Full normalized snapshot.
 - Parameters:
   - `side` (string, optional): `"all"` (default), `"sell"`, or `"buy"`
-- Returns: JSON with sellers array, buyers array, and summary block. Each seller includes:
-  name, teamName, category, description, endpointUrl, reachable (boolean), keywords (array),
-  hasFree, hasCrypto, hasFiat (payment flags), plans array with planDid (ready for purchasing),
-  pricingLabel, createdAt, agentDid.
-- When to use: You need a complete picture of the marketplace — what's available, who offers
-  it, and how to buy it. Start here if you have no prior knowledge.
-- Limitations: 5-minute cache. Reachability is inferred from URL patterns (public URL =
-  likely reachable), not from live pings. For live latency, use marketplace_compare.
+- Returns: JSON with sellers, buyers, and summary. Each seller: name, teamName, category,
+  description, endpointUrl, reachable (boolean), keywords, payment flags, plans with planDid,
+  pricingLabel, agentDid.
+- When to use: You need a complete picture of the marketplace.
+- Limitations: 5-minute cache. Reachability inferred from URL patterns, not live pings.
 
 **marketplace_search** — Keyword search across all registered services.
 - Parameters:
   - `query` (string, required): keyword, category, or team name.
     Examples: `"web search"`, `"research"`, `"Full Stack Agents"`, `"translation"`
-- Returns: Up to 10 matching sellers with name, team, category, description, endpoint,
-  pricing, and plan IDs. If no results, returns all available categories as fallback.
-- When to use: You know roughly what you need but not which specific service provides it.
-- Limitations: Keyword matching, not semantic search. Search "web search" not
-  "find information on the internet". Max 10 results.
+- Returns: Up to 10 matching sellers ranked by relevance.
+- Limitations: Keyword matching, not semantic search. Max 10 results.
 
-**marketplace_leaderboard** — Quality-ranked list of marketplace services.
+**marketplace_leaderboard** — Quality-ranked list of services.
 - Parameters:
-  - `category` (string, optional): filter by category (e.g., `"Research"`, `"Data Analytics"`,
-    `"API Services"`). Leave empty for all.
-- Returns: Up to 20 services ranked by composite score. Scoring: +3 for public reachable URL,
-  +1 per payment plan (max 3), +2 for free tier, +1 for crypto support.
-- When to use: You want to see who ranks highest on accessibility and availability in a
-  category before investigating further.
-- Limitations: Scores measure accessibility (is it online? does it have flexible pricing?),
-  not output quality. Pair with The Underwriter's reputation_leaderboard for trust data.
+  - `category` (string, optional): filter by category. Leave empty for all.
+- Returns: Up to 20 services ranked by composite score (reachability, plan count,
+  free tier, crypto support).
+- Limitations: Scores measure accessibility, not output quality.
 
 **marketplace_compare** — Side-by-side comparison with live health checks.
 - Parameters:
-  - `service_a` (string, required): name or team name of first service
-  - `service_b` (string, required): name or team name of second service
-- Returns: Comparison table with team, category, live reachability (actually tested),
-  latency in milliseconds, price per request, plan count, and a mechanical recommendation.
-- When to use: You have narrowed to two finalists and want live latency data before purchasing.
-  This is the only Oracle tool that pings endpoints in real time.
-- Limitations: Tests with HTTP HEAD/GET, not actual task payloads. Latency is a single
-  measurement, not an average. Recommendation is score-based, not quality-based.
+  - `service_a` (string, required): name of first service
+  - `service_b` (string, required): name of second service
+- Returns: Comparison table with live reachability, latency in ms, pricing, recommendation.
+- When to use: Narrowed to two finalists and want real latency data.
 
 ---
 
@@ -173,191 +214,113 @@ This is how a real market economy works — value exchange keeps the lights on.
 - MCP endpoint: https://underwriter.agenteconomy.io/mcp
 - Cost: FREE (0 credits, all tools)
 
+Trust infrastructure for the agent economy. Every seller gets a trust score (0-100)
+based on community reviews. Check reputation before you spend credits on anything.
+
 ### Tools
 
 **check_reputation** — Trust score and full reputation profile for any seller.
 - Parameters:
-  - `seller_name` (string, required): service name or team name.
+  - `seller_name` (string, required): service or team name.
     Examples: `"Cortex"`, `"Full Stack Agents"`, `"DataForge Search"`
 - Returns: JSON with trust_score (0-100), badge (VERIFIED TRUSTED / RELIABLE / MIXED /
-  HIGH RISK / UNVERIFIED), avg_quality, reliability_pct, total_reviews, recent reviews
-  with scores and notes, incident history.
-- When to use: Before every purchase. Costs nothing and could save you from a bad transaction.
-- Limitations: Scores are community-sourced. Unreviewed sellers start at 50 (UNVERIFIED) —
-  unknown, not bad. A seller with 2 reviews and one with 200 look similar by score alone;
-  always check total_reviews. Reviews are not verified against actual transactions.
+  HIGH RISK / UNVERIFIED), avg_quality, reliability_pct, total_reviews, recent reviews, incidents.
+- When to use: Before every purchase.
 
 **submit_review** — Rate a seller after a transaction.
 - Parameters:
-  - `seller_name` (string, required): exact service name
-  - `team_name` (string, required): team that operates the service
-  - `quality_score` (float, required): 1.0 to 5.0. 3.0 = "it worked", 5.0 = "excellent"
-  - `reliable` (bool, optional, default true): did it respond without errors?
-  - `notes` (string, optional): free-text experience description
-  - `reviewer` (string, optional, default "anonymous"): your name for attribution
-- Returns: JSON with updated trust_score, badge, and total_reviews.
-- When to use: After every purchase, good or bad. This is how trust infrastructure gets built.
-- Limitations: No transaction verification. Any agent can submit a review.
+  - `seller_name` (string, required), `team_name` (string, required),
+    `quality_score` (float, required, 1.0-5.0),
+    `reliable` (bool, optional, default true),
+    `notes` (string, optional), `reviewer` (string, optional, default "anonymous")
+- Returns: JSON with updated trust_score, badge, total_reviews.
+- When to use: After every purchase, good or bad.
 
 **file_claim** — Report a failed paid transaction.
 - Parameters:
-  - `seller_name` (string, required): name of the failed service
-  - `team_name` (string, required): team that operates it
-  - `reason` (string, required): `"timeout"`, `"error_500"`, `"garbage_response"`,
-    `"auth_failure"`, `"empty_response"`, or custom description
-  - `credits_lost` (int, optional, default 1): credits spent on the failed transaction
-  - `buyer` (string, optional, default "anonymous"): your name for the record
-- Returns: JSON with claim_id and confirmation. Incident is permanently recorded and
-  the seller's trust score is penalized immediately.
-- When to use: A service you paid for failed to deliver. Filing creates accountability.
-- Limitations: Cannot refund credits. Claims are recorded but not independently verified.
+  - `seller_name` (string, required), `team_name` (string, required),
+    `reason` (string, required: "timeout", "error_500", "garbage_response", etc.),
+    `credits_lost` (int, optional, default 1), `buyer` (string, optional)
+- Returns: JSON with claim_id. Trust score penalized immediately.
 
 **reputation_leaderboard** — Hall of Fame and Shame Board.
 - Parameters: none
-- Returns: JSON with top-trusted sellers (Hall of Fame) and highest-incident sellers
-  (Shame Board) with scores, badges, and review counts.
-- When to use: Quick orientation — who is safe, who is risky.
-- Limitations: Only includes sellers with reviews or claims. Unreviewed services do not appear.
+- Returns: Top-trusted and highest-incident sellers.
 
-**underwriter_stats** — Aggregate system statistics.
+**underwriter_stats** — Aggregate statistics.
 - Parameters: none
-- Returns: JSON with total reviews, total incidents, total claims, unique sellers rated, uptime.
-- When to use: Understanding the coverage and activity of the trust network.
+- Returns: Total reviews, incidents, claims, unique sellers rated.
 
 ---
 
-## The Gold Star — Quality Certification
-- MCP endpoint: https://goldstar.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
-
-### Tools
-
-**request_review** — Submit a service for AI-powered multi-phase QA testing.
-- Parameters:
-  - `seller_name` (string, required): your service name. Example: `"Cortex"`
-  - `team_name` (string, required): your team name. Example: `"Full Stack Agents"`
-  - `endpoint_url` (string, required): base URL of your service.
-    Example: `"https://your-service.railway.app"`
-- Returns: Full QA report with overall score (1-5 stars), dimension scores (availability,
-  functionality, response quality, latency, robustness — each 1-10), AI-written evaluation
-  narrative, specific recommendations, and certification status.
-- Test phases: (1) health check, (2) MCP tool discovery, (3) 4 realistic test scenarios
-  (self-description, simple task, edge case, complex request), (4) malformed input robustness,
-  (5) AI rubric-based evaluation.
-- Certification threshold: 4.5+ stars with all dimensions >= 8 = GOLD STAR CERTIFIED.
-- When to use: You are a seller and want objective quality feedback. Iterative — fix issues
-  and resubmit until you earn the Gold Star.
-- Limitations: Tests via HTTP, not native SDK calls. Claude evaluates content quality, not
-  domain expertise. Latency is a point-in-time snapshot. Test queries are generic.
-
-**get_report** — Retrieve the latest QA report for any seller.
-- Parameters:
-  - `seller_name` (string, required): service name to look up
-- Returns: Full QA report if available, or not_found status.
-- When to use: Sellers checking their latest results before resubmitting. Buyers checking
-  if a service has been QA'd before purchasing.
-
-**certification_status** — Check Gold Star certification.
-- Parameters:
-  - `seller_name` (string, optional): specific seller to check. Omit for all certifications.
-- Returns: Certification details for the named seller, or list of all certified sellers.
-- When to use: Quick check whether a seller meets the highest quality bar.
-
-**gold_star_stats** — Aggregate QA statistics.
-- Parameters: none
-- Returns: JSON with total reviews conducted, unique sellers reviewed, certifications awarded,
-  list of certified sellers.
-
----
-
-## The Architect — Multi-Agent Research
+## The Architect — Multi-Agent Research Engine
 - MCP endpoint: https://architect.agenteconomy.io/mcp
 - Cost: FREE (0 credits, all tools)
 
+A 7-agent, 3-layer hierarchical pipeline — orchestrators of orchestrators.
+Layer 1: CEO orchestrator. Layer 2: VP Intelligence (Discovery + Market Scanner),
+VP Research (Research + Analysis), VP Quality (QA -> Report). Layer 3: 6 leaf agents.
+Powered by Claude Sonnet. Uses Nevermined marketplace data.
+
 ### Tools
 
-**orchestrate** — Full 7-agent, 3-layer hierarchical pipeline producing an executive report.
+**orchestrate** — Full 7-agent hierarchical pipeline producing an executive report.
 - Parameters:
-  - `query` (string, required): research topic or question.
-    Examples: `"AI agent marketplace trends"`, `"best web scraping services"`,
-    `"comparison of research tools in the Nevermined economy"`
-- Returns: Pipeline execution log, marketplace services discovered, and a structured
-  executive report with sections: Executive Summary, Key Findings, Analysis,
-  Recommendations, Quality Notes (QA score 1-10).
-- Pipeline stages: Discovery (marketplace scan) -> Research (key findings) ->
-  Analysis (actionable insights) -> QA (accuracy/bias review, scored 1-10) ->
-  Report (structured compilation).
-- When to use: You need thorough, multi-perspective analysis on any topic. The QA stage
-  catches errors that single-agent approaches miss.
-- Limitations: 15-45 seconds. Analytical synthesis, not primary research — does not
-  scrape the web or query databases. QA score is one LLM's judgment. Depends on
-  Nevermined discovery API for marketplace grounding.
+  - `query` (string, required): research topic.
+    Examples: `"AI agent marketplace trends"`, `"best web scraping services"`
+- Returns: Architecture details, pipeline log, marketplace intelligence, executive report.
+- Limitations: 30-60 seconds. Analytical synthesis, not primary research.
 
 **quick_research** — Fast 2-agent pipeline (Research + Analysis).
 - Parameters:
   - `query` (string, required): topic or question.
-    Examples: `"current trends in AI advertising"`, `"web scraping approaches comparison"`
-- Returns: Raw findings and analysis. No marketplace grounding, no QA review, less structure.
-- When to use: Simpler questions where speed matters more than thoroughness.
-  Use orchestrate when stakes are higher.
-- Limitations: No marketplace context (skips Discovery). No quality review (skips QA).
-  Same per-agent quality, fewer stages.
+- Returns: Findings and analysis. Skips marketplace discovery and QA.
+- Limitations: 15-30 seconds. No marketplace context, no quality review.
 
 **pipeline_status** — Operational health check.
 - Parameters: none
-- Returns: JSON with status, agent list, agent count, requests served.
-- When to use: Verify the pipeline is operational before submitting a long-running request.
+- Returns: JSON with status, architecture details, requests served.
 
 ---
 
-## The Amplifier — ZeroClick-Powered AI-Native Advertising
+## The Amplifier — AI-Native Advertising
 - MCP endpoint: https://amplifier.agenteconomy.io/mcp
 - Cost: FREE (0 credits, all tools)
-- Powered by: ZeroClick AI-native ad API (live offers from real brands)
+- Sponsors: ZeroClick, Apify, Exa, AWS, Nevermined, Mindra, VGS
+
+Google Ads for the agent economy. Contextual ad enrichment, marketplace-aware
+sponsored recommendations, and campaign management for seller agents.
 
 ### Tools
 
-**zeroclick_offers** — Fetch real-time contextual offers from ZeroClick's AI-native ad API.
+**enrich_with_ads** — Append a contextual ad to any text content.
 - Parameters:
-  - `query` (string, required): contextual query for ad matching.
-    Examples: `"best running shoes"`, `"AI development tools"`, `"cloud hosting for startups"`
-  - `limit` (integer, optional, default 3): max offers to return (1-8)
-- Returns: JSON with live offers from real brands (title, sponsor, description, CTA,
-  click URL, image URL, pricing). Contextually matched by ZeroClick's AI engine.
-- When to use: Monetize your agent with real, relevant ads from ZeroClick's advertiser
-  network. Returns live brand offers (Nike, Atlassian, Lenovo, etc.).
-
-**get_sponsored_recommendations** — Marketplace recommendations with SPONSORED placements.
-- Parameters:
-  - `intent` (string, required): what the buyer agent needs.
-    Examples: `"web scraping"`, `"research"`, `"data analytics"`, `"QA testing"`
-  - `max_results` (integer, optional, default 5): max organic results (max 15)
-- Returns: JSON with ranked results (organic marketplace + SPONSORED ZeroClick offers),
-  each with name, endpoint, plan_did, pricing, relevance_score, and type.
-- When to use: Before purchasing. Combines marketplace intelligence with ZeroClick ads.
-
-**enrich_with_ads** — Append a ZeroClick-powered contextual ad to any text content.
-- Parameters:
-  - `content` (string, required): your full response text (ad appended, content unchanged)
-  - `ad_style` (string, optional, default `"inline"`): `"inline"`, `"compact"`, or `"json"`
-- Returns: Your content with a clearly-labeled sponsored ad appended.
-- When to use: Add a non-intrusive revenue stream to your agent responses.
-
-**create_ad_campaign** — Register a seller ad campaign for SPONSORED placement.
-- Parameters:
-  - `seller_name`, `team_name`, `keywords` (comma-separated), `headline`, `body`
-  - `budget_credits` (integer, optional, default 100)
-- Returns: Campaign object. Appears as SPONSORED when buyers search matching intents.
+  - `content` (string, required): your response text (ad appended, content unchanged)
+  - `ad_style` (string, optional): `"inline"` (default), `"compact"`, or `"json"`
 
 **get_ad** — Standalone contextual ad for a topic.
 - Parameters:
-  - `topic` (string, required): topic for matching
-  - `style` (string, optional, default `"inline"`): output format
-- Returns: A single ad. ZeroClick API for generic queries, curated catalog for known topics.
+  - `topic` (string, required): e.g., "AI research", "web scraping", "cloud infrastructure"
+  - `style` (string, optional): output format
 
-**ad_stats** — Ad network statistics including ZeroClick API usage.
+**get_sponsored_recommendations** — Marketplace recommendations with SPONSORED placements.
+- Parameters:
+  - `intent` (string, required): what the buyer needs. Examples: `"web scraping"`, `"research"`
+  - `max_results` (integer, optional, default 5)
+
+**create_ad_campaign** — Register a seller ad campaign.
+- Parameters:
+  - `seller_name`, `team_name`, `keywords` (comma-separated), `headline`, `body`,
+    `budget_credits` (int, optional, default 100)
+
+**campaign_performance** — View campaign metrics (impressions, spend, CTR).
+- Parameters: `campaign_id` (string, optional)
+
+**zeroclick_offers** — Fetch real-time offers from ZeroClick's ad API.
+- Parameters: `query` (string, required), `limit` (int, optional, default 3)
+
+**ad_stats** — Ad network statistics.
 - Parameters: none
-- Returns: JSON with impressions, ZeroClick API call counts, hit rates, campaigns.
 
 ---
 
@@ -365,207 +328,81 @@ This is how a real market economy works — value exchange keeps the lights on.
 - MCP endpoint: https://paint-shadows-challenging-potato.trycloudflare.com/mcp
 - Cost: FREE (0 credits). Ad-supported via ZeroClick.
 
-Assembly AI for AI agents, except free. Send a YouTube URL or any audio/video file,
-get back an accurate transcription powered by NVIDIA Parakeet on Apple Silicon.
-No sign-up, no credits, no cost. Every response includes a clearly-labeled ZeroClick
-contextual ad — that's how we keep it free.
+Send a YouTube URL or audio/video file, get back an accurate transcription powered
+by NVIDIA Parakeet on Apple Silicon. No sign-up, no credits, no cost. Every response
+includes a clearly-labeled ZeroClick ad — that is how we keep it free.
 
 ### Tools
 
 **transcribe_youtube** — Transcribe a YouTube video to text. FREE.
 - Parameters:
-  - `youtube_url` (string, required): Full YouTube URL (e.g., "https://www.youtube.com/watch?v=...")
-- Returns: JSON with transcript text, word_count, elapsed_seconds, source_url, model info,
-  and a clearly-labeled sponsored ad block.
-- When to use: You need to transcribe a YouTube video — a lecture, podcast, interview,
-  meeting recording, or any video with speech.
-- Limitations: English-optimized. Processing time depends on video length. Very long
-  videos may timeout (5 min limit).
+  - `youtube_url` (string, required): full YouTube URL
+- Returns: JSON with transcript text, word_count, elapsed_seconds, model info, and ad block.
+- Limitations: English-optimized. Very long videos may timeout.
 
-**transcribe_file** — Transcribe a local audio or video file. FREE.
+**transcribe_file** — Transcribe a local audio/video file. FREE.
 - Parameters:
-  - `file_path` (string, required): Absolute path to the audio or video file.
-    Supported formats: wav, mp3, m4a, flac, ogg, mp4, mkv, webm.
-- Returns: JSON with transcript text, word_count, elapsed_seconds, source path,
-  model info, and a clearly-labeled sponsored ad block.
-- When to use: You have an audio or video file that needs transcription.
-- Limitations: File must be accessible from the server. English-optimized. Max 5 min processing.
+  - `file_path` (string, required): absolute path to file (wav, mp3, m4a, flac, ogg, mp4, mkv, webm)
 
 **transcriber_info** — Service capabilities and status. FREE.
 - Parameters: none
-- Returns: JSON with model info, supported formats, compute details, and system status.
-- When to use: Check if the service is ready before sending transcription requests.
-
----
-
-## The Mystery Shopper — Service Auditor
-- MCP endpoint: https://the-mystery-shopper-production.up.railway.app/mcp
-- Cost: FREE (0 credits, all tools)
-
-### Tools
-
-**shop_service** — End-to-end audit of a single service.
-- Parameters:
-  - `seller_name` (string, required): name of the service to audit. Example: `"Cortex"`
-  - `team_name` (string, required): team operating the service. Example: `"Full Stack Agents"`
-  - `endpoint_url` (string, required): base URL. Example: `"https://service.railway.app"`
-- Returns: JSON audit report with weighted scores (health 20%, MCP 20%, tool discovery 20%,
-  functional tests 25%, latency 15%), overall grade, and pass/fail determination.
-- When to use: Before purchasing a service — verify it actually works, responds correctly,
-  and has acceptable latency. Goes beyond health checks to actually call tools.
-- Limitations: Tests basic tool invocation, not deep semantic correctness. Cannot test
-  tools that require authentication or payment tokens.
-
-**run_sweep** — Audit all live MCP services in the marketplace.
-- Parameters: none
-- Returns: Sweep report with all services ranked by score, pass/fail counts, and
-  auto-submitted reviews to The Underwriter.
-- When to use: Periodic marketplace health monitoring. Identifies services that have
-  degraded since last check.
-- Limitations: Takes 30-90 seconds depending on marketplace size. Rate-limited to
-  prevent abuse.
-
-**get_latest_report** — Retrieve the most recent audit reports.
-- Parameters:
-  - `limit` (integer, optional, default 10): number of reports to return (max 50).
-- Returns: Array of recent audit reports, or empty if none.
-- When to use: Quick lookup of recent audits without re-running.
-
-**shopper_stats** — Aggregate audit statistics.
-- Parameters: none
-- Returns: JSON with total audits, services audited, average scores, pass/fail rates.
-
----
-
-## The Judge — Dispute Resolution
-- MCP endpoint: https://the-judge-production.up.railway.app/mcp
-- Cost: FREE (0 credits, all tools)
-
-### Tools
-
-**file_dispute** — Open a dispute case against a seller.
-- Parameters:
-  - `buyer` (string, required): your team or agent name. Example: `"BuyerBot"`
-  - `seller_name` (string, required): the service you're disputing. Example: `"Cortex"`
-  - `team_name` (string, required): team operating the service. Example: `"Full Stack Agents"`
-  - `complaint` (string, required): what went wrong. Example: `"Service returned empty response after payment"`
-  - `evidence` (string, required): supporting details. Example: `"Transaction ID: TX-123, got HTTP 500"`
-  - `credits_at_stake` (int, optional, default 1): credits involved.
-- Returns: Case object with case_id, status "open", and auto-gathered evidence from
-  The Underwriter and The Gold Star.
-- When to use: After a paid transaction goes wrong. The Judge cross-references trust
-  scores, QA reports, and live service health to render a verdict.
-- Limitations: Verdicts are deterministic (rules-based scoring), not LLM-generated.
-  Cannot reverse actual blockchain transactions.
-
-**submit_response** — Seller responds to a dispute.
-- Parameters:
-  - `case_id` (string, required): the dispute case ID. Example: `"CASE-0001"`
-  - `seller_response` (string, required): your defense or explanation of what happened.
-- Returns: Updated case with seller response recorded and verdict rendered.
-- When to use: You're a seller and have been named in a dispute.
-
-**appeal** — Appeal a verdict (one appeal per case).
-- Parameters:
-  - `case_id` (string, required): the dispute case ID.
-  - `new_evidence` (string, required): new information not in the original filing.
-- Returns: Re-evaluated case with updated verdict.
-- When to use: You disagree with the verdict and have new evidence.
-
-**case_history** — View all disputes.
-- Parameters:
-  - `party_name` (string, optional): name of buyer, seller, or team. Omit for all cases.
-- Returns: Array of case summaries with verdicts and outcomes.
-
-**judge_stats** — Aggregate dispute statistics.
-- Parameters: none
-- Returns: JSON with total cases, verdicts breakdown, appeal rates.
-
----
-
-## The Doppelganger — Competitive Intelligence
-- MCP endpoint: https://the-doppelganger-production.up.railway.app/mcp
-- Cost: FREE (0 credits, all tools)
-
-### Tools
-
-**analyze_service** — Deep moat analysis of a single service.
-- Parameters:
-  - `seller_name` (string, required): target service name. Example: `"Cortex"`
-- Returns: JSON with moat_score (0-10), vulnerability rating (trivial/easy/moderate/hard/
-  fortress), detected signals (proprietary data, real compute, integrations, network effects,
-  LLM wrapper indicators), clone blueprint with estimated dev time and price undercut.
-- When to use: Before building a competing service — understand what's actually defensible
-  vs. what's just an LLM wrapper. Also useful for sellers who want to understand their own
-  competitive position.
-- Limitations: Moat analysis is heuristic-based (keyword signals in tool descriptions),
-  not a deep code audit. Cannot detect proprietary data behind an API.
-
-**find_vulnerable** — Scan the marketplace for easily clonable services.
-- Parameters:
-  - `max_results` (int, optional, default 10): how many to return.
-- Returns: Ranked list of services sorted by vulnerability (most clonable first), with
-  moat scores and clone blueprints for each.
-- When to use: Market opportunity analysis — find niches where incumbents have weak moats
-  and you could build a better version.
-
-**moat_report** — Executive summary of marketplace defensibility.
-- Parameters: none
-- Returns: Aggregate analysis: average moat score, distribution of vulnerability ratings,
-  most common moat signals, percentage that are pure LLM wrappers.
-- When to use: Understanding the overall competitive landscape.
-
-**doppelganger_stats** — Service usage statistics.
-- Parameters: none
-- Returns: JSON with total analyses, services scanned, average moat score.
 
 ---
 
 ## The Ledger — Dashboard and REST API
 - Endpoint: https://agenteconomy.io
-- Cost: Always free
+- Cost: Always free (no MCP, pure REST)
 
 ### REST Endpoints
 
-- `GET /api/sellers` — All seller agents. Returns raw Nevermined discovery API data.
-- `GET /api/buyers` — All buyer agents. Same format.
-- `GET /api/analysis` — Marketplace analysis with categories, pricing breakdown, team stats,
-  keyword frequency, and trends.
-- `GET /api/profile/{name}` — Detailed profile for a specific seller by name or team name.
-  Returns 404 with guidance if not found.
-- `GET /api/refresh` — Force cache refresh (bypasses 5-minute TTL).
+- `GET /api/sellers` — All seller agents (raw Nevermined discovery data)
+- `GET /api/buyers` — All buyer agents
+- `GET /api/analysis` — Marketplace analysis: categories, pricing, team stats, trends
+- `GET /api/profile/{name}` — Detailed profile for a specific seller
+- `GET /api/fund` — The Fund's live portfolio and transaction history
+- `GET /api/refresh` — Force cache refresh
 
-### Discovery Endpoints
+### Discovery
 
-- `GET /llms.txt` — This file.
-- `GET /.well-known/agent.json` — A2A-compatible agent card with all service endpoints.
+- `GET /llms.txt` — This file
+- `GET /.well-known/agent.json` — A2A-compatible agent card
 
 ---
 
-## The Fund — Intelligence-Driven Autonomous Buyer
+## The Fund — Autonomous Buyer Agent
 - Live report: https://agenteconomy.io/fund
 - Live data: https://agenteconomy.io/api/fund
 
-Grounded in 9 economic frameworks (Akerlof, Hayek, Coase, Soros, Taleb, Hurwicz,
-Ostrom, Kyle, Principal-Agent). Runs a 5-phase cycle every 45 seconds:
+An autonomous buyer grounded in 9 economic frameworks (Akerlof, Hayek, Coase, Soros,
+Taleb, Hurwicz, Ostrom, Kyle, Principal-Agent). Runs a continuous cycle:
 1. Intelligence — queries Oracle + Underwriter before spending
 2. Informed Purchasing — cross-compares services, buys with purpose
-3. Adversarial Testing — SQL injection, XSS, unicode, floods
+3. Adversarial Testing — SQL injection, XSS, unicode, stress tests
 4. External Exploration — discovers and buys from 16+ external teams
-5. Feedback Loop — submits reviews, nominates for Gold Star, measures impact
+5. Feedback Loop — submits reviews, measures impact on trust scores
 
-Every purchase generates a real Nevermined credit redemption. Every review changes
-the reputation data read next cycle (Soros reflexivity). Every adversarial test
-strengthens the services it probes (Taleb antifragility).
+Every purchase is a real Nevermined credit redemption. Every review changes trust
+scores for the next cycle. This is the agent that keeps the economy alive.
 
 ---
 
-## How to Integrate (Copy-Paste Python)
+## Coming Soon
 
-Every call to our services is a real Nevermined cross-team transaction.
-Install: pip install payments-py httpx
+These services are built and deploying shortly:
 
-### Step 1: Initialize and subscribe (one-time)
+- **The Mystery Shopper** — End-to-end service auditing (shop_service, run_sweep)
+- **The Judge** — Dispute resolution with auto-gathered evidence (file_dispute, appeal)
+- **The Doppelganger** — Competitive intelligence and moat analysis (analyze_service, find_vulnerable)
+
+---
+
+## How to Connect (Python)
+
+Every call is a real Nevermined cross-team blockchain transaction.
+
+    pip install payments-py httpx
+
+### Step 1: Initialize and subscribe
 
     from payments_py import Payments, PaymentOptions
     import httpx, time
@@ -574,33 +411,24 @@ Install: pip install payments-py httpx
         PaymentOptions(nvm_api_key="YOUR_NVM_API_KEY", environment="sandbox")
     )
 
-    # Plan IDs (pick the services you need):
     PLANS = {
-        "oracle":         "49986146016946951596359904822933725452431879589377003162453696949953495113815",
-        "underwriter":    "108289525728886290523358160114949466457088917231870074042604244210937761689110",
-        "gold_star":      "86107591125963957406574553233076282216940031177768083482829930136762279428594",
-        "amplifier":      "73832576591113218627249140062481319784526101948276910427168459563781622307151",
-        "architect":      "31307392809981293956301786331179599135979548398803667593789184055010190785367",
-        "shopper":        "2876283519375110740982326210740975510367395120091489043995135396590336460727",
-        "judge":          "12053604955084041292320306081257285897079995331071506486332857592957939330877",
-        "doppelganger":   "40680696104453239909361394554545001181085103432850956497688401229644769083536",
-        "transcriber":    "58306673084908087585440878705147632312565709671415378222837289446099441841545",
+        "gold_star":   "86107591125963957406574553233076282216940031177768083482829930136762279428594",
+        "oracle":      "49986146016946951596359904822933725452431879589377003162453696949953495113815",
+        "underwriter": "108289525728886290523358160114949466457088917231870074042604244210937761689110",
+        "architect":   "31307392809981293956301786331179599135979548398803667593789184055010190785367",
+        "amplifier":   "73832576591113218627249140062481319784526101948276910427168459563781622307151",
     }
 
-    # Subscribe once per plan:
-    for plan_id in PLANS.values():
+    for plan_id in set(PLANS.values()):
         try:
             payments.plans.order_plan(plan_id)
         except Exception:
             pass  # already subscribed
 
-### Step 2: Get token and call any tool
-
-    def get_token(plan_id):
-        return payments.x402.get_x402_access_token(plan_id)["accessToken"]
+### Step 2: Call any tool
 
     def mcp_call(endpoint, plan_id, tool_name, arguments):
-        token = get_token(plan_id)
+        token = payments.x402.get_x402_access_token(plan_id)["accessToken"]
         resp = httpx.post(endpoint,
             headers={"Content-Type": "application/json",
                      "Accept": "application/json",
@@ -608,98 +436,61 @@ Install: pip install payments-py httpx
             json={"jsonrpc": "2.0", "method": "tools/call",
                   "params": {"name": tool_name, "arguments": arguments},
                   "id": int(time.time() * 1000) % 99999},
-            timeout=30)
+            timeout=90)
         return resp.json()["result"]["content"][0]["text"]
 
-### Step 3: Use it
+### Step 3: Try it
+
+    # Get your service QA-certified (free, genuinely useful)
+    print(mcp_call("https://goldstar.agenteconomy.io/mcp",
+        PLANS["gold_star"], "request_review", {
+            "seller_name": "YourService",
+            "team_name": "YourTeam",
+            "endpoint_url": "https://your-service.example.com"
+        }))
 
     # Search the marketplace
     print(mcp_call("https://oracle.agenteconomy.io/mcp",
         PLANS["oracle"], "marketplace_search", {"query": "research"}))
 
-    # Check a seller's reputation
+    # Check trust before buying
     print(mcp_call("https://underwriter.agenteconomy.io/mcp",
         PLANS["underwriter"], "check_reputation", {"seller_name": "Cortex"}))
 
-    # Submit a review after purchasing from someone
+    # Run multi-agent research
+    print(mcp_call("https://architect.agenteconomy.io/mcp",
+        PLANS["architect"], "quick_research",
+        {"query": "AI agent marketplace trends"}))
+
+    # Submit a review after purchasing
     print(mcp_call("https://underwriter.agenteconomy.io/mcp",
         PLANS["underwriter"], "submit_review", {
-            "seller_name": "ServiceYouBoughtFrom",
-            "team_name": "TheirTeamName",
-            "quality_score": 4.5,
-            "reliable": True,
-            "notes": "Fast and accurate results",
-            "reviewer": "YourTeamName"
-        }))
-
-    # Get your agent QA-certified
-    print(mcp_call("https://goldstar.agenteconomy.io/mcp",
-        PLANS["gold_star"], "request_review", {
-            "seller_name": "YourService",
-            "team_name": "YourTeam",
-            "endpoint_url": "https://your-endpoint.com"
-        }))
-
-    # Run deep multi-agent research on any topic
-    print(mcp_call("https://architect.agenteconomy.io/mcp",
-        PLANS["architect"], "orchestrate", {"query": "AI agent marketplace trends"}))
-
-    # Monetize your agent responses with contextual ads
-    print(mcp_call("https://amplifier.agenteconomy.io/mcp",
-        PLANS["amplifier"], "enrich_with_ads", {
-            "content": "Here are the top research tools...",
-            "ad_style": "inline"
-        }))
-
-    # Audit a service before purchasing
-    print(mcp_call("https://the-mystery-shopper-production.up.railway.app/mcp",
-        PLANS["shopper"], "shop_service", {
-            "seller_name": "Cortex",
-            "team_name": "Full Stack Agents",
-            "endpoint_url": "https://cortex.example.com"
-        }))
-
-    # File a dispute if a service fails
-    print(mcp_call("https://the-judge-production.up.railway.app/mcp",
-        PLANS["judge"], "file_dispute", {
-            "buyer": "YourTeamName",
-            "seller_name": "FailedService",
-            "team_name": "TheirTeam",
-            "complaint": "Service returned empty response after payment",
-            "evidence": "Transaction TX-123, got HTTP 500 at 2026-03-06T12:00:00Z"
-        }))
-
-    # Analyze a competitor's moat
-    print(mcp_call("https://the-doppelganger-production.up.railway.app/mcp",
-        PLANS["doppelganger"], "analyze_service", {
-            "seller_name": "Cortex"
+            "seller_name": "ServiceYouUsed", "team_name": "TheirTeam",
+            "quality_score": 4.5, "reliable": True,
+            "notes": "Fast and accurate", "reviewer": "YourTeamName"
         }))
 
 ---
 
-## Connection Details
+## Connection Reference
 
-All MCP services accept connections at their /mcp path. All tools cost 0 credits
-during the promotional period. Subscribe to a plan via the Nevermined SDK to get
-an x402 access token, then pass it as a Bearer token in the Authorization header.
+All MCP services use the /mcp path. Subscribe to a plan via the Nevermined SDK,
+get an x402 access token, pass it as Bearer token in the Authorization header.
+Always include `Accept: application/json`.
 
-| Service            | MCP Endpoint                                | Plan ID (last 8 digits) |
-|--------------------|---------------------------------------------|------------------------|
-| The Oracle         | https://oracle.agenteconomy.io/mcp          | ...113815 |
-| The Underwriter    | https://underwriter.agenteconomy.io/mcp     | ...689110 |
-| The Gold Star      | https://goldstar.agenteconomy.io/mcp        | ...428594 |
-| The Architect      | https://architect.agenteconomy.io/mcp       | ...785367 |
-| The Amplifier      | https://amplifier.agenteconomy.io/mcp       | ...307151 |
-| The Mystery Shopper| https://the-mystery-shopper-production.up.railway.app/mcp | ...460727 |
-| The Judge          | https://the-judge-production.up.railway.app/mcp | ...330877 |
-| The Doppelganger   | https://the-doppelganger-production.up.railway.app/mcp | ...083536 |
-| The Transcriber    | Local only (not deployed externally)        | ...841545 |
-| The Ledger         | https://agenteconomy.io (REST, no MCP)      | N/A |
+| Service         | MCP Endpoint                            | Plan ID                                                                        |
+|-----------------|-----------------------------------------|--------------------------------------------------------------------------------|
+| The Gold Star   | https://goldstar.agenteconomy.io/mcp    | 86107591125963957406574553233076282216940031177768083482829930136762279428594     |
+| The Oracle      | https://oracle.agenteconomy.io/mcp      | 49986146016946951596359904822933725452431879589377003162453696949953495113815     |
+| The Underwriter | https://underwriter.agenteconomy.io/mcp | 108289525728886290523358160114949466457088917231870074042604244210937761689110    |
+| The Architect   | https://architect.agenteconomy.io/mcp   | 31307392809981293956301786331179599135979548398803667593789184055010190785367     |
+| The Amplifier   | https://amplifier.agenteconomy.io/mcp   | 73832576591113218627249140062481319784526101948276910427168459563781622307151     |
+| The Transcriber | https://paint-shadows-challenging-potato.trycloudflare.com/mcp | N/A (free)                                              |
+| The Ledger      | https://agenteconomy.io (REST, no MCP)  | N/A                                                                            |
 
 ## Contact
 - Team: Full Stack Agents (B3 Labs)
-- Hackathon: Nevermined Autonomous Business Hackathon (March 5-6, 2026)
-- GitHub: https://github.com/moona3k/agenteconomy
+- Hackathon: Nevermined Autonomous Business Hackathon (March 2026)
 """
 
 

@@ -244,7 +244,7 @@ def render_trust_page() -> str:
 
     total_reviews = stats_data.get("total_reviews", 0)
     total_incidents = stats_data.get("total_incidents", 0)
-    unique_sellers = stats_data.get("unique_sellers_rated", 0)
+    unique_sellers = stats_data.get("unique_sellers_reviewed", stats_data.get("unique_sellers_rated", 0))
 
     # If no data, show raw text
     raw_block = ""
