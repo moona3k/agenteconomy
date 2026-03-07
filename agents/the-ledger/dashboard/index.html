@@ -1282,6 +1282,82 @@ body {
 .team-card .tc-section { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; font-weight: 700; }
 .team-card .tc-list { font-size: 11px; font-family: var(--font-mono); margin-bottom: 8px; line-height: 1.7; font-weight: 500; }
 
+/* Infrastructure Grid */
+.infra-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.infra-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px 16px;
+  text-align: center;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.infra-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.3;
+  transition: opacity var(--transition);
+}
+
+.infra-card:hover::before { opacity: 0.6; }
+
+.infra-card.loading .infra-val {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.infra-card.live {
+  border-color: rgba(0, 229, 160, 0.15);
+}
+
+.infra-card.error {
+  border-color: rgba(255, 59, 110, 0.15);
+}
+
+.infra-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.infra-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+}
+
+.infra-val {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.infra-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
 /* Pulse Ring */
 .economy-pulse-grid {
   display: grid;
@@ -1415,6 +1491,7 @@ body {
 @media (max-width: 1200px) {
   .hero-stats { grid-template-columns: repeat(3, 1fr); }
   .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+  .infra-grid { grid-template-columns: repeat(3, 1fr); }
   .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
 }
 
@@ -1428,6 +1505,7 @@ body {
   .portfolio-grid { grid-template-columns: 1fr; }
   .payment-grid { grid-template-columns: 1fr; }
   .economy-pulse-grid { grid-template-columns: repeat(2, 1fr); }
+  .infra-grid { grid-template-columns: repeat(2, 1fr); }
   .header-metrics { display: none; }
   .bar-label { flex: 0 0 100px; font-size: 10px; }
   .footer-inner { grid-template-columns: 1fr; gap: 24px; }
@@ -1951,6 +2029,22 @@ body {
       <div class="panel-header"><h2>Economy Pulse</h2><span class="panel-badge" id="health-score">--</span></div>
       <div class="panel-body">
         <div class="economy-pulse-grid" id="economy-pulse"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="border-color:rgba(167,139,250,0.12)">
+      <div class="panel-header">
+        <h2>Our Infrastructure</h2>
+        <span class="panel-badge" style="color:var(--accent-violet)">Live from MCP</span>
+      </div>
+      <div class="panel-body">
+        <div class="infra-grid" id="infra-stats">
+          <div class="infra-card loading"><div class="infra-icon" style="color:#00d4ff">&#9783;</div><div class="infra-label">The Oracle</div><div class="infra-val">--</div><div class="infra-sub">Marketplace Intel</div></div>
+          <div class="infra-card loading"><div class="infra-icon" style="color:#a78bfa">&#9878;</div><div class="infra-label">The Underwriter</div><div class="infra-val">--</div><div class="infra-sub">Trust & Insurance</div></div>
+          <div class="infra-card loading"><div class="infra-icon" style="color:#fbbf24">&#9733;</div><div class="infra-label">The Gold Star</div><div class="infra-val">--</div><div class="infra-sub">QA Certification</div></div>
+          <div class="infra-card loading"><div class="infra-icon" style="color:#00e5a0">&#9883;</div><div class="infra-label">The Architect</div><div class="infra-val">--</div><div class="infra-sub">Multi-Agent Pipeline</div></div>
+          <div class="infra-card loading"><div class="infra-icon" style="color:#fb923c">&#9776;</div><div class="infra-label">The Amplifier</div><div class="infra-val">--</div><div class="infra-sub">AI-Native Ads</div></div>
+        </div>
       </div>
     </div>
 
@@ -2941,9 +3035,42 @@ function drawMetatronsCube(ctx, cx, cy, radius) {
   ctx.setLineDash([]);
 }
 
+// Infrastructure Stats — fetches live data from our MCP services
+async function fetchInfraStats() {
+  const services = [
+    { id: 'oracle', url: 'https://oracle.agenteconomy.io', statsPath: '/health', tools: 4, detail: 'data · search · leaderboard · compare' },
+    { id: 'underwriter', url: 'https://underwriter.agenteconomy.io', statsPath: '/health', tools: 5, detail: 'reputation · review · claim · leaderboard · stats' },
+    { id: 'goldstar', url: 'https://goldstar.agenteconomy.io', statsPath: '/health', tools: 4, detail: 'request_review · get_report · status · stats' },
+    { id: 'architect', url: 'https://architect.agenteconomy.io', statsPath: '/health', tools: 3, detail: 'orchestrate · quick_research · pipeline_status' },
+    { id: 'amplifier', url: 'https://amplifier.agenteconomy.io', statsPath: '/health', tools: 7, detail: 'enrich · get_ad · create · update · delete · stats · list' },
+  ];
+
+  const cards = document.querySelectorAll('#infra-stats .infra-card');
+
+  await Promise.allSettled(services.map(async (svc, i) => {
+    const card = cards[i];
+    try {
+      const res = await fetch(svc.url + svc.statsPath, { signal: AbortSignal.timeout(5000) });
+      const data = await res.json();
+      card.querySelector('.infra-val').textContent = svc.tools + ' tools';
+      card.querySelector('.infra-sub').textContent = data.status === 'ok' ? 'Operational' : data.status;
+      card.classList.remove('loading');
+      card.classList.add('live');
+      card.style.color = card.querySelector('.infra-icon').style.color;
+    } catch (err) {
+      card.querySelector('.infra-val').textContent = '—';
+      card.querySelector('.infra-sub').textContent = 'Unreachable';
+      card.classList.remove('loading');
+      card.classList.add('error');
+    }
+  }));
+}
+
 // Init
 fetchAll();
+fetchInfraStats();
 setInterval(fetchAll, 60000);
+setInterval(fetchInfraStats, 120000);
 window.addEventListener('resize', () => {
   if (document.querySelector('.tab[data-tab="network"]').classList.contains('active')) drawNetwork();
 });

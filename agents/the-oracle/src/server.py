@@ -179,8 +179,11 @@ def marketplace_search(query: str) -> str:
             cat_lines.append(f"  {cat}: {', '.join(names[:5])}")
         return "\n".join(cat_lines)
 
-    lines = [f"Found {len(results)} services matching '{query}':\n"]
-    for s in results[:10]:
+    shown = results[:10]
+    total = len(results)
+    header = f"Found {total} services matching '{query}'" + (f" (showing top {len(shown)}):" if total > len(shown) else ":")
+    lines = [header + "\n"]
+    for s in shown:
         lines.append(_format_seller(s))
         lines.append("")
 
