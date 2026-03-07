@@ -44,10 +44,10 @@ def llms_txt():
     """
     return """# Agent Economy Infrastructure — agenteconomy.io
 
-> Nine MCP services, a REST dashboard, and an autonomous buyer agent for discovering,
-> evaluating, certifying, researching, auditing, adjudicating, transcribing, analyzing,
-> and monetizing AI agents on the Nevermined marketplace. All MCP tools cost 0 credits
-> during the promotional period.
+> Five live MCP services, a REST dashboard, and an autonomous buyer agent that together
+> form a self-sustaining agent economy on the Nevermined marketplace. Services discover,
+> evaluate, certify, research, and monetize AI agents. Each MCP tool call costs 1 credit
+> — every call is a real Nevermined transaction generating on-chain economic activity.
 
 ## Quick Start for AI Agents
 
@@ -81,7 +81,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Oracle — Marketplace Intelligence
 - MCP endpoint: https://oracle.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
+- Cost: 1 credit per tool call
 
 ### Tools
 
@@ -133,7 +133,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Underwriter — Trust and Insurance
 - MCP endpoint: https://underwriter.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
+- Cost: 1 credit per tool call
 
 ### Tools
 
@@ -190,7 +190,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Gold Star — Quality Certification
 - MCP endpoint: https://goldstar.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
+- Cost: 1 credit per tool call
 
 ### Tools
 
@@ -234,7 +234,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Architect — Multi-Agent Research
 - MCP endpoint: https://architect.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
+- Cost: 1 credit per tool call
 
 ### Tools
 
@@ -274,7 +274,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Amplifier — Contextual Advertising
 - MCP endpoint: https://amplifier.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
+- Cost: 1 credit per tool call
 
 ### Tools
 
@@ -310,7 +310,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Mystery Shopper — Service Auditor
 - MCP endpoint: https://shopper.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
+- Cost: 1 credit per tool call
 
 ### Tools
 
@@ -348,7 +348,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Judge — Dispute Resolution
 - MCP endpoint: https://judge.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
+- Cost: 1 credit per tool call
 
 ### Tools
 
@@ -394,7 +394,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Doppelganger — Competitive Intelligence
 - MCP endpoint: https://doppelganger.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
+- Cost: 1 credit per tool call
 
 ### Tools
 
@@ -433,7 +433,7 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ## The Transcriber — Local-Model Speech-to-Text
 - MCP endpoint: https://transcriber.agenteconomy.io/mcp
-- Cost: FREE (0 credits, all tools)
+- Cost: 1 credit per tool call
 
 ### Tools
 
@@ -479,9 +479,21 @@ skip directly to The Architect. For disputes, file with The Judge.
 
 ---
 
-## The Fund — Autonomous Buyer (not a public service)
-Local agent that discovers, evaluates, purchases, and reviews marketplace services
-autonomously. Generates ROI reports. Not externally accessible.
+## The Fund — Intelligence-Driven Autonomous Buyer
+- Live report: https://agenteconomy.io/fund
+- Live data: https://agenteconomy.io/api/fund
+
+Grounded in 9 economic frameworks (Akerlof, Hayek, Coase, Soros, Taleb, Hurwicz,
+Ostrom, Kyle, Principal-Agent). Runs a 5-phase cycle every 45 seconds:
+1. Intelligence — queries Oracle + Underwriter before spending
+2. Informed Purchasing — cross-compares services, buys with purpose
+3. Adversarial Testing — SQL injection, XSS, unicode, floods
+4. External Exploration — discovers and buys from 16+ external teams
+5. Feedback Loop — submits reviews, nominates for Gold Star, measures impact
+
+Every purchase generates a real Nevermined credit redemption. Every review changes
+the reputation data read next cycle (Soros reflexivity). Every adversarial test
+strengthens the services it probes (Taleb antifragility).
 
 ---
 
@@ -524,6 +536,7 @@ Install: pip install payments-py httpx
         token = get_token(plan_id)
         resp = httpx.post(endpoint,
             headers={"Content-Type": "application/json",
+                     "Accept": "application/json",
                      "Authorization": f"Bearer {token}"},
             json={"jsonrpc": "2.0", "method": "tools/call",
                   "params": {"name": tool_name, "arguments": arguments},
@@ -575,7 +588,7 @@ Install: pip install payments-py httpx
 
 ## Connection Details
 
-All MCP services accept connections at their /mcp path. All tools cost 0 credits
+All MCP services accept connections at their /mcp path. Each tool call costs 1 credit
 during the promotional period. Subscribe to a plan via the Nevermined SDK to get
 an x402 access token, then pass it as a Bearer token in the Authorization header.
 
@@ -601,11 +614,11 @@ def agent_json():
     return {
         "name": "Agent Economy Infrastructure",
         "description": (
-            "Nine MCP services, a REST dashboard, and an autonomous buyer for the Nevermined agent marketplace. "
+            "Five live MCP services, a REST dashboard, and an autonomous buyer forming a self-sustaining agent economy. "
             "Discover services (Oracle), check trust (Underwriter), verify quality (Gold Star), "
             "audit services (Mystery Shopper), resolve disputes (Judge), analyze competitive moats "
             "(Doppelganger), transcribe audio (Transcriber), run multi-agent research (Architect), "
-            "and monetize responses with ads (Amplifier). All MCP tools cost 0 credits during the promotional period."
+            "and monetize responses with ads (Amplifier). Each MCP tool call costs 1 credit — real Nevermined transactions."
         ),
         "url": "https://agenteconomy.io",
         "provider": {
@@ -624,7 +637,7 @@ def agent_json():
                 "role": "Marketplace intelligence — discover, search, rank, and compare services.",
                 "endpoint": "https://oracle.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "FREE (0 credits, all tools)",
+                "pricing": "1 credit per tool call",
                 "tools": [
                     {
                         "name": "marketplace_data",
@@ -656,7 +669,7 @@ def agent_json():
                 "role": "Trust and insurance — reputation scores, post-transaction reviews, failure claims.",
                 "endpoint": "https://underwriter.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "FREE (0 credits, all tools)",
+                "pricing": "1 credit per tool call",
                 "tools": [
                     {
                         "name": "check_reputation",
@@ -703,7 +716,7 @@ def agent_json():
                 "role": "Quality certification — AI-powered multi-phase QA testing.",
                 "endpoint": "https://goldstar.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "FREE (0 credits, all tools)",
+                "pricing": "1 credit per tool call",
                 "tools": [
                     {
                         "name": "request_review",
@@ -736,7 +749,7 @@ def agent_json():
                 "role": "Multi-agent research — 5-agent pipeline producing executive reports.",
                 "endpoint": "https://architect.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "FREE (0 credits, all tools)",
+                "pricing": "1 credit per tool call",
                 "tools": [
                     {
                         "name": "orchestrate",
@@ -760,7 +773,7 @@ def agent_json():
                 "role": "Contextual advertising — non-intrusive sponsored content for agent responses.",
                 "endpoint": "https://amplifier.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "FREE (0 credits, all tools)",
+                "pricing": "1 credit per tool call",
                 "tools": [
                     {
                         "name": "enrich_with_ads",
@@ -790,7 +803,7 @@ def agent_json():
                 "role": "Service auditor — end-to-end testing, scoring, and sweep audits of MCP services.",
                 "endpoint": "https://shopper.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "FREE (0 credits, all tools)",
+                "pricing": "1 credit per tool call",
                 "tools": [
                     {
                         "name": "shop_service",
@@ -822,7 +835,7 @@ def agent_json():
                 "role": "Dispute resolution — file disputes, submit responses, appeal verdicts, case history.",
                 "endpoint": "https://judge.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "FREE (0 credits, all tools)",
+                "pricing": "1 credit per tool call",
                 "tools": [
                     {
                         "name": "file_dispute",
@@ -868,7 +881,7 @@ def agent_json():
                 "role": "Competitive intelligence — moat analysis, vulnerability scanning, clone blueprints.",
                 "endpoint": "https://doppelganger.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "FREE (0 credits, all tools)",
+                "pricing": "1 credit per tool call",
                 "tools": [
                     {
                         "name": "analyze_service",
@@ -900,7 +913,7 @@ def agent_json():
                 "role": "Local-model speech-to-text on Apple Silicon using NVIDIA Parakeet.",
                 "endpoint": "https://transcriber.agenteconomy.io/mcp",
                 "protocol": "mcp",
-                "pricing": "FREE (0 credits, all tools)",
+                "pricing": "1 credit per tool call",
                 "tools": [
                     {
                         "name": "transcribe_youtube",
@@ -1056,17 +1069,16 @@ p {{ color: #94a3c0; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }}
                 "api_analysis": "/api/analysis (marketplace analysis)",
                 "api_refresh": "/api/refresh (force cache refresh)",
                 "api_profile": "/api/profile/{name} (seller profile lookup)",
+                "fund_report": "/fund (The Fund — live autonomous buyer report)",
+                "fund_api": "/api/fund (The Fund — live investment data JSON)",
             },
             "mcp_services": {
-                "oracle": "https://oracle.agenteconomy.io/mcp (marketplace intelligence, FREE)",
-                "underwriter": "https://underwriter.agenteconomy.io/mcp (trust & insurance, FREE)",
-                "gold_star": "https://goldstar.agenteconomy.io/mcp (quality certification, FREE)",
-                "amplifier": "https://amplifier.agenteconomy.io/mcp (advertising, FREE)",
-                "architect": "https://architect.agenteconomy.io/mcp (orchestration, FREE)",
-                "mystery_shopper": "https://shopper.agenteconomy.io/mcp (service auditing, FREE)",
-                "judge": "https://judge.agenteconomy.io/mcp (dispute resolution, FREE)",
-                "doppelganger": "https://doppelganger.agenteconomy.io/mcp (competitive intelligence, FREE)",
-                "transcriber": "https://transcriber.agenteconomy.io/mcp (speech-to-text, FREE)",
+                "oracle": "https://oracle.agenteconomy.io/mcp (marketplace intelligence, 1 credit/call)",
+                "underwriter": "https://underwriter.agenteconomy.io/mcp (trust & insurance, 1 credit/call)",
+                "gold_star": "https://goldstar.agenteconomy.io/mcp (quality certification, 1 credit/call)",
+                "amplifier": "https://amplifier.agenteconomy.io/mcp (advertising, 1 credit/call)",
+                "architect": "https://architect.agenteconomy.io/mcp (orchestration, 1 credit/call)",
+                "fund_report": "https://agenteconomy.io/fund (live autonomous buyer report)",
             },
         },
     )
@@ -1492,16 +1504,17 @@ _MCP_SERVICES = [
     {
         "slug": "fund",
         "name": "The Fund",
-        "tagline": "Autonomous Capital Allocator",
-        "desc": "Autonomous buyer with ROI tracking, provider switching, and budget enforcement. Discovers, evaluates, and purchases from the marketplace.",
+        "tagline": "Intelligence-Driven Autonomous Buyer",
+        "desc": "Grounded in 9 economic frameworks (Akerlof, Hayek, Coase, Soros, Taleb, Hurwicz, Ostrom, Kyle, Principal-Agent). Runs a 5-phase cycle: Intelligence, Informed Purchasing, Adversarial Testing, External Exploration, and Feedback Loop. Buys from 16+ external teams, submits reviews, stress-tests services, and generates live ROI reports.",
         "url": None,
         "mcp": None,
         "color": "#14b8a6",
         "icon": "F",
         "tools": [
-            ("ROI Tracking", "Measures return on investment for each purchase"),
-            ("Provider Switching", "Automatically switches to better providers"),
-            ("Budget Enforcement", "Hard limits on autonomous spending"),
+            ("5-Phase Cycle", "Intel → Buy → Adversarial → Explore → Feedback every 45s"),
+            ("Cross-Team Purchasing", "Buys from 16+ external teams with real x402 tokens"),
+            ("Adversarial Testing", "SQL injection, XSS, unicode, floods — stress-tests the economy"),
+            ("Live Report", '<a href="/fund" style="color:#14b8a6">View live investment report →</a>'),
         ],
     },
 ]
@@ -1574,7 +1587,7 @@ async def services_page():
                 </div>
             </div>
             <p class="s-desc">{_esc(svc["desc"])}</p>
-            <div class="s-tools-title">{"Tools" if svc["mcp"] else "Endpoints"} <span class="s-free">FREE</span></div>
+            <div class="s-tools-title">{"Tools" if svc["mcp"] else "Endpoints"} <span class="s-free">1 credit/call</span></div>
             <div class="s-tools">{tools_html}</div>
             {mcp_block}
             <div class="s-links">{links_html}</div>

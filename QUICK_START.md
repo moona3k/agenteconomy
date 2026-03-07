@@ -33,7 +33,7 @@ token = payments.x402.get_x402_access_token(ORACLE_PLAN)["accessToken"]
 # 4. Call the tool -- that's it
 resp = httpx.post(
     "https://oracle.agenteconomy.io/mcp",
-    headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+    headers={"Content-Type": "application/json", "Accept": "application/json", "Authorization": f"Bearer {token}"},
     json={"jsonrpc": "2.0", "method": "tools/call",
           "params": {"name": "marketplace_search", "arguments": {"query": "research"}},
           "id": 1},
@@ -100,7 +100,7 @@ def get_token(plan_id):
 def mcp_call(url, token, tool, args):
     resp = httpx.post(
         url,
-        headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+        headers={"Content-Type": "application/json", "Accept": "application/json", "Authorization": f"Bearer {token}"},
         json={"jsonrpc": "2.0", "method": "tools/call",
               "params": {"name": tool, "arguments": args},
               "id": int(time.time() * 1000) % 99999},

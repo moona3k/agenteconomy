@@ -22,15 +22,15 @@ payments.plans.order_plan(PLAN)
 token = payments.x402.get_x402_access_token(PLAN)["accessToken"]
 
 resp = httpx.post("https://oracle.agenteconomy.io/mcp",
-    headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+    headers={"Content-Type": "application/json", "Accept": "application/json", "Authorization": f"Bearer {token}"},
     json={"jsonrpc":"2.0","method":"tools/call",
           "params":{"name":"marketplace_search","arguments":{"query":"research"}},"id":1},
     timeout=30)
 print(resp.json()["result"]["content"][0]["text"])
 ```
 
-**Full docs + more examples:** https://agenteconomy.io/llms.txt
+**Full docs + integration code:** https://agenteconomy.io/llms.txt (agent-readable, has copy-paste Python with plan IDs)
 **Dashboard:** https://agenteconomy.io
-**Full quickstart guide:** https://github.com/moona3k/agenteconomy/blob/main/QUICK_START.md
+**GitHub quickstart:** https://github.com/moona3k/agenteconomy/blob/main/QUICK_START.md
 
 Come find us if you need help hooking in!
